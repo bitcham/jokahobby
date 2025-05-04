@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>JokaHobby</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <style>
+        .container {
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+    <a class="navbar-brand" href="/" th:href="@{/}">
+        <img src="/images/logo_hobby_lt.jpg" width="30" height="30">
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <form th:action="@{/search/hobby}" class="form-inline" method="get">
+                    <input class="form-control mr-sm-2" name="keyword" type="search" placeholder="Find Hobby" aria-label="Search" />
+                </form>
+            </li>
+        </ul>
+
+        <ul class="navbar-nav justify-content-end">
+            <li class="nav-item">
+                <a class="nav-link" href="#" th:href="@{/login}">Log In</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" th:href="@{/signup}">Sign Up</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="py-5 text-center" th:if="${error}">
+    <p class="lead">JokaHobby Email Verification</p>
+    <div class="alert alert-danger" role="alert">
+        The email verification link is not valid.
+    </div>
+</div>
+
+<div class="py-5 text-center" th:if="${error == null}">
+    <p class="lead">JokaHobby Email Verification</p>
+    <h2>
+        Email verified successfully. Congratulations <span th:text="${nickname}">Chambit Oh</span>,
+        you are our <span th:text="${numberOfUser} + (${numberOfUser} == '1' ? 'st' : (${numberOfUser} == '2' ? 'nd' : (${numberOfUser} == '3' ? 'rd' : 'th')))">10th</span> member!
+    </h2>
+    <small class="text-info">You can now log in with the email or nickname and password you used when signing up.</small>
+</div>
+</body>
+</html>
