@@ -1,5 +1,7 @@
 package com.jokahobby.account;
 
+import com.jokahobby.domain.Account;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
@@ -58,7 +61,9 @@ class AccountControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(view().name("redirect:/"));
 
-        assertTrue(accountRepository.existsByEmail("chambit.oh@email.com"));
+        Account account = accountRepository.findByEmail("chambit.oh@email.com");
+        assertNotNull(account);
+        assertNotNull(account.getPassword(), "12345678");
         then(javaMailSender).should().send(any(SimpleMailMessage.class));
     }
 
