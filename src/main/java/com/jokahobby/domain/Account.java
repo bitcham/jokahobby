@@ -1,9 +1,10 @@
-package com.exerciselle.domain;
+package com.jokahobby.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static jakarta.persistence.FetchType.*;
 
@@ -47,7 +48,13 @@ public class Account {
 
     private boolean hobbyEnrollmentResultByEmail;
 
+    private boolean hobbyEnrollmentResultByWeb;
+
     private boolean hobbyUpdatedByEmail;
 
     private boolean hobbyUpdatedByWeb;
+
+    public void generateEmailCheckToken() {
+        this.emailCheckToken = UUID.randomUUID().toString();
+    }
 }

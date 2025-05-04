@@ -1,4 +1,4 @@
-package com.exerciselle.account;
+package com.jokahobby.account;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,8 @@ class AccountControllerTest {
     void signUpForm() throws Exception {
         mockMvc.perform(get("/sign-up"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("account/sign-up"));
+                .andExpect(view().name("account/sign-up"))
+                .andExpect(model().attributeExists("signUpForm"));
     }
 
 }
