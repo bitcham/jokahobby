@@ -25,6 +25,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.util.Collections;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class AccountService implements UserDetailsService {
 
@@ -35,7 +36,6 @@ public class AccountService implements UserDetailsService {
     private final SecurityContextRepository securityContextRepository;
 
 
-    @Transactional
     public Account processNewAccount(@Valid SignUpForm signUpForm) {
         Account newAccount = saveNewAccount(signUpForm);
         newAccount.generateEmailCheckToken();
@@ -82,6 +82,7 @@ public class AccountService implements UserDetailsService {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public UserDetails loadUserByUsername(String emailOrNickname) throws UsernameNotFoundException {
         Account account = accountRepository.findByEmail(emailOrNickname);
@@ -94,5 +95,11 @@ public class AccountService implements UserDetailsService {
         }
 
         return new UserAccount(account);
+    }
+
+
+    public void completeSingUp(Account account) {
+        account.completeSignUp();
+        login(account);
     }
 }
