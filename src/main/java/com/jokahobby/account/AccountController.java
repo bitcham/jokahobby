@@ -3,6 +3,7 @@ package com.jokahobby.account;
 import com.jokahobby.domain.Account;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Controller;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import java.time.LocalDateTime;
 
-
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 public class AccountController {
@@ -41,7 +42,10 @@ public class AccountController {
         if(errors.hasErrors()) {
             return "account/sign-up";
         }
-        accountService.processNewAccount(signUpForm);
+        log.info("errors: {}", errors);
+        log.info("Sign Up Form: {}", signUpForm);
+        Account account = accountService.processNewAccount(signUpForm);
+        accountService.login(account);
         return "redirect:/";
     }
 
@@ -54,13 +58,13 @@ public class AccountController {
             return view;
         }
 
-        if(!account.getEmailCheckToken().equals(token)){
+        if(!account.isValidToken(token)){
             model.addAttribute("error", "wrong.token");
             return view;
         }
 
-        account.setEmailVerified(true);
-        account.setJoinedAt(LocalDateTime.now());
+        account.completeSignUp();
+        accountService.login(account);
         model.addAttribute("numberOfUser", accountRepository.count());
         model.addAttribute("nickname", account.getNickname());
         return view;
