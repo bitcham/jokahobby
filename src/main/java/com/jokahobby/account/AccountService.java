@@ -2,6 +2,7 @@ package com.jokahobby.account;
 
 import com.jokahobby.domain.Account;
 import com.jokahobby.exception.AuthenticationContextException;
+import com.jokahobby.settings.Profile;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -101,5 +102,13 @@ public class AccountService implements UserDetailsService {
     public void completeSingUp(Account account) {
         account.completeSignUp();
         login(account);
+    }
+
+    public void updateProfile(Account account, @Valid Profile profile) {
+        account.setUrl(profile.getUrl());
+        account.setBio(profile.getBio());
+        account.setOccupation(profile.getOccupation());
+        account.setLocation(profile.getLocation());
+        accountRepository.save(account);
     }
 }

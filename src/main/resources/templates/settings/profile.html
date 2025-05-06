@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments.html :: head}"></head>
+<body class="bg-light">
+    <div th:replace="~{fragments.html :: main-nav}"></div>
+    <div class="container">
+        <div class="row mt-5 justify-content-center">
+            <div class="col-2">
+                <div th:replace="~{fragments.html :: settings-menu(currentMenu='profile')}"></div>
+            </div>
+            <div class="col-8">
+                <div th:if="${message}" class="alert alert-info alert-dismissible fade show mt-3" role="alert">
+                    <span th:text="${message}">Message</span>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">x</span>
+            </div>
+            <div class="col-8">
+                <div class="row">
+                    <h2 class="col-sm-12" th:text="${account.nickname}">cutedog</h2>
+                </div>
+                <div class="row mt-3">
+                    <form class="col-sm-6" action="#"
+                          th:action="@{/settings/profile}" th:object="${profile}" method="post" novalidate>
+                        <div class="form-group">
+                            <label for="bio">Brief Introduction</label>
+                            <input id="bio" type="text" th:field="*{bio}" class="form-control"
+                                   placeholder="Please provide a brief introduction." aria-describedby="bioHelp" required>
+                            <small id="bioHelp" class="form-text text-muted">
+                                Please enter no more than 35 characters.
+                            </small>
+                            <small class="form-text text-danger" th:if="${#fields.hasErrors('bio')}" th:errors="*{bio}">
+                                It's a bit too long.
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="url">Link</label>
+                            <input id="url" type="url" th:field="*{url}" class="form-control"
+                                   placeholder="http://jokahobby.com" aria-describedby="urlHelp" required>
+                            <small id="urlHelp" class="form-text text-muted">
+                                Add links to your blog, YouTube, portfolio, or favorite websites that represent you.
+                            </small>
+                            <small class="form-text text-danger" th:if="${#fields.hasErrors('url')}" th:errors="*{url}">
+                                This is not a valid URL. Please enter as shown in the example.
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="company">Occupation</label>
+                            <input id="company" type="text" th:field="*{occupation}" class="form-control"
+                                   placeholder="What do you do?" aria-describedby="occupationHelp" required>
+                            <small id="occupationHelp" class="form-text text-muted">
+                                Students? Developer? Manager? Job seeker? CEO?
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="location">Location</label>
+                            <input id="location" type="text" th:field="*{location}" class="form-control"
+                                   placeholder="Tampere, Finland"
+                                   aria-describedby="locationdHelp" required>
+                            <small id="locationdHelp" class="form-text text-muted">
+                                Please provide the city name where you mainly operate (where you live, work, or hang out).
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <button class="btn btn-primary btn-block" type="submit"
+                                    aria-describedby="submitHelp">Update</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
