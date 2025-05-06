@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="fragments.html::head"></head>
+<head th:replace="~{fragments :: head}"></head>
 <body class="bg-light">
-<nav th:replace="fragments.html::main-nav"></nav>
+<nav th:replace="~{fragments :: main-nav}"></nav>
 
 <div class="py-5 text-center" th:if="${error}">
     <p class="lead">JokaHobby Email Verification</p>
@@ -19,6 +19,6 @@
     </h2>
     <small class="text-info">You can now log in with the email or nickname and password you used when signing up.</small>
 </div>
-<footer th:replace="fragments.html::footer"></footer>
+<footer th:replace="~{fragments :: footer}"></footer>
 </body>
 </html>

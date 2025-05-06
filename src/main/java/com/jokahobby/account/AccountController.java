@@ -70,6 +70,24 @@ public class AccountController {
         return view;
     }
 
+    @GetMapping("/check-email")
+    public String checkEmail(@CurrentUser Account account, Model model) {
+        model.addAttribute("email", account.getEmail());
+        return "account/check-email";
+    }
+
+    @GetMapping("/resend-confirm-email")
+    public String resendConfirmEmail(@CurrentUser Account account, Model model) {
+        if(!account.canSendConfirmEmail()) {
+            model.addAttribute("error", "Verification email can only be sent once every hour.");
+            model.addAttribute("email", account.getEmail());
+            return "account/check-email";
+        }
+
+        accountService.sendSignUpConfirmEmail(account);
+        return "redirect:/";
+    }
+
 
 
 }
