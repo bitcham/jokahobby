@@ -19,8 +19,8 @@ public class SettingsController {
 
     private final AccountService accountService;
 
-    private final String SETTINGS_PROFILE_URL = "/settings/profile";
-    private final String SETTINGS_PROFILE_VIEW = "settings/profile";
+    static final String SETTINGS_PROFILE_URL = "/settings/profile";
+    static final String SETTINGS_PROFILE_VIEW = "settings/profile";
 
     @GetMapping(SETTINGS_PROFILE_URL)
     public String profileUpdateForm(@CurrentUser Account account, Model model){

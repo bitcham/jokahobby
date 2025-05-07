@@ -22,4 +22,13 @@ public class SignUpForm {
     @Length(min = 8, max = 50)
     private String password;
 
+    @Override
+    public String toString() {
+        return "SignUpForm{" +
+                "nickname='" + nickname + '\'' +
+                ", email='" + email + '\'' +
+                ", password='********" + '\'' +
+                '}';
+    }
+
 }
