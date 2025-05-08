@@ -23,9 +23,10 @@ public class SettingsController {
 
     static final String SETTINGS_PROFILE_URL = "/settings/profile";
     static final String SETTINGS_PROFILE_VIEW = "settings/profile";
-
     static final String SETTINGS_PASSWORD_URL = "/settings/password";
     static final String SETTINGS_PASSWORD_VIEW = "settings/password";
+    static final String SETTINGS_NOTIFICATIONS_URL = "/settings/notifications";
+    static final String SETTINGS_NOTIFICATIONS_VIEW = "settings/notifications";
 
     @InitBinder("passwordForm")
     public void initBinder(WebDataBinder webDataBinder) {
@@ -70,6 +71,26 @@ public class SettingsController {
         accountService.updatePassword(account, passwordForm.getNewPasswordConfirm());
         redirectAttributes.addFlashAttribute("message", "Your password updated successfully.");
         return "redirect:" + SETTINGS_PASSWORD_URL;
+    }
+
+    @GetMapping(SETTINGS_NOTIFICATIONS_URL)
+    public String notificationsForm(@CurrentUser Account account, Model model) {
+        model.addAttribute(account);
+        model.addAttribute(new Notifications(account));
+        return SETTINGS_NOTIFICATIONS_VIEW;
+    }
+
+    @PostMapping(SETTINGS_NOTIFICATIONS_URL)
+    public String notificationsUpdate(@CurrentUser Account account, @Valid Notifications notifications, Errors errors,
+                                      Model model, RedirectAttributes redirectAttributes) {
+        if (errors.hasErrors()) {
+            model.addAttribute(account);
+            return SETTINGS_NOTIFICATIONS_VIEW;
+        }
+
+        accountService.updateNotifications(account, notifications);
+        redirectAttributes.addFlashAttribute("message", "Your notification settings updated successfully.");
+        return "redirect:" + SETTINGS_NOTIFICATIONS_URL;
     }
 
 

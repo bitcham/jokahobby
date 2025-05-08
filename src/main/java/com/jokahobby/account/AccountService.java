@@ -2,6 +2,7 @@ package com.jokahobby.account;
 
 import com.jokahobby.domain.Account;
 import com.jokahobby.exception.AuthenticationContextException;
+import com.jokahobby.settings.Notifications;
 import com.jokahobby.settings.PasswordForm;
 import com.jokahobby.settings.Profile;
 import jakarta.servlet.http.HttpServletRequest;
@@ -117,6 +118,16 @@ public class AccountService implements UserDetailsService {
 
     public void updatePassword(Account account, String newPasswordConfirm) {
         account.setPassword(passwordEncoder.encode(newPasswordConfirm));
+        accountRepository.save(account);
+    }
+
+    public void updateNotifications(Account account, @Valid Notifications notifications) {
+        account.setHobbyCreatedByWeb(notifications.isHobbyCreatedByWeb());
+        account.setHobbyCreatedByEmail(notifications.isHobbyCreatedByEmail());
+        account.setHobbyUpdatedByWeb(notifications.isHobbyUpdatedByWeb());
+        account.setHobbyUpdatedByEmail(notifications.isHobbyUpdatedByEmail());
+        account.setHobbyEnrollmentResultByWeb(notifications.isHobbyEnrollmentResultByWeb());
+        account.setHobbyEnrollmentResultByEmail(notifications.isHobbyEnrollmentResultByEmail());
         accountRepository.save(account);
     }
 }
