@@ -1,4 +1,4 @@
-package com.jokahobby.settings;
+package com.jokahobby.settings.form;
 
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;

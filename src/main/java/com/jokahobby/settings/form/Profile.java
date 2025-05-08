@@ -1,0 +1,22 @@
+package com.jokahobby.settings.form;
+
+import lombok.Data;
+import org.hibernate.validator.constraints.Length;
+
+@Data
+public class Profile {
+
+    @Length(max = 50)
+    private String bio;
+
+    @Length(max = 50)
+    private String url;
+
+    @Length(max = 25)
+    private String occupation;
+
+    private String location;
+
+    private String profileImage;
+
+}

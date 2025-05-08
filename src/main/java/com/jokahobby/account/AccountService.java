@@ -2,13 +2,16 @@ package com.jokahobby.account;
 
 import com.jokahobby.domain.Account;
 import com.jokahobby.exception.AuthenticationContextException;
-import com.jokahobby.settings.Notifications;
-import com.jokahobby.settings.PasswordForm;
-import com.jokahobby.settings.Profile;
+import com.jokahobby.settings.form.Notifications;
+import com.jokahobby.settings.form.Profile;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.validator.constraints.Length;
+import org.modelmapper.ModelMapper;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -37,6 +40,7 @@ public class AccountService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final SecurityContextHolderStrategy securityContextHolderStrategy;
     private final SecurityContextRepository securityContextRepository;
+    private final ModelMapper modelMapper;
 
 
     public Account processNewAccount(@Valid SignUpForm signUpForm) {
@@ -107,11 +111,7 @@ public class AccountService implements UserDetailsService {
     }
 
     public void updateProfile(Account account, @Valid Profile profile) {
-        account.setUrl(profile.getUrl());
-        account.setBio(profile.getBio());
-        account.setOccupation(profile.getOccupation());
-        account.setLocation(profile.getLocation());
-        account.setProfileImage(profile.getProfileImage());
+        modelMapper.map(profile, account);
         accountRepository.save(account);
     }
 
@@ -122,12 +122,13 @@ public class AccountService implements UserDetailsService {
     }
 
     public void updateNotifications(Account account, @Valid Notifications notifications) {
-        account.setHobbyCreatedByWeb(notifications.isHobbyCreatedByWeb());
-        account.setHobbyCreatedByEmail(notifications.isHobbyCreatedByEmail());
-        account.setHobbyUpdatedByWeb(notifications.isHobbyUpdatedByWeb());
-        account.setHobbyUpdatedByEmail(notifications.isHobbyUpdatedByEmail());
-        account.setHobbyEnrollmentResultByWeb(notifications.isHobbyEnrollmentResultByWeb());
-        account.setHobbyEnrollmentResultByEmail(notifications.isHobbyEnrollmentResultByEmail());
+        modelMapper.map(notifications, account);
         accountRepository.save(account);
+    }
+
+    public void updateNickname(Account account, @NotBlank @Length(min = 3, max = 20) @Pattern(regexp = "^[a-zA-Z0-9]{3,20}$") String nickname) {
+        account.setNickname(nickname);
+        accountRepository.save(account);
+        login(account);
     }
 }

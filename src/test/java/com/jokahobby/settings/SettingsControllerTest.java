@@ -142,6 +142,50 @@ class SettingsControllerTest {
         assertThat(passwordEncoder.matches(newPassword, cutedog.getPassword())).isFalse();
     }
 
+    @WithAccount("cutedog")
+    @DisplayName("Nickname update form")
+    @Test
+    void nicknameUpdateForm() throws Exception{
+        mockMvc.perform(get(SETTINGS_ACCOUNT_URL))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("nicknameForm"));
+    }
+
+    @WithAccount("cutedog")
+    @DisplayName("Nickname update - correct data")
+    @Test
+    void nicknameUpdate() throws Exception{
+        String newNickname = "newNickname";
+        mockMvc.perform(post(SETTINGS_ACCOUNT_URL)
+                        .param("nickname", newNickname)
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(SETTINGS_ACCOUNT_URL))
+                .andExpect(flash().attributeExists("message"));
+
+        Account cutedog = accountRepository.findByNickname(newNickname);
+        assertThat(cutedog.getNickname()).isEqualTo(newNickname);
+    }
+
+    @WithAccount("cutedog")
+    @DisplayName("Nickname update - incorrect data")
+    @Test
+    void nicknameUpdate_error() throws Exception{
+        String newNickname = "a";
+        mockMvc.perform(post(SETTINGS_ACCOUNT_URL)
+                        .param("nickname", newNickname)
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name(SETTINGS_ACCOUNT_VIEW))
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("nicknameForm"))
+                .andExpect(model().hasErrors());
+
+        assertThat(accountRepository.findByNickname(newNickname)).isNull();
+    }
+
+
 
 
 }

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments.html :: head}"></head>
+<body class="bg-light">
+    <nav th:replace="~{fragments.html :: main-nav}"></nav>
+    <div class="container">
+        <div class="row mt-5 justify-content-center">
+            <div class="col-2">
+                <div th:replace="~{fragments.html :: settings-menu(currentMenu='account')}"></div>
+            </div>
+            <div class="col-8">
+                <div th:if="${message}" class="alert alert-info alert-dismissible fade show mt-3" role="alert">
+                    <span th:text="${message}">Complete</span>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="row">
+                    <h2 class="col-12">Change Nickname</h2>
+                </div>
+                <div class="row">
+                    <form class="needs-validation col-12" th:object="${nicknameForm}" th:action="@{/settings/account}" method="post" novalidate>
+                        <div class="alert alert-warning" role="alert">
+                            If you change your nickname, your profile page link will also change!
+                        </div>
+                        <div class="form-group">
+                            <input id="nickname" type="text" th:field="*{nickname}" class="form-control" aria-describedby="nicknameHelp" required>
+                            <small id="nicknameHelp" class="form-text text-muted">
+                                Enter between 3 and 20 characters using only letters and numbers without spaces. You can change it after signing up.
+                            </small>
+                            <small class="invalid-feedback">Please enter a nickname.</small>
+                            <small class="form-text text-danger" th:if="${#fields.hasErrors('nickname')}" th:errors="*{nickname}">nickname Error</small>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-outline-primary" type="submit" aria-describedby="submitHelp">Change</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="dropdown-divider"></div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <h2 class="text-danger">Delete Account</h2>
+                        <div class="alert alert-danger" role="alert">
+                            This account cannot be deleted.
+                        </div>
+                        <button class="btn btn-outline-danger disabled">Delete Account</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div th:replace="~{fragments.html :: footer}"></div>
+    </div>
+    <script th:replace="~{fragments.html :: form-validation}"></script>
+</body>
+</html>

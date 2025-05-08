@@ -1,6 +1,7 @@
-package com.jokahobby.settings;
+package com.jokahobby.settings.validator;
 
 
+import com.jokahobby.settings.form.PasswordForm;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
