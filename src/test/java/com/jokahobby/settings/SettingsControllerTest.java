@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.TestExecutionEvent;
 import org.springframework.security.test.context.support.WithSecurityContext;
 import org.springframework.security.test.context.support.WithUserDetails;
@@ -39,6 +40,8 @@ class SettingsControllerTest {
 
     @Autowired
     private AccountRepository accountRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
 
     @AfterEach
@@ -92,5 +95,53 @@ class SettingsControllerTest {
         Account cutedog = accountRepository.findByNickname("cutedog");
         assertThat(cutedog.getBio()).isNull();
     }
+
+    @WithAccount("cutedog")
+    @DisplayName("Password update form")
+    @Test
+    void passwordUpdateForm() throws Exception{
+        mockMvc.perform(get(SETTINGS_PASSWORD_URL))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("passwordForm"));
+    }
+
+    @WithAccount("cutedog")
+    @DisplayName("Password update - correct data")
+    @Test
+    void passwordUpdate() throws Exception {
+        String newPassword = "newPassword";
+        mockMvc.perform(post(SETTINGS_PASSWORD_URL)
+                        .param("newPassword", newPassword)
+                        .param("newPasswordConfirm", newPassword)
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(SETTINGS_PASSWORD_URL))
+                .andExpect(flash().attributeExists("message"));
+
+        Account cutedog = accountRepository.findByNickname("cutedog");
+        assertThat(passwordEncoder.matches(newPassword, cutedog.getPassword())).isTrue();
+    }
+
+    @WithAccount("cutedog")
+    @DisplayName("Password update - incorrect data")
+    @Test
+    void passwordUpdate_error() throws Exception {
+        String newPassword = "newPassword";
+        mockMvc.perform(post(SETTINGS_PASSWORD_URL)
+                        .param("newPassword", newPassword)
+                        .param("newPasswordConfirm", "wrongPassword")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name(SETTINGS_PASSWORD_VIEW))
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("passwordForm"))
+                .andExpect(model().hasErrors());
+
+        Account cutedog = accountRepository.findByNickname("cutedog");
+        assertThat(passwordEncoder.matches(newPassword, cutedog.getPassword())).isFalse();
+    }
+
+
 
 }
