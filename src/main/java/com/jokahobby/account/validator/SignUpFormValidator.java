@@ -1,5 +1,7 @@
-package com.jokahobby.account;
+package com.jokahobby.account.validator;
 
+import com.jokahobby.account.AccountRepository;
+import com.jokahobby.account.form.SignUpForm;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;

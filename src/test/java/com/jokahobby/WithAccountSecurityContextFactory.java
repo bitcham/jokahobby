@@ -1,9 +1,8 @@
 package com.jokahobby;
 
 import com.jokahobby.account.AccountService;
-import com.jokahobby.account.SignUpForm;
+import com.jokahobby.account.form.SignUpForm;
 import lombok.RequiredArgsConstructor;
-import org.aspectj.lang.annotation.RequiredTypes;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;

@@ -1,5 +1,6 @@
 package com.jokahobby.account;
 
+import com.jokahobby.account.form.SignUpForm;
 import com.jokahobby.domain.Account;
 import com.jokahobby.exception.AuthenticationContextException;
 import com.jokahobby.settings.form.Notifications;
@@ -130,5 +131,15 @@ public class AccountService implements UserDetailsService {
         account.setNickname(nickname);
         accountRepository.save(account);
         login(account);
+    }
+
+    public void sendLoginLink(Account account) {
+        account.generateEmailCheckToken();
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(account.getEmail());
+        mailMessage.setSubject("JokaHobby, Login Link");
+        mailMessage.setText("/login-by-email?token=" + account.getEmailCheckToken() +
+                "&email=" + account.getEmail());
+        javaMailSender.send(mailMessage);
     }
 }

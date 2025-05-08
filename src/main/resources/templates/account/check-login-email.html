@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments.html :: head}"></head>
+<body class="bg-light">
+    <nav th:replace="~{fragments.html :: main-nav}"></nav>
+
+    <div class="container">
+        <div class="py-5 text-center" th:if="${error}">
+            <p class="lead">JokaHobby Email Login</p>
+            <div  class="alert alert-danger" role="alert">
+                The email is incorrect or not registered.
+            </div>
+            <p class="lead" th:text="${email}">your@email.com</p>
+        </div>
+
+        <div class="py-5 text-center" th:if="${error == null}">
+            <p class="lead">JokaHobby Email Login</p>
+
+            <h2>Please check your email. We've sent a login link.</h2>
+            <p class="lead" th:text="${email}">your@email.com</p>
+            <small class="text-info">You need to check your email to login.</small>
+        </div>
+    </div>
+</body>
+</html>

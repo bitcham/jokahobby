@@ -38,6 +38,9 @@ public class SettingsController {
     static final String SETTINGS_NOTIFICATIONS_VIEW = "settings/notifications";
     static final String SETTINGS_ACCOUNT_URL = "/settings/account";
     static final String SETTINGS_ACCOUNT_VIEW = "settings/account";
+    static final String SETTINGS_TAGS_URL = "/settings/tags";
+    static final String SETTINGS_TAGS_VIEW = "settings/tags";
+
 
 
     @InitBinder("passwordForm")
@@ -129,6 +132,13 @@ public class SettingsController {
         redirectAttributes.addFlashAttribute("message", "Your nickname updated successfully.");
         return "redirect:" + SETTINGS_ACCOUNT_URL;
     }
+
+    @GetMapping(SETTINGS_TAGS_URL)
+    public String tagsForm(@CurrentUser Account account, Model model) {
+        model.addAttribute(account);
+        return SETTINGS_TAGS_VIEW;
+    }
+
 
 
 

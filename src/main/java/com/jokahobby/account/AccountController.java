@@ -1,5 +1,7 @@
 package com.jokahobby.account;
 
+import com.jokahobby.account.form.SignUpForm;
+import com.jokahobby.account.validator.SignUpFormValidator;
 import com.jokahobby.domain.Account;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Slf4j
 @Controller
@@ -97,6 +100,44 @@ public class AccountController {
         model.addAttribute("isOwner", byNickname.equals(account));
         return "account/profile";
     }
+
+    @GetMapping("/email-login")
+    public String emailLoginForm() {
+        return "account/email-login";
+    }
+
+    @PostMapping("/email-login")
+    public String sendEmailLoginLink(String email, Model model, RedirectAttributes redirectAttributes) {
+        Account account = accountRepository.findByEmail(email);
+        if (account == null) {
+            model.addAttribute("error", "The email address is not registered.");
+            return "account/email-login";
+        }
+
+        if (!account.canSendConfirmEmail()) {
+            model.addAttribute("error", "Verification email can only be sent once every hour.");
+            return "account/email-login";
+        }
+
+        accountService.sendLoginLink(account);
+        redirectAttributes.addFlashAttribute("message", "The email login link has been sent.");
+        return "redirect:/email-login";
+    }
+
+    @GetMapping("/login-by-link")
+    public String loginByEmail(String token, String email, Model model){
+        Account account = accountRepository.findByEmail(email);
+        String view = "account/logged-in-by-email";
+        if(account == null || !account.isValidToken(token)){
+            model.addAttribute("error", "You cannot log in");
+            return view;
+        }
+
+        accountService.login(account);
+        return view;
+    }
+
+
 
 
 
