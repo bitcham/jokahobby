@@ -32,6 +32,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -147,5 +148,13 @@ public class AccountService implements UserDetailsService {
 
     public void addTag(Account account, Tag tag) {
         accountRepository.findById(account.getId()).ifPresent(a -> a.getTags().add(tag));
+    }
+
+    public Set<Tag> getTags(Account account) {
+        return accountRepository.findById(account.getId()).orElseThrow().getTags();
+    }
+
+    public void removeTag(Account account, Tag tag) {
+        accountRepository.findById(account.getId()).ifPresent(a -> a.getTags().remove(tag));
     }
 }

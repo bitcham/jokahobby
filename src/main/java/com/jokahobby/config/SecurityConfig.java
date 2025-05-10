@@ -30,6 +30,7 @@ public class SecurityConfig {
     private final AccountService accountService;
     private final DataSource dataSource;
 
+
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http, HandlerMappingIntrospector introspector) throws Exception {
         MvcRequestMatcher.Builder mvcMatcherBuilder = new MvcRequestMatcher.Builder(introspector);
