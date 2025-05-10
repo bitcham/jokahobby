@@ -2,6 +2,7 @@ package com.jokahobby.account;
 
 import com.jokahobby.account.form.SignUpForm;
 import com.jokahobby.domain.Account;
+import com.jokahobby.domain.Tag;
 import com.jokahobby.exception.AuthenticationContextException;
 import com.jokahobby.settings.form.Notifications;
 import com.jokahobby.settings.form.Profile;
@@ -30,6 +31,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.Collections;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -141,5 +143,9 @@ public class AccountService implements UserDetailsService {
         mailMessage.setText("/login-by-email?token=" + account.getEmailCheckToken() +
                 "&email=" + account.getEmail());
         javaMailSender.send(mailMessage);
+    }
+
+    public void addTag(Account account, Tag tag) {
+        accountRepository.findById(account.getId()).ifPresent(a -> a.getTags().add(tag));
     }
 }
