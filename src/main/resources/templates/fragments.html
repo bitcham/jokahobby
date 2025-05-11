@@ -97,6 +97,8 @@
     <a class="list-group-item list-group-item-action list-group-item-danger" th:classappend="${currentMenu == 'account'}? active" href="#" th:href="@{/settings/account}">Account</a>
 </div>
 
+
+
 <script type="application/javascript" th:fragment="form-validation">
     (function () {
         'use strict';
@@ -117,6 +119,16 @@
             })
         }, false)
     }())
+</script>
+
+<script type="application/javascript" th:inline="javascript" th:fragment="ajax-csrf-header">
+    $(function() {
+        var csrfToken = /*[[${_csrf.token}]]*/ null;
+        var csrfHeader = /*[[${_csrf.headerName}]]*/ null;
+        $(document).ajaxSend(function (e, xhr, options) {
+            xhr.setRequestHeader(csrfHeader, csrfToken);
+        });
+    });
 </script>
 
 </html>

@@ -6,29 +6,31 @@
     <div class="container">
         <div class="row mt-5 justify-content-center">
             <div class="col-2">
-                <div th:replace="~{fragments.html :: settings-menu(currentMenu='tags')}"></div>
+                <div th:replace="~{fragments.html :: settings-menu(currentMenu='zones')}"></div>
             </div>
             <div class="col-8">
                 <div class="row">
-                    <h2 class="col-12">Hobby Topics of Interest</h2>
+                    <h2 class="col-12">Main Activity Regions</h2>
                 </div>
                 <div class="row">
                     <div class="col-12">
                         <div class="alert alert-info" role="alert">
-                            Please enter hobby topics you're interested in. You can receive notifications when hobbies related to these topics are created. Enter tags separated by commas (,) or press Enter.
+                            Please register regions where you can mainly attend hobbies. You can receive notifications when hobbies are created in those regions.<br/>
+                            You can only select regions that are registered in the system.
                         </div>
                         <div id="whitelist" th:text="${whitelist}" hidden></div>
-                        <input id="tags" type="text" name="tags" th:value="${#strings.listJoin(tags, ',')}" class="tagify-outside" aria-describedby="tagHelp"/>
+                        <input id="tags" type="text" name="tags" th:value="${#strings.listJoin(zones, ',')}"
+                               class="tagify-outside" aria-describedby="tagHelp"/>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <script src="/node_modules/@yaireo/tagify/dist/tagify.min.js"></script>
     <script th:replace="~{fragments.html :: ajax-csrf-header}"></script>
+    <script src="/node_modules/@yaireo/tagify/dist/tagify.min.js"></script>
     <script type="application/javascript">
         $(function () {
-            function tagRequest(url, tagTitle) {
+            function tagRequest(url, zoneName) {
                 $.ajax({
                     dataType: "json",
                     autocomplete: {
@@ -37,8 +39,8 @@
                     },
                     contentType: "application/json; charset=utf-8",
                     method: "POST",
-                    url: "/settings/tags" + url,
-                    data: JSON.stringify({'tagTitle': tagTitle})
+                    url: "/settings/zones" + url,
+                    data: JSON.stringify({'zoneName': zoneName})
                 }).done(function (data, status) {
                     console.log("${data} and status is ${status}");
                 });
@@ -55,7 +57,7 @@
             var tagInput = document.querySelector("#tags");
 
             var tagify = new Tagify(tagInput, {
-                pattern: /^.{0,20}$/,
+                enforceWhitelist: true,
                 whitelist: JSON.parse(document.querySelector("#whitelist").textContent),
                 dropdown : {
                     enabled: 1, // suggest tags after a single character input
@@ -67,7 +69,7 @@
 
             // add a class to Tagify's input element
             tagify.DOM.input.classList.add('form-control');
-            // re-place Tagify's input element outside of the element (tagify.DOM.scope), just before it
+            // re-place Tagify's input element outside of the  element (tagify.DOM.scope), just before it
             tagify.DOM.scope.parentNode.insertBefore(tagify.DOM.input, tagify.DOM.scope);
         });
     </script>

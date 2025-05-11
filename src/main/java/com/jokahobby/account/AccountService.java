@@ -3,6 +3,7 @@ package com.jokahobby.account;
 import com.jokahobby.account.form.SignUpForm;
 import com.jokahobby.domain.Account;
 import com.jokahobby.domain.Tag;
+import com.jokahobby.domain.Zone;
 import com.jokahobby.exception.AuthenticationContextException;
 import com.jokahobby.settings.form.Notifications;
 import com.jokahobby.settings.form.Profile;
@@ -49,20 +50,14 @@ public class AccountService implements UserDetailsService {
 
     public Account processNewAccount(@Valid SignUpForm signUpForm) {
         Account newAccount = saveNewAccount(signUpForm);
-        newAccount.generateEmailCheckToken();
         sendSignUpConfirmEmail(newAccount);
         return newAccount;
     }
 
     private Account saveNewAccount(SignUpForm signUpForm) {
-        Account account = Account.builder()
-                .email(signUpForm.getEmail())
-                .nickname(signUpForm.getNickname())
-                .password(passwordEncoder.encode(signUpForm.getPassword()))
-                .hobbyCreatedByWeb(true)
-                .hobbyEnrollmentResultByWeb(true)
-                .hobbyUpdatedByWeb(true)
-                .build();
+        signUpForm.setPassword(passwordEncoder.encode(signUpForm.getPassword()));
+        Account account = modelMapper.map(signUpForm, Account.class);
+        account.generateEmailCheckToken();
         return accountRepository.save(account);
     }
 
@@ -156,5 +151,17 @@ public class AccountService implements UserDetailsService {
 
     public void removeTag(Account account, Tag tag) {
         accountRepository.findById(account.getId()).ifPresent(a -> a.getTags().remove(tag));
+    }
+
+    public Set<Zone> getZones(Account account) {
+        return accountRepository.findById(account.getId()).orElseThrow().getZones();
+    }
+
+    public void addZone(Account account, Zone zone) {
+        accountRepository.findById(account.getId()).ifPresent(a -> a.getZones().add(zone));
+    }
+
+    public void removeZone(Account account, Zone zone) {
+        accountRepository.findById(account.getId()).ifPresent(a -> a.getZones().remove(zone));
     }
 }
