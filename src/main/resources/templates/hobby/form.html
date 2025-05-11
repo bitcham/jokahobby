@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments.html :: head}"></head>
+<body class="bg-light">
+    <div th:replace="~{fragments.html :: main-nav}"></div>
+
+    <div class="container">
+        <div class="py-5 text-center">
+            <h2>Create Hobby</h2>
+        </div>
+        <div class="row justify-content-center">
+            <form class="needs-validation col-sm-10" th:action="@{/new-hobby}" th:object="${hobbyForm}" method="post" novalidate>
+                <div class="form-group">
+                    <label for="path">Hobby URL</label>
+                    <input id="path" type="text" th:field="*{path}" class="form-control"
+                           placeholder="e.g.) study-path" aria-describedby="pathHelp" required min="3" max="20">
+                    <small id="pathHelp" class="form-text text-muted">
+                        Enter at least 3 characters and up to 20 characters using only letters, numbers, dashes(-) and underscores(_) without spaces. This will be used for the hobby home address. e.g.) /hobby/<b>hobby-path</b>
+                    </small>
+                    <small class="invalid-feedback">Please enter a hobby path.</small>
+                    <small class="form-text text-danger" th:if="${#fields.hasErrors('path')}" th:errors="*{path}">Path Error</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="title">Hobby Room Name</label>
+                    <input id="title" type="text" th:field="*{title}" class="form-control"
+                           placeholder="Study Name" aria-describedby="titleHelp" required max="50">
+                    <small id="titleHelp" class="form-text text-muted">
+                        Enter the study name within 50 characters.
+                    </small>
+                    <small class="invalid-feedback">Please enter a hobby room name.</small>
+                    <small class="form-text text-danger" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">Title Error</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="shortDescription">Brief Introduction</label>
+                    <textarea id="shortDescription" type="textarea" th:field="*{shortDescription}" class="form-control"
+                              placeholder="Briefly introduce your study." aria-describedby="shortDescriptionHelp" required maxlength="150"></textarea>
+                    <small id="shortDescriptionHelp" class="form-text text-muted">
+                        Please provide a brief introduction of your study within 150 characters.
+                    </small>
+                    <small class="invalid-feedback">Please enter a brief introduction.</small>
+                    <small class="form-text text-danger" th:if="${#fields.hasErrors('shortDescription')}" th:errors="*{shortDescription}">ShortDescription Error</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="fullDescription">Detailed Description</label>
+                    <textarea id="fullDescription" type="textarea" th:field="*{fullDescription}" class="form-control"
+                              placeholder="Describe your study in detail." aria-describedby="fullDescriptionHelp" required maxlength="500"></textarea>
+                    <small id="fullDescriptionHelp" class="form-text text-muted">
+                        Please describe in detail about the hobby room to be used, and hobby members being recruited.
+                    </small>
+                    <small class="invalid-feedback">Please enter a detailed description.</small>
+                    <small class="form-text text-danger" th:if="${#fields.hasErrors('fullDescription')}" th:errors="*{fullDescription}">FullDescription Error</small>
+                </div>
+
+                <div class="form-group">
+                    <button class="btn btn-primary btn-block" type="submit"
+                            aria-describedby="submitHelp">Create Hobby</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="fragments.html :: footer"></div>
+    </div>
+    <script th:replace="~{fragments.html :: form-validation}"></script>
+    <script src="/node_modules/summernote/dist/summernote-bs4.js"></script>
+    <script type="application/javascript">
+        $(function () {
+            $('#fullDescription').summernote({
+                fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', 'Noto Sans KR', 'Merriweather'],
+                placeholder: 'Please describe in detail about the study\'s goals, schedule, process, textbooks or online courses to be used, and study members being recruited.',
+                tabsize: 2,
+                height: 300
+            });
+        });
+    </script>
+</body>
+</html>
