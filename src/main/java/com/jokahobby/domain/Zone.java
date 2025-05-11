@@ -1,14 +1,12 @@
 package com.jokahobby.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
 @Getter @Setter @EqualsAndHashCode(of = "id")
 @Builder @AllArgsConstructor @NoArgsConstructor
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"city", "province"}))
 public class Zone {
 
     @Id @GeneratedValue
@@ -36,7 +34,7 @@ public class Zone {
         }
 
         if(province.equals("none") || province.isBlank()) {
-            return String.format("%s/it %s(%s)", country, city, localNameOfCity);
+            return String.format("%s/%s(%s)", country, city, localNameOfCity);
         }
 
         return String.format("%s/%s(%s)/%s", country, city, localNameOfCity, province);

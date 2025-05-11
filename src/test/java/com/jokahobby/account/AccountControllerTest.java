@@ -1,6 +1,8 @@
 package com.jokahobby.account;
 
 import com.jokahobby.domain.Account;
+import com.jokahobby.mail.EmailMessage;
+import com.jokahobby.mail.EmailService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +31,7 @@ class AccountControllerTest {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private AccountRepository accountRepository;
-    @MockBean JavaMailSender javaMailSender;
+    @MockBean EmailService emailService;
 
     @DisplayName("Check Email Token - Incorrect Input")
     @Test
@@ -102,7 +104,7 @@ class AccountControllerTest {
         Account account = accountRepository.findByEmail("chambit.oh@email.com");
         assertNotNull(account);
         assertNotNull(account.getPassword(), "12345678");
-        then(javaMailSender).should().send(any(SimpleMailMessage.class));
+        then(emailService).should().sendEmail(any(EmailMessage.class));
     }
 
 }

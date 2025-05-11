@@ -46,15 +46,15 @@ public class Account {
 
     private boolean hobbyCreatedByEmail;
 
-    private boolean hobbyCreatedByWeb;
+    private boolean hobbyCreatedByWeb = true;
 
     private boolean hobbyEnrollmentResultByEmail;
 
-    private boolean hobbyEnrollmentResultByWeb;
+    private boolean hobbyEnrollmentResultByWeb = true;
 
     private boolean hobbyUpdatedByEmail;
 
-    private boolean hobbyUpdatedByWeb;
+    private boolean hobbyUpdatedByWeb = true;
 
     private LocalDateTime emailCheckTokenGeneratedAt;
 

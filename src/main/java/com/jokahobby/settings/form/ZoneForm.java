@@ -9,19 +9,30 @@ public class ZoneForm {
     private String zoneName;
 
     public String getCountryName() {
-        return zoneName.substring(0, zoneName.indexOf("/"));
+        return zoneName.split("/")[0];
     }
 
-    public String getCityName(){
-        return zoneName.substring(zoneName.indexOf("/") + 1, zoneName.indexOf("("));
+    public String getCityName() {
+        String[] parts = zoneName.split("/");
+        String cityPart = parts[1];
+        return cityPart.contains("(") ? cityPart.substring(0, cityPart.indexOf("(")) : cityPart;
     }
 
     public String getLocalNameOfCity() {
-        return zoneName.substring(zoneName.indexOf("(") + 1, zoneName.indexOf(")"));
+        String[] parts = zoneName.split("/");
+        String cityPart = parts[1];
+        if (cityPart.contains("(") && cityPart.contains(")")) {
+            return cityPart.substring(cityPart.indexOf("(") + 1, cityPart.indexOf(")"));
+        }
+        return "none";
     }
 
     public String getProvinceName() {
-        return zoneName.substring(zoneName.lastIndexOf("/") + 1);
+        String[] parts = zoneName.split("/");
+        if (parts.length == 3) {
+            return parts[2];
+        }
+        return "none";
     }
 
 

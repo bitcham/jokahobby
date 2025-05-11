@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>JokaHobby</title>
+</head>
+<body>
+<div>
+    <p class="lead">Hello, <span th:text="${nickname}"></span></p>
+
+    <h2 th:text="${message}">Message</h2>
+
+    <div>
+        <a th:href="@{${host} + ${link}}" th:text="${linkName}">link name</a>
+        <p>If the link doesn't work, please copy and paste the URL into your web browser.</p>
+        <small th:text="${host + link}"></small>
+    </div>
+</div>
+<footer>
+    <small class="d-block mb-3 text-muted">JokaHobby&copy; 2025</small>
+</footer>
+</body>
+</html>

@@ -19,8 +19,8 @@
                             You can only select regions that are registered in the system.
                         </div>
                         <div id="whitelist" th:text="${whitelist}" hidden></div>
-                        <input id="tags" type="text" name="tags" th:value="${#strings.listJoin(zones, ',')}"
-                               class="tagify-outside" aria-describedby="tagHelp"/>
+                        <input id="zones" type="text" name="zones" th:value="${#strings.listJoin(zones, ',')}"
+                               class="tagify-outside" aria-describedby="zoneHelp"/>
                     </div>
                 </div>
             </div>
@@ -30,7 +30,7 @@
     <script src="/node_modules/@yaireo/tagify/dist/tagify.min.js"></script>
     <script type="application/javascript">
         $(function () {
-            function tagRequest(url, zoneName) {
+            function zoneRequest(url, zoneName) {
                 $.ajax({
                     dataType: "json",
                     autocomplete: {
@@ -47,21 +47,21 @@
             }
 
             function onAdd(e) {
-                tagRequest("/add", e.detail.data.value);
+                zoneRequest("/add", e.detail.data.value);
             }
 
             function onRemove(e) {
-                tagRequest("/remove", e.detail.data.value);
+                zoneRequest("/remove", e.detail.data.value);
             }
 
-            var tagInput = document.querySelector("#tags");
+            var zoneInput = document.querySelector("#zones");
 
-            var tagify = new Tagify(tagInput, {
+            var tagify = new Tagify(zoneInput, {
                 enforceWhitelist: true,
                 whitelist: JSON.parse(document.querySelector("#whitelist").textContent),
                 dropdown : {
-                    enabled: 1, // suggest tags after a single character input
-                } // map tags
+                    enabled: 1, // suggest zones after a single character input
+                } // map zones
             });
 
             tagify.on("add", onAdd);

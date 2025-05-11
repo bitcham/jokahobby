@@ -1,10 +1,13 @@
 package com.jokahobby.account;
 
 import com.jokahobby.account.form.SignUpForm;
+import com.jokahobby.config.AppProperties;
 import com.jokahobby.domain.Account;
 import com.jokahobby.domain.Tag;
 import com.jokahobby.domain.Zone;
 import com.jokahobby.exception.AuthenticationContextException;
+import com.jokahobby.mail.EmailMessage;
+import com.jokahobby.mail.EmailService;
 import com.jokahobby.settings.form.Notifications;
 import com.jokahobby.settings.form.Profile;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,10 +16,9 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.constraints.Length;
 import org.modelmapper.ModelMapper;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -30,22 +32,26 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class AccountService implements UserDetailsService {
 
     private final AccountRepository accountRepository;
-    private final JavaMailSender javaMailSender;
+    private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final SecurityContextHolderStrategy securityContextHolderStrategy;
     private final SecurityContextRepository securityContextRepository;
     private final ModelMapper modelMapper;
+    private final TemplateEngine templateEngine;
+    private final AppProperties appProperties;
 
 
     public Account processNewAccount(@Valid SignUpForm signUpForm) {
@@ -62,11 +68,22 @@ public class AccountService implements UserDetailsService {
     }
 
     public void sendSignUpConfirmEmail(Account newAccount) {
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(newAccount.getEmail());
-        mailMessage.setSubject("JokaHobby, Registration Verification");
-        mailMessage.setText("/check-email-token?token=" + newAccount.getEmailCheckToken() + "&email=" + newAccount.getEmail());
-        javaMailSender.send(mailMessage);
+        Context context = new Context();
+        context.setVariable("link", "/check-email-token?token=" + newAccount.getEmailCheckToken() +
+                "&email=" + newAccount.getEmail());
+        context.setVariable("nickname", newAccount.getNickname());
+        context.setVariable("linkName", "Email Verification");
+        context.setVariable("message", "Please click the link below to verify your email address.");
+        context.setVariable("host", appProperties.getHost());
+
+        String message = templateEngine.process("mail/simple-link", context);
+
+        EmailMessage emailMessage = EmailMessage.builder()
+                .to(newAccount.getEmail())
+                .subject("JokaHobby, Account Verification")
+                .message(message)
+                .build();
+        emailService.sendEmail(emailMessage);
     }
 
 
@@ -132,13 +149,21 @@ public class AccountService implements UserDetailsService {
     }
 
     public void sendLoginLink(Account account) {
-        account.generateEmailCheckToken();
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(account.getEmail());
-        mailMessage.setSubject("JokaHobby, Login Link");
-        mailMessage.setText("/login-by-email?token=" + account.getEmailCheckToken() +
+        Context context = new Context();
+        context.setVariable("link", "/login-by-email?token=" + account.getEmailCheckToken() +
                 "&email=" + account.getEmail());
-        javaMailSender.send(mailMessage);
+        context.setVariable("nickname", account.getNickname());
+        context.setVariable("linkName", "Login Link");
+        context.setVariable("message", "Please click the link below to login.");
+        context.setVariable("host", appProperties.getHost());
+        String message = templateEngine.process("mail/simple-link", context);
+
+        EmailMessage emailMessage = EmailMessage.builder()
+                .to(account.getEmail())
+                .subject("JokaHobby, login link")
+                .message(message)
+                .build();
+        emailService.sendEmail(emailMessage);
     }
 
     public void addTag(Account account, Tag tag) {
