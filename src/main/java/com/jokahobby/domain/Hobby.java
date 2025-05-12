@@ -1,5 +1,6 @@
 package com.jokahobby.domain;
 
+import com.jokahobby.account.UserAccount;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,6 +10,11 @@ import java.util.Set;
 
 import static jakarta.persistence.FetchType.*;
 
+@NamedEntityGraph(name = "Hobby.withAll", attributeNodes = {
+        @NamedAttributeNode("tags"),
+        @NamedAttributeNode("zones"),
+        @NamedAttributeNode("managers"),
+        @NamedAttributeNode("members")})
 @Entity
 @Getter
 @Setter
@@ -66,5 +72,19 @@ public class Hobby {
 
     public void addManager(Account account) {
         this.managers.add(account);
+    }
+
+    public boolean isJoinable(UserAccount userAccount) {
+        Account account = userAccount.getAccount();
+        return this.isPublished() && this.isRecruiting()
+                && !this.members.contains(account) && !this.managers.contains(account);
+    }
+
+    public boolean isMember(UserAccount userAccount) {
+        return this.members.contains(userAccount.getAccount());
+    }
+
+    public boolean isManager(UserAccount userAccount) {
+        return this.managers.contains(userAccount.getAccount());
     }
 }

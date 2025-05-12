@@ -19,4 +19,12 @@ public class HobbyService {
         newHobby.addManager(account);
         return newHobby;
     }
+
+    public Hobby getHobby(String path) {
+        Hobby hobby = hobbyRepository.findByPath(path);
+        if (hobby == null) {
+            throw new IllegalArgumentException("Hobby not found");
+        }
+        return hobby;
+    }
 }

@@ -10,7 +10,7 @@ public class HobbyForm {
 
     @NotBlank
     @Length(min = 3, max = 20)
-    @Pattern(regexp = "^[a-zA-Z0-9가-힣äöåÄÖÅ]{3,20}$")
+    @Pattern(regexp = "^[a-zA-Z0-9가-힣äöåÄÖÅ_-]{3,20}$")
     private String path;
 
     @NotBlank
