@@ -1,8 +1,9 @@
 package com.jokahobby.hobby;
 
-import com.jokahobby.account.CurrentUser;
+import com.jokahobby.account.CurrentAccount;
 import com.jokahobby.domain.Account;
 import com.jokahobby.domain.Hobby;
+import com.jokahobby.hobby.form.HobbyForm;
 import com.jokahobby.hobby.validator.HobbyFormValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +35,7 @@ public class HobbyController {
     }
 
     @GetMapping("/new-hobby")
-    public String newHobbyForm(@CurrentUser Account account, Model model) {
+    public String newHobbyForm(@CurrentAccount Account account, Model model) {
         model.addAttribute(account);
         model.addAttribute("hobbyForm", new HobbyForm());
 
@@ -42,7 +43,7 @@ public class HobbyController {
     }
 
     @PostMapping("/new-hobby")
-    public String newHobbySubmit(@CurrentUser Account account, @Valid HobbyForm hobbyForm, Errors errors, Model model) {
+    public String newHobbySubmit(@CurrentAccount Account account, @Valid HobbyForm hobbyForm, Errors errors, Model model) {
         if (errors.hasErrors()) {
             model.addAttribute(account);
             return "hobby/form";
@@ -52,17 +53,16 @@ public class HobbyController {
     }
 
     @GetMapping("/hobby/{path}")
-    public String viewHobby(@CurrentUser Account account, @PathVariable String path, Model model) {
-        Hobby hobby = hobbyService.getHobby(path);
+    public String viewHobby(@CurrentAccount Account account, @PathVariable String path, Model model) {
         model.addAttribute(account);
-        model.addAttribute(hobbyRepository.findByPath(path));
+        model.addAttribute(hobbyService.getHobby(path));
         return "hobby/view";
     }
 
     @GetMapping("/hobby/{path}/members")
-    public String viewHobbyMembers(@CurrentUser Account account, @PathVariable String path, Model model){
+    public String viewHobbyMembers(@CurrentAccount Account account, @PathVariable String path, Model model){
         model.addAttribute(account);
-        model.addAttribute(hobbyRepository.findByPath(path));
+        model.addAttribute(hobbyService.getHobby(path));
         return "hobby/members";
     }
 }

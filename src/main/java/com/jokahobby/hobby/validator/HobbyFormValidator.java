@@ -1,6 +1,6 @@
 package com.jokahobby.hobby.validator;
 
-import com.jokahobby.hobby.HobbyForm;
+import com.jokahobby.hobby.form.HobbyForm;
 import com.jokahobby.hobby.HobbyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

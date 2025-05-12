@@ -2,8 +2,11 @@ package com.jokahobby.hobby;
 
 import com.jokahobby.domain.Account;
 import com.jokahobby.domain.Hobby;
+import com.jokahobby.hobby.form.HobbyDescriptionForm;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class HobbyService {
 
     private final HobbyRepository hobbyRepository;
+    private final ModelMapper modelMapper;
 
     public Hobby createNewHobby(Hobby hobby, Account account) {
         Hobby newHobby = hobbyRepository.save(hobby);
@@ -26,5 +30,17 @@ public class HobbyService {
             throw new IllegalArgumentException("Hobby not found");
         }
         return hobby;
+    }
+
+    public Hobby getHobbyToUpdate(Account account, String path) {
+        Hobby hobby = this.getHobby(path);
+        if (!account.isManagerOf(hobby)) {
+            throw new AccessDeniedException("You do not have permission to access this feature.");
+        }
+        return hobby;
+    }
+
+    public void updateHobbyDescription(Hobby hobby, @Valid HobbyDescriptionForm hobbyDescriptionForm) {
+       modelMapper.map(hobbyDescriptionForm, hobby);
     }
 }

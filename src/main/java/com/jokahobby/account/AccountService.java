@@ -189,4 +189,12 @@ public class AccountService implements UserDetailsService {
     public void removeZone(Account account, Zone zone) {
         accountRepository.findById(account.getId()).ifPresent(a -> a.getZones().remove(zone));
     }
+
+    public Account getAccount(String nickname) {
+        Account byNickname = accountRepository.findByNickname(nickname);
+        if (byNickname == null) {
+            throw new IllegalArgumentException(nickname + " is not a valid nickname.");
+        }
+        return byNickname;
+    }
 }

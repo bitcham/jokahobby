@@ -72,13 +72,13 @@ public class AccountController {
     }
 
     @GetMapping("/check-email")
-    public String checkEmail(@CurrentUser Account account, Model model) {
+    public String checkEmail(@CurrentAccount Account account, Model model) {
         model.addAttribute("email", account.getEmail());
         return "account/check-email";
     }
 
     @GetMapping("/resend-confirm-email")
-    public String resendConfirmEmail(@CurrentUser Account account, Model model) {
+    public String resendConfirmEmail(@CurrentAccount Account account, Model model) {
         if(!account.canSendConfirmEmail()) {
             model.addAttribute("error", "Verification email can only be sent once every hour.");
             model.addAttribute("email", account.getEmail());
@@ -90,12 +90,8 @@ public class AccountController {
     }
 
     @GetMapping("/profile/{nickname}")
-    public String viewProfile(@PathVariable String nickname, Model model, @CurrentUser Account account) {
-        Account byNickname = accountRepository.findByNickname(nickname);
-        if (byNickname == null) {
-            throw new IllegalArgumentException(nickname + " is not a valid nickname.");
-        }
-
+    public String viewProfile(@PathVariable String nickname, Model model, @CurrentAccount Account account) {
+        Account byNickname = accountService.getAccount(nickname);
         model.addAttribute("account", byNickname);
         model.addAttribute("isOwner", byNickname.equals(account));
         return "account/profile";
