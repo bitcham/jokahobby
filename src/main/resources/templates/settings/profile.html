@@ -129,24 +129,26 @@
                 if (e.target.files.length === 1) {
                     const reader = new FileReader();
                     reader.onload = e => {
-                        if (e.target.result) {
-                            let img = document.createElement("img");
-                            img.id = 'new-profile';
-                            img.src = e.target.result;
-                            img.width = 250;
-
-                            $newProfileImage.html(img);
-                            $newProfileImage.show();
-                            $currentProfileImage.hide();
-
-                            let $newImage = $(img);
-                            $newImage.cropper({aspectRatio: 1});
-                            cropper = $newImage.data('cropper');
-
-                            $cutBtn.show();
-                            $confirmBtn.hide();
-                            $resetBtn.show();
+                        if (!e.target.result.startsWith('data:image')) {
+                            alert("Please select a image file.");
+                            return;
                         }
+                        let img = document.createElement("img");
+                        img.id = 'new-profile';
+                        img.src = e.target.result;
+                        img.setAttribute('width', '100%');
+
+                        $newProfileImage.html(img);
+                        $newProfileImage.show();
+                        $currentProfileImage.hide();
+
+                        let $newImage = $(img);
+                        $newImage.cropper({aspectRatio: 1});
+                        cropper = $newImage.data('cropper');
+
+                        $cutBtn.show();
+                        $confirmBtn.hide();
+                        $resetBtn.show();
                     };
 
                     reader.readAsDataURL(e.target.files[0]);
@@ -165,6 +167,12 @@
 
             $cutBtn.click(function () {
                 let dataUrl = cropper.getCroppedCanvas().toDataURL();
+
+                if(dataUrl.length > 1000 * 1024){
+                    alert("Image size is too large. It should be less than 1MB. Current size: " + (dataUrl.length / 1024).toFixed(2) + "KB");
+                    return;
+                }
+
                 let newImage = document.createElement("img");
                 newImage.id = "cropped-new-profile-image";
                 newImage.src = dataUrl;

@@ -4,7 +4,6 @@ import com.jokahobby.account.CurrentAccount;
 import com.jokahobby.domain.Account;
 import com.jokahobby.domain.Hobby;
 import com.jokahobby.hobby.form.HobbyDescriptionForm;
-import com.jokahobby.hobby.form.HobbyForm;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -33,6 +32,7 @@ public class HobbySettingsController {
     static final String ROOT = "/";
     static final String SETTINGS = "settings";
     static final String HOBBY = "hobby";
+    static final String BANNER = "banner";
 
     @GetMapping(DESCRIPTION)
     public String viewHobbySetting(@CurrentAccount Account account, @PathVariable String path, Model model) {
@@ -58,6 +58,36 @@ public class HobbySettingsController {
         hobbyService.updateHobbyDescription(hobby, hobbyDescriptionForm);
         redirectAttributes.addFlashAttribute("message", "Hobby information updated successfully.");
         return "redirect:/" + HOBBY + "/" + getEncodedPath(path) + ROOT + SETTINGS + ROOT + DESCRIPTION;
+    }
+
+    @GetMapping(BANNER)
+    public String hobbyImageForm(@CurrentAccount Account account, @PathVariable String path, Model model) {
+        Hobby hobby = hobbyService.getHobbyToUpdate(account,path);
+        model.addAttribute(account);
+        model.addAttribute(hobby);
+        return HOBBY + ROOT + SETTINGS + ROOT + BANNER;
+    }
+
+    @PostMapping(BANNER)
+    public String hobbyImageSubmit(@CurrentAccount Account account, @PathVariable String path, String image, RedirectAttributes redirectAttributes) {
+        Hobby hobby = hobbyService.getHobbyToUpdate(account,path);
+        hobbyService.updateHobbyImage(hobby, image);
+        redirectAttributes.addFlashAttribute("message", "Hobby banner updated successfully.");
+        return "redirect:/" + HOBBY + ROOT + getEncodedPath(path) + ROOT + SETTINGS + ROOT + BANNER;
+    }
+
+    @PostMapping(BANNER + "/enable")
+    public String enableHobbyBanner(@CurrentAccount Account account, @PathVariable String path){
+        Hobby hobby = hobbyService.getHobbyToUpdate(account,path);
+        hobbyService.enableHobbyBanner(hobby);
+        return "redirect:/" + HOBBY + ROOT + getEncodedPath(path) + ROOT + SETTINGS + ROOT + BANNER;
+    }
+
+    @PostMapping(BANNER + "/disable")
+    public String disableHobbyBanner(@CurrentAccount Account account, @PathVariable String path){
+        Hobby hobby = hobbyService.getHobbyToUpdate(account,path);
+        hobbyService.disableHobbyBanner(hobby);
+        return "redirect:/" + HOBBY + ROOT + getEncodedPath(path) + ROOT + SETTINGS + ROOT + BANNER;
     }
 
     private String getEncodedPath(String path) {

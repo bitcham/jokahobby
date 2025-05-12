@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="fragments.html :: head"></head>
+<head th:replace="~{fragments.html :: head}"></head>
 <body>
-<nav th:replace="fragments.html :: main-nav"></nav>
-<div th:replace="fragments.html :: hobby-banner"></div>
+<nav th:replace="~{fragments.html :: main-nav}"></nav>
+<div th:replace="~{fragments.html :: hobby-banner}"></div>
 <div class="container">
-    <div th:replace="fragments.html :: hobby-info"></div>
-    <div th:replace="fragments.html :: hobby-menu(hobbyMenu='settings')"></div>
+    <div th:replace="~{fragments.html :: hobby-info}"></div>
+    <div th:replace="~{fragments.html :: hobby-menu(hobbyMenu='settings')}"></div>
     <div class="row mt-3 justify-content-center">
         <div class="col-2">
             <div th:replace="fragments.html :: hobby-settings-menu(currentMenu='image')"></div>
@@ -62,9 +62,9 @@
                 </div>
             </div>
         </div>
-        <div th:replace="fragments.html :: footer"></div>
+        <div th:replace="~{fragments.html :: footer}"></div>
     </div>
-    <script th:replace="fragments.html :: tooltip"></script>
+    <script th:replace="~{fragments.html :: tooltip}"></script>
     <link  href="/node_modules/cropper/dist/cropper.min.css" rel="stylesheet">
     <script src="/node_modules/cropper/dist/cropper.min.js"></script>
     <script src="/node_modules/jquery-cropper/dist/jquery-cropper.min.js"></script>
@@ -133,8 +133,8 @@
             $cutBtn.click(function () {
                 let dataUrl = cropper.getCroppedCanvas().toDataURL();
 
-                if (dataUrl.length > 1000 * 1024) {
-                    alert("The image file is too large. Please use a file smaller than 1024000. Current image size: " + dataUrl.length);
+                if(dataUrl.length > 1000 * 1024){
+                    alert("Image size is too large. It should be less than 1MB. Current size: " + (dataUrl.length / 1024).toFixed(2) + "KB");
                     return;
                 }
 
