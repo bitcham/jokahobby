@@ -109,4 +109,7 @@ public class HobbyControllerTest {
                 .andExpect(model().attributeExists("account"))
                 .andExpect(model().attributeExists("hobby"));
     }
+
+
+
 }

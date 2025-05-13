@@ -10,7 +10,10 @@ import com.jokahobby.domain.Zone;
 import com.jokahobby.settings.form.*;
 import com.jokahobby.settings.validator.NicknameValidator;
 import com.jokahobby.settings.validator.PasswordFormValidator;
+import com.jokahobby.tag.TagForm;
 import com.jokahobby.tag.TagRepository;
+import com.jokahobby.tag.TagService;
+import com.jokahobby.zone.ZoneForm;
 import com.jokahobby.zone.ZoneRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +41,7 @@ public class SettingsController {
     private final TagRepository tagRepository;
     private final ObjectMapper objectMapper;
     private final ZoneRepository zoneRepository;
+    private final TagService tagService;
 
     static final String ROOT = "/";
     static final String SETTINGS = "settings";
@@ -143,14 +147,8 @@ public class SettingsController {
     @PostMapping(TAGS + "/add" )
     @ResponseBody
     public ResponseEntity addTag(@CurrentAccount Account account, @RequestBody TagForm tagForm){
-        String title = tagForm.getTagTitle();
-        Tag tag =  tagRepository.findByTitle(title).orElseGet(() -> tagRepository
-                .save(Tag.builder()
-                        .title(title)
-                        .build()) );
-
+        Tag tag =  tagService.findOrCreateNew(tagForm.getTagTitle());
         accountService.addTag(account, tag);
-
         return ResponseEntity.ok().build();
     }
 
@@ -194,12 +192,12 @@ public class SettingsController {
     @PostMapping(ZONES + "/add")
     @ResponseBody
     public ResponseEntity addZone(@CurrentAccount Account account, @RequestBody ZoneForm zoneForm) {
-       Zone zone = zoneRepository.findByCityAndProvince(zoneForm.getCityName(), zoneForm.getProvinceName());
-        if(zone == null){
+       Optional<Zone> zone = zoneRepository.findByCityAndProvince(zoneForm.getCityName(), zoneForm.getProvinceName());
+        if(zone.isEmpty()){
             return ResponseEntity.badRequest().build();
         }
 
-        accountService.addZone(account, zone);
+        accountService.addZone(account, zone.get());
         return ResponseEntity.ok().build();
 
     }
@@ -207,12 +205,12 @@ public class SettingsController {
     @PostMapping(ZONES + "/remove")
     @ResponseBody
     public ResponseEntity removeZone(@CurrentAccount Account account, @RequestBody ZoneForm zoneForm) {
-        Zone zone = zoneRepository.findByCityAndProvince(zoneForm.getCityName(), zoneForm.getProvinceName());
-        if(zone == null){
+        Optional<Zone> zone = zoneRepository.findByCityAndProvince(zoneForm.getCityName(), zoneForm.getProvinceName());
+        if(zone.isEmpty()){
             return ResponseEntity.badRequest().build();
         }
 
-        accountService.removeZone(account, zone);
+        accountService.removeZone(account, zone.get());
         return ResponseEntity.ok().build();
     }
 

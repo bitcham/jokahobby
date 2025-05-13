@@ -1,4 +1,4 @@
-package com.jokahobby.settings.form;
+package com.jokahobby.tag;
 
 import lombok.Data;
 

@@ -15,6 +15,14 @@ import static jakarta.persistence.FetchType.*;
         @NamedAttributeNode("zones"),
         @NamedAttributeNode("managers"),
         @NamedAttributeNode("members")})
+@NamedEntityGraph(name = "Hobby.withTagsAndManagers", attributeNodes = {
+        @NamedAttributeNode("tags"),
+        @NamedAttributeNode("managers")})
+@NamedEntityGraph(name = "Hobby.withZonesAndManagers", attributeNodes = {
+        @NamedAttributeNode("zones"),
+        @NamedAttributeNode("managers")})
+@NamedEntityGraph(name = "Hobby.withManagers", attributeNodes = {
+        @NamedAttributeNode("managers")})
 @Entity
 @Getter
 @Setter
@@ -74,6 +82,10 @@ public class Hobby {
         this.managers.add(account);
     }
 
+    public void addMemeber(Account account) {
+        this.members.add(account);
+    }
+
     public boolean isJoinable(UserAccount userAccount) {
         Account account = userAccount.getAccount();
         return this.isPublished() && this.isRecruiting()
@@ -90,5 +102,42 @@ public class Hobby {
 
     public String getImage() {
         return image != null ? image : "/images/default_banner.jpg";
+    }
+
+
+    public void publish() {
+        if(!this.closed && !this.published) {
+            this.published = true;
+            this.publishedDateTime = LocalDateTime.now();
+        } else{
+            throw new RuntimeException("Hobby is already published or closed.");
+        }
+    }
+
+    public void close() {
+        if(this.published && !this.closed) {
+            this.closed = true;
+            this.closedDateTime = LocalDateTime.now();
+        } else{
+            throw new RuntimeException("Hobby is already closed or not published.");
+        }
+    }
+
+    public boolean canUpdateRecruiting() {
+        return this.published && this.recruitingUpdatedDateTime == null
+                || this.recruitingUpdatedDateTime.isBefore(LocalDateTime.now().minusHours(1));
+    }
+
+    public void startRecruit() {
+        if(canUpdateRecruiting()) {
+            this.recruiting = true;
+            this.recruitingUpdatedDateTime = LocalDateTime.now();
+        } else {
+            throw new RuntimeException("Recruiting cannot be started. Please publish the hobby or try again after one hour.");
+        }
+    }
+
+    public boolean isRemovable() {
+        return !this.published || this.closed;
     }
 }

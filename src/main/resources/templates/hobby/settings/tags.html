@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments.html :: head}"></head>
+<body>
+    <nav th:replace="~{fragments.html :: main-nav}"></nav>
+    <div th:replace="~{fragments.html :: hobby-banner}"></div>
+    <div class="container">
+        <div th:replace="~{fragments.html :: hobby-info}"></div>
+        <div th:replace="~{fragments.html :: hobby-menu(hobbyMenu='settings')}"></div>
+        <div class="row mt-3 justify-content-center">
+            <div class="col-2">
+                <div th:replace="~{fragments.html :: hobby-settings-menu(currentMenu='tags')}"></div>
+            </div>
+            <div class="col-8">
+                <div class="row">
+                    <h2 class="col-sm-12">Hobby Topics</h2>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="alert alert-info" role="alert">
+                            Register the main topics covered in this hobby group as tags. Enter tags followed by a comma (,) or press Enter.
+                        </div>
+                        <div id="whitelist" th:text="${whitelist}" hidden>
+                        </div>
+                        <input id="tags" type="text" name="tags" th:value="${#strings.listJoin(tags, ',')}"
+                               class="tagify-outside" aria-describedby="tagHelp">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div th:replace="~{fragments.html :: footer}"></div>
+    </div>
+    <script th:replace="~{fragments.html :: ajax-csrf-header}"></script>
+    <script th:replace="~{fragments.html :: update-tags(baseUrl='/hobby/' + ${hobby.path} + '/settings/tags')}"></script>
+</body>
+</html>

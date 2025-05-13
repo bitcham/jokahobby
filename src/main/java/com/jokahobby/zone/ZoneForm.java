@@ -1,4 +1,4 @@
-package com.jokahobby.settings.form;
+package com.jokahobby.zone;
 
 import com.jokahobby.domain.Zone;
 import lombok.Data;

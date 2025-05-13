@@ -7,8 +7,8 @@ import com.jokahobby.account.AccountService;
 import com.jokahobby.domain.Account;
 import com.jokahobby.domain.Tag;
 import com.jokahobby.domain.Zone;
-import com.jokahobby.settings.form.TagForm;
-import com.jokahobby.settings.form.ZoneForm;
+import com.jokahobby.tag.TagForm;
+import com.jokahobby.zone.ZoneForm;
 import com.jokahobby.tag.TagRepository;
 import com.jokahobby.zone.ZoneRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -281,8 +281,8 @@ class SettingsControllerTest {
                 .andExpect(status().isOk());
 
         Account cutedog = accountRepository.findByNickname("cutedog");
-        Zone zone = zoneRepository.findByCityAndProvince(testZone.getCity(), testZone.getProvince());
-        assertTrue(cutedog.getZones().contains(zone));
+        Optional<Zone> zone = zoneRepository.findByCityAndProvince(testZone.getCity(), testZone.getProvince());
+        assertTrue(cutedog.getZones().contains(zone.get()));
     }
 
     @WithAccount("cutedog")
@@ -290,8 +290,8 @@ class SettingsControllerTest {
     @Test
     void removeZone() throws Exception {
         Account cutedog = accountRepository.findByNickname("cutedog");
-        Zone zone = zoneRepository.findByCityAndProvince(testZone.getCity(), testZone.getProvince());
-        accountService.addZone(cutedog, zone);
+        Optional<Zone> zone = zoneRepository.findByCityAndProvince(testZone.getCity(), testZone.getProvince());
+        accountService.addZone(cutedog, zone.get());
 
         ZoneForm zoneForm = new ZoneForm();
         zoneForm.setZoneName(testZone.toString());
@@ -302,7 +302,7 @@ class SettingsControllerTest {
                         .with(csrf()))
                 .andExpect(status().isOk());
 
-        assertFalse(cutedog.getZones().contains(zone));
+        assertFalse(cutedog.getZones().contains(zone.get()));
     }
 
 

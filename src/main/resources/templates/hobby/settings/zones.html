@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments.html :: head}"></head>
+<body>
+    <nav th:replace="~{fragments.html :: main-nav}"></nav>
+    <div th:replace="~{fragments.html :: hobby-banner}"></div>
+    <div class="container">
+        <div th:replace="~{fragments.html :: hobby-info}"></div>
+        <div th:replace="~{fragments.html :: hobby-menu(hobbyMenu='settings')}"></div>
+        <div class="row mt-3 justify-content-center">
+            <div class="col-2">
+                <div th:replace="~{fragments.html :: hobby-settings-menu(currentMenu='zones')}"></div>
+            </div>
+            <div class="col-8">
+                <div class="row">
+                    <h2 class="col-sm-12">Main Activity Areas</h2>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="alert alert-info" role="alert">
+                            Register the areas where you mainly conduct hobby activities.<br/>
+                            You can only select areas registered in the system.
+                        </div>
+                        <div id="whitelist" th:text="${whitelist}" hidden></div>
+                        <input id="zones" type="text" name="zones" th:value="${#strings.listJoin(zones, ',')}"
+                               class="tagify-outside">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div th:replace="~{fragments.html :: footer}"></div>
+    </div>
+    <script th:replace="~{fragments.html :: ajax-csrf-header}"></script>
+    <script th:replace="~{fragments.html :: update-zones(baseUrl='/hobby/' + ${hobby.path} + '/settings/zones')}"></script>
+</body>
+</html>
