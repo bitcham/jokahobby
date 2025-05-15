@@ -65,4 +65,20 @@ public class HobbyController {
         model.addAttribute(hobbyService.getHobby(path));
         return "hobby/members";
     }
+
+    @GetMapping("/hobby/{path}/join")
+    public String joinHobby(@CurrentAccount Account account, @PathVariable String path){
+        Hobby hobby = hobbyRepository.findHobbyWithMembersByPath(path);
+        hobbyService.addMember(hobby, account);
+        return "redirect:/hobby/" + hobby.getEncodedPath(path) + "/members";
+    }
+
+    @GetMapping("/hobby/{path}/leave")
+    public String leaveHobby(@CurrentAccount Account account, @PathVariable String path){
+        Hobby hobby = hobbyRepository.findHobbyWithMembersByPath(path);
+        hobbyService.removeMember(hobby, account);
+        return "redirect:/hobby/" + hobby.getEncodedPath(path) + "/members";
+    }
+
+
 }

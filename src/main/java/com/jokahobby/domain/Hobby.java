@@ -4,11 +4,13 @@ import com.jokahobby.account.UserAccount;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
 import static jakarta.persistence.FetchType.*;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @NamedEntityGraph(name = "Hobby.withAll", attributeNodes = {
         @NamedAttributeNode("tags"),
@@ -23,6 +25,8 @@ import static jakarta.persistence.FetchType.*;
         @NamedAttributeNode("managers")})
 @NamedEntityGraph(name = "Hobby.withManagers", attributeNodes = {
         @NamedAttributeNode("managers")})
+@NamedEntityGraph(name = "Hobby.withMembers", attributeNodes = {
+        @NamedAttributeNode("members")})
 @Entity
 @Getter
 @Setter
@@ -139,5 +143,17 @@ public class Hobby {
 
     public boolean isRemovable() {
         return !this.published || this.closed;
+    }
+
+    public void addMember(Account account) {
+        this.getMembers().add(account);
+    }
+
+    public void removeMember(Account account) {
+        this.getMembers().remove(account);
+    }
+
+    public String getEncodedPath(String path) {
+        return URLEncoder.encode(path, UTF_8);
     }
 }

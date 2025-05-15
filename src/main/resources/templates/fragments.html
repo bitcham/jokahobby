@@ -173,7 +173,7 @@
             <span sec:authorize="isAuthenticated()" th:if="${hobby.isJoinable(#authentication.principal)}"
                   class="btn-group" role="group" aria-label="Basic example">
                     <a class="btn btn-primary" th:href="@{'/hobby/' + ${hobby.path} + '/join'}">
-                        Join to the hobby group
+                        Join the Group
                     </a>
                     <a class="btn btn-outline-primary" th:href="@{'/hobby/' + ${hobby.path} + '/members'}"
                        th:text="${hobby.members.size()}">1</a>
@@ -181,7 +181,7 @@
             <span sec:authorize="isAuthenticated()"
                   th:if="${!hobby.closed && hobby.isMember(#authentication.principal)}" class="btn-group" role="group">
                     <a class="btn btn-outline-warning" th:href="@{'/hobby/' + ${hobby.path} + '/leave'}">
-                        Leave the hobby group
+                        Leave the Group
                     </a>
                     <a class="btn btn-outline-primary" th:href="@{'/hobby/' + ${hobby.path} + '/members'}"
                        th:text="${hobby.members.size()}">1</a>
