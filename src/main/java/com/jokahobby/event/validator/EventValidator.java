@@ -17,6 +17,11 @@ public class EventValidator implements Validator {
     @Override
     public void validate(Object target, Errors errors) {
         EventForm eventForm = (EventForm) target;
+
+        if(eventForm.getLimitOfEnrollments() < 2) {
+            errors.rejectValue("limitOfEnrollments", "invalid.limitOfEnrollments", "Limit of enrollments must be at least 2.");
+        }
+
         if(isNotValidEndEnrollmentDateTime(eventForm)) {
             errors.rejectValue("endEnrollmentDateTime", "invalid.endEnrollmentDateTime", "End enrollment date time must be after current date time and before end date time.");
         }
@@ -35,7 +40,7 @@ public class EventValidator implements Validator {
     }
 
     private static boolean isNotValidEndEnrollmentDateTime(EventForm eventForm) {
-        return eventForm.getEndEnrollmentDateTime().isBefore(LocalDateTime.now()) || eventForm.getEndEnrollmentDateTime().isBefore(eventForm.getEndDateTime());
+        return eventForm.getEndEnrollmentDateTime().isBefore(LocalDateTime.now()) || eventForm.getEndEnrollmentDateTime().isAfter(eventForm.getEndDateTime());
     }
 
     private static boolean IsNotValidEndDateTime(EventForm eventForm) {

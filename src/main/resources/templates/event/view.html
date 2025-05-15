@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments.html :: head}"></head>
+<body>
+    <nav th:replace="~{fragments.html :: main-nav}"></nav>
+    <div th:replace="~{fragments.html :: hobby-banner}"></div>
+    <div class="container">
+        <div class="row py-4 text-left justify-content-center bg-light">
+            <div class="col-6">
+                <span class="h2">
+                <a href="#" class="text-decoration-none" th:href="@{'/hobby/' + ${hobby.path}}">
+                    <span th:text="${hobby.title}">hobby Name</span>
+                </a> / </span>
+                <span class="h2" th:text="${event.title}"></span>
+            </div>
+            <div class="col-4 text-right justify-content-end">
+                <span sec:authorize="isAuthenticated()">
+                    <button th:if="${event.isEnrollableFor(#authentication.principal)}"
+                            class="btn btn-outline-primary" data-toggle="modal" data-target="#enroll">
+                        <i class="fa fa-plus-circle"></i> Apply to Join
+                    </button>
+                    <button th:if="${event.isDisenrollableFor(#authentication.principal)}"
+                            class="btn btn-outline-primary" data-toggle="modal" data-target="#disenroll">
+                        <i class="fa fa-minus-circle"></i> Cancel Application
+                    </button>
+                    <span class="text-success" th:if="${event.isAttended(#authentication.principal)}" disabled>
+                        <i class="fa fa-check-circle"></i> Attendance Complete
+                    </span>
+                </span>
+            </div>
+            <div class="modal fade" id="disenroll" tabindex="-1" role="dialog" aria-labelledby="leaveTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="leaveTitle" th:text="${event.title}"></h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Are you sure you want to cancel your event registration?</p>
+                            <p>By clicking <strong>Confirm</strong>, you'll cancel this registration and give the opportunity to other waitlisted participants.</p>
+                            <p>Thank you.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <form th:action="@{'/hobby/' + ${hobby.path} + '/events/' + ${event.id} + '/leave'}" method="post">
+                                <button class="btn btn-primary" type="submit" aria-describedby="submitHelp">Confirm</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="enroll" tabindex="-1" role="dialog" aria-labelledby="enrollmentTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="enrollmentTitle" th:text="${event.title}"></h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Would you like to attend this event? It's a good idea to add it to your calendar.</p>
+                            <p>By clicking <strong>Confirm</strong>, you'll apply to join this event.</p>
+                            <p>Thank you.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <form th:action="@{'/hobby/' + ${hobby.path} + '/events/' + ${event.id} + '/enroll'}" method="post">
+                                <button class="btn btn-primary" type="submit" aria-describedby="submitHelp">Confirm</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row px-3 justify-content-center">
+            <div class="col-7 pt-3">
+                <dt class="font-weight-light">Detailed Event Description</dt>
+                <dd th:utext="${event.description}"></dd>
+
+                <dt class="font-weight-light">Event Registrations (<span th:text="${event.enrollments.size()}"></span>)</dt>
+                <dd>
+                    <table class="table table-borderless table-sm" th:if="${event.enrollments.size() > 0}">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Participant</th>
+                                <th scope="col">Registration Date</th>
+                                <th scope="col">Status</th>
+                                <th th:if="${hobby.isManager(#authentication.principal)}" scope="col">
+                                    Registration Management
+                                </th>
+                                <th th:if="${hobby.isManager(#authentication.principal)}" scope="col">
+                                    Attendance Check
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="enroll: ${event.enrollments}">
+                                <th scope="row" th:text="${enrollStat.count}"></th>
+                                <td>
+                                    <a th:href="@{'/profile/' + ${enroll.account.nickname}}"
+                                       class="text-decoration-none">
+                                        <svg th:if="${#strings.isEmpty(enroll.account?.profileImage)}" data-jdenticon-value="nickname"
+                                             th:data-jdenticon-value="${enroll.account.nickname}" width="24" height="24" class="rounded border bg-light"></svg>
+                                        <img th:if="${!#strings.isEmpty(enroll.account?.profileImage)}"
+                                             th:src="${enroll.account?.profileImage}" width="24" height="24" class="rounded border"/>
+                                        <span th:text="${enroll.account.nickname}"></span>
+                                    </a>
+                                </td>
+                                <td>
+                                    <span class="date-time" th:text="${enroll.enrolledAt}"></span>
+                                </td>
+                                <td>
+                                    <span th:if="${enroll.accepted}">Confirmed</span>
+                                    <span th:if="${!enroll.accepted}">Waiting</span>
+                                </td>
+                                <td th:if="${hobby.isManager(#authentication.principal)}">
+                                    <a th:if="${event.isAcceptable(enroll)}" href="#" class="text-decoration-none"
+                                       th:href="@{'/hobby/' + ${hobby.path} + '/events/' + ${event.id} + '/enrollments/' + ${enroll.id} + '/accept'}" >Accept</a>
+                                    <a th:if="${event.isRejectable(enroll)}" href="#" class="text-decoration-none"
+                                       th:href="@{'/hobby/' + ${hobby.path} + '/events/' + ${event.id} + '/enrollments/' + ${enroll.id} + '/reject'}">Reject</a>
+                                </td>
+                                <td th:if="${hobby.isManager(#authentication.principal)}">
+                                    <a th:if="${enroll.accepted && !enroll.attended}" href="#" class="text-decoration-none"
+                                       th:href="@{'/hobby/' + ${hobby.path} + '/events/' + ${event.id} + '/enrollments/' + ${enroll.id} + '/checkin'}">Check-in</a>
+                                    <a th:if="${enroll.accepted && enroll.attended}" href="#" class="text-decoration-none"
+                                       th:href="@{'/hobby/' + ${hobby.path} + '/events/' + ${event.id} + '/enrollments/' + ${enroll.id} + '/cancel-checkin'}">Cancel Check-in</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </dd>
+            </div>
+            <dl class="col-3 pt-3 text-right">
+                <dt class="font-weight-light">Registration Method</dt>
+                <dd>
+                    <span th:if="${event.eventType == T(com.jokahobby.domain.EventType).FCFS}">First Come First Served</span>
+                    <span th:if="${event.eventType == T(com.jokahobby.domain.EventType).CONFIRMATIVE}">Admin Confirmation</span>
+                </dd>
+
+                <dt class="font-weight-light">Capacity</dt>
+                <dd>
+                    <span th:text="${event.limitOfEnrollments}"></span> people
+                </dd>
+
+                <dt class="font-weight-light">Registration Deadline</dt>
+                <dd>
+                    <span class="date" th:text="${event.endEnrollmentDateTime}"></span>
+                    <span class="weekday" th:text="${event.endEnrollmentDateTime}"></span><br/>
+                    <span class="time" th:text="${event.endEnrollmentDateTime}"></span>
+                </dd>
+
+                <dt class="font-weight-light">Event Date and Time</dt>
+                <dd>
+                    <span class="date" th:text="${event.startDateTime}"></span>
+                    <span class="weekday" th:text="${event.startDateTime}"></span><br/>
+                    <span class="time" th:text="${event.startDateTime}"></span> -
+                    <span class="time" th:text="${event.endDateTime}"></span>
+                </dd>
+
+                <dt class="font-weight-light">Organizer</dt>
+                <dd>
+                    <a th:href="@{'/profile/' + ${event.createdBy.nickname}}" class="text-decoration-none">
+                        <svg th:if="${#strings.isEmpty(event.createdBy?.profileImage)}"
+                             th:data-jdenticon-value="${event.createdBy.nickname}" width="24" height="24" class="rounded border bg-light"></svg>
+                        <img th:if="${!#strings.isEmpty(event.createdBy?.profileImage)}"
+                             th:src="${event.createdBy?.profileImage}" width="24" height="24" class="rounded border"/>
+                        <span th:text="${event.createdBy.nickname}"></span>
+                    </a>
+                </dd>
+
+                <dt th:if="${hobby.isManager(#authentication.principal)}" class="font-weight-light">Event Management</dt>
+                <dd th:if="${hobby.isManager(#authentication.principal)}">
+                    <a class="btn btn-outline-primary btn-sm my-1"
+                       th:href="@{'/hobby/' + ${hobby.path} + '/events/' + ${event.id} + '/edit'}" >
+                        Edit Event
+                    </a> <br/>
+                    <button class="btn btn-outline-danger btn-sm" data-toggle="modal" data-target="#cancel">
+                        Cancel Event
+                    </button>
+                </dd>
+            </dl>
+            <div class="modal fade" id="cancel" tabindex="-1" role="dialog" aria-labelledby="cancelTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="cancelTitle" th:text="${event.title}"></h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Are you sure you want to cancel this event?</p>
+                            <p>By clicking <strong>Confirm</strong>, you'll delete all data related to this event and its registrations.</p>
+                            <p>Thank you.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <form th:action="@{'/hobby/' + ${hobby.path} + '/events/' + ${event.id}}" th:method="delete">
+                                <button class="btn btn-primary" type="submit" aria-describedby="submitHelp">Confirm</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div th:replace="~{fragments.html :: footer}"></div>
+    </div>
+    <script th:replace="~{fragments.html :: date-time}"></script>
+</body>
+</html>

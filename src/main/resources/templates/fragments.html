@@ -427,5 +427,30 @@
         });
     </script>
 </div>
+<div th:fragment="date-time">
+    <script src="/node_modules/moment/min/moment-with-locales.min.js"></script>
+    <script type="application/javascript">
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
 
+            var userLocale = window.userLocale || 'en';
+            moment.locale(userLocale);
+
+            var parseFormat = "YYYY-MM-DD[T]HH:mm";
+
+            $(".date-time").text(function(index, dateTime) {
+                return moment(dateTime, parseFormat).format('LLL');
+            });
+            $(".date").text(function(index, dateTime) {
+                return moment(dateTime, parseFormat).format('LL');
+            });
+            $(".weekday").text(function(index, dateTime) {
+                return moment(dateTime, parseFormat).format('dddd');
+            });
+            $(".time").text(function(index, dateTime) {
+                return moment(dateTime, parseFormat).format('LT');
+            });
+        })
+    </script>
+</div>
 </html>

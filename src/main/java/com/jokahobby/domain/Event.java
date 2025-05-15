@@ -1,11 +1,16 @@
 package com.jokahobby.domain;
 
+import com.jokahobby.account.UserAccount;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@NamedEntityGraph(
+        name = "Event.withEnrollments",
+        attributeNodes = @NamedAttributeNode("enrollments")
+)
 @Entity
 @Getter @Setter @EqualsAndHashCode(of = "id")
 public class Event {
@@ -16,7 +21,7 @@ public class Event {
     private Hobby hobby;
 
     @ManyToOne
-    private Account createBy;
+    private Account createdBy;
 
     @Column(nullable = false)
     private String title;
@@ -36,7 +41,8 @@ public class Event {
     @Column(nullable = false)
     private LocalDateTime endDateTime;
 
-    private int limitOfEnrollment;
+    @Column
+    private Integer limitOfEnrollments;
 
     @OneToMany(mappedBy = "event")
     private List<Enrollment> enrollments;
@@ -46,5 +52,44 @@ public class Event {
 
     public void setCreatedDateTime(LocalDateTime now) {
         this.createDateTime = now;
+    }
+
+    private boolean isNotClosed() {
+        return this.endEnrollmentDateTime.isAfter(LocalDateTime.now());
+    }
+
+    public boolean isEnrollableFor(UserAccount userAccount) {
+        return isNotClosed() && !isAlreadyEnrolled(userAccount);
+    }
+
+    public boolean isDisenrollableFor(UserAccount userAccount) {
+        return isNotClosed() && isAlreadyEnrolled(userAccount);
+    }
+
+    public boolean isAttended(UserAccount userAccount) {
+        Account account = userAccount.getAccount();
+        for (Enrollment e : this.enrollments) {
+            if (e.getAccount().equals(account) && e.isAttended()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isAlreadyEnrolled(UserAccount userAccount) {
+        Account account = userAccount.getAccount();
+        for (Enrollment e : this.enrollments) {
+            if (e.getAccount().equals(account)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public int numberOfRemainSpots(){
+        return this.limitOfEnrollments - (int) this.enrollments.stream()
+                .filter(Enrollment::isAccepted)
+                .count();
     }
 }

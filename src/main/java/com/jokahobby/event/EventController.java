@@ -16,6 +16,10 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 @Controller
 @RequestMapping("/hobby/{path}")
 @RequiredArgsConstructor
@@ -24,13 +28,14 @@ public class EventController {
     private final HobbyService hobbyService;
     private final EventService eventService;
     private final ModelMapper modelMapper;
+    private final EventRepository eventRepository;
 
     @InitBinder("eventForm")
     public void initBinder(WebDataBinder webDataBinder) {
         webDataBinder.setValidator(new EventValidator());
     }
 
-    @GetMapping("/events")
+    @GetMapping("/new-event")
     public String newEventForm(@CurrentAccount Account account, @PathVariable String path, Model model){
         Hobby hobby = hobbyService.getHobbyToUpdateStatus(account, path);
         model.addAttribute(hobby);
@@ -51,6 +56,40 @@ public class EventController {
         Event event = eventService.createNewEvent(modelMapper.map(eventForm, Event.class), hobby, account);
         return "redirect:/hobby/" + hobby.getEncodedPath() + "/events/" + event.getId();
     }
+
+    @GetMapping("/events/{id}")
+    public String getEvent(@CurrentAccount Account account, @PathVariable String path,
+                           @PathVariable Long id, Model model) {
+        model.addAttribute(account);
+        model.addAttribute(eventRepository.findById(id).orElseThrow());
+        model.addAttribute(hobbyService.getHobby(path));
+        return "event/view";
+    }
+
+    @GetMapping("/events")
+    public String viewHobbyEvents(@CurrentAccount Account account, @PathVariable String path, Model model) {
+        Hobby hobby = hobbyService.getHobby(path);
+        model.addAttribute(account);
+        model.addAttribute(hobby);
+
+        List<Event> events = eventRepository.findByHobbyOrderByStartDateTime(hobby);
+        List<Event> newEvents = new ArrayList<>();
+        List<Event> oldEvents = new ArrayList<>();
+        events.forEach(e -> {
+            if (e.getEndDateTime().isBefore(LocalDateTime.now())){
+                oldEvents.add(e);
+            } else {
+                newEvents.add(e);
+            }
+        });
+
+        model.addAttribute("newEvents", newEvents);
+        model.addAttribute("oldEvents", oldEvents);
+        return "hobby/events";
+
+        
+    }
+
 
 
 }

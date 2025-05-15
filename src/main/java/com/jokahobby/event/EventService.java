@@ -23,7 +23,7 @@ public class EventService {
 
 
     public Event createNewEvent(Event event, Hobby hobby, Account account) {
-        event.setCreateBy(account);
+        event.setCreatedBy(account);
         event.setCreatedDateTime(LocalDateTime.now());
         event.setHobby(hobby);
         return eventRepository.save(event);
