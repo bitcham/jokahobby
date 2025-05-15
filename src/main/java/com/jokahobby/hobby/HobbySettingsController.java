@@ -13,7 +13,6 @@ import com.jokahobby.zone.ZoneForm;
 import com.jokahobby.tag.TagRepository;
 import com.jokahobby.tag.TagService;
 import com.jokahobby.zone.ZoneRepository;
-import jakarta.persistence.criteria.Root;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -23,12 +22,8 @@ import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.net.URLEncoder;
 import java.util.List;
 import java.util.Optional;
-
-import static java.nio.charset.StandardCharsets.*;
 
 @Controller
 @RequestMapping("/hobby/{path}/settings/")
@@ -78,7 +73,7 @@ public class HobbySettingsController {
         }
         hobbyService.updateHobbyDescription(hobby, hobbyDescriptionForm);
         redirectAttributes.addFlashAttribute("message", "Hobby information updated successfully.");
-        return "redirect:/" + HOBBY + "/" + hobby.getEncodedPath(path) + ROOT + SETTINGS + ROOT + DESCRIPTION;
+        return "redirect:/" + HOBBY + "/" + hobby.getEncodedPath() + ROOT + SETTINGS + ROOT + DESCRIPTION;
     }
 
     @GetMapping(BANNER)
@@ -94,21 +89,21 @@ public class HobbySettingsController {
         Hobby hobby = hobbyService.getHobbyToUpdate(account,path);
         hobbyService.updateHobbyImage(hobby, image);
         redirectAttributes.addFlashAttribute("message", "Hobby banner updated successfully.");
-        return "redirect:/" + HOBBY + ROOT + hobby.getEncodedPath(path) + ROOT + SETTINGS + ROOT + BANNER;
+        return "redirect:/" + HOBBY + ROOT + hobby.getEncodedPath() + ROOT + SETTINGS + ROOT + BANNER;
     }
 
     @PostMapping(BANNER + "/enable")
     public String enableHobbyBanner(@CurrentAccount Account account, @PathVariable String path){
         Hobby hobby = hobbyService.getHobbyToUpdate(account,path);
         hobbyService.enableHobbyBanner(hobby);
-        return "redirect:/" + HOBBY + ROOT + hobby.getEncodedPath(path) + ROOT + SETTINGS + ROOT + BANNER;
+        return "redirect:/" + HOBBY + ROOT + hobby.getEncodedPath() + ROOT + SETTINGS + ROOT + BANNER;
     }
 
     @PostMapping(BANNER + "/disable")
     public String disableHobbyBanner(@CurrentAccount Account account, @PathVariable String path){
         Hobby hobby = hobbyService.getHobbyToUpdate(account,path);
         hobbyService.disableHobbyBanner(hobby);
-        return "redirect:/" + HOBBY + ROOT + hobby.getEncodedPath(path) + ROOT + SETTINGS + ROOT + BANNER;
+        return "redirect:/" + HOBBY + ROOT + hobby.getEncodedPath() + ROOT + SETTINGS + ROOT + BANNER;
     }
 
     @GetMapping(TAGS)
@@ -195,7 +190,7 @@ public class HobbySettingsController {
         Hobby hobby = hobbyService.getHobbyToUpdateStatus(account, path);
         hobbyService.publish(hobby);
         attributes.addFlashAttribute("message", "Hobby has been published.");
-        return "redirect:/" + HOBBY + ROOT + hobby.getEncodedPath(path) + ROOT + SETTINGS + ROOT + HOBBY;
+        return "redirect:/" + HOBBY + ROOT + hobby.getEncodedPath() + ROOT + SETTINGS + ROOT + HOBBY;
     }
 
     @PostMapping(HOBBY + "/close")
@@ -204,7 +199,7 @@ public class HobbySettingsController {
         Hobby hobby = hobbyService.getHobbyToUpdateStatus(account, path);
         hobbyService.close(hobby);
         attributes.addFlashAttribute("message", "Hobby has been closed.");
-        return "redirect:/" + HOBBY + ROOT + hobby.getEncodedPath(path) + ROOT + SETTINGS + ROOT + HOBBY;
+        return "redirect:/" + HOBBY + ROOT + hobby.getEncodedPath() + ROOT + SETTINGS + ROOT + HOBBY;
     }
 
     @PostMapping(HOBBY + "/remove")
@@ -221,12 +216,12 @@ public class HobbySettingsController {
         Hobby hobby = hobbyService.getHobbyToUpdateStatus(account, path);
         if (!hobby.canUpdateRecruiting()) {
             attributes.addFlashAttribute("message", "Within 1 hour of the last update, you cannot change the recruiting status.");
-            return "redirect:/" + HOBBY + ROOT + hobby.getEncodedPath(path) + ROOT + SETTINGS + ROOT + HOBBY;
+            return "redirect:/" + HOBBY + ROOT + hobby.getEncodedPath() + ROOT + SETTINGS + ROOT + HOBBY;
         }
 
         hobbyService.startRecruit(hobby);
         attributes.addFlashAttribute("message", "Recruiting has started.");
-        return "redirect:/" + HOBBY + ROOT + hobby.getEncodedPath(path) + ROOT + SETTINGS + ROOT + HOBBY;
+        return "redirect:/" + HOBBY + ROOT + hobby.getEncodedPath() + ROOT + SETTINGS + ROOT + HOBBY;
     }
 
     @PostMapping(HOBBY + ROOT + PATH)
@@ -241,7 +236,7 @@ public class HobbySettingsController {
         }
         hobbyService.updateHobbyPath(hobby, newPath);
         redirectAttributes.addFlashAttribute("message", "Hobby path updated successfully.");
-        return "redirect:/" + HOBBY + ROOT + hobby.getEncodedPath(newPath) + ROOT + SETTINGS + ROOT + HOBBY;
+        return "redirect:/" + HOBBY + ROOT + hobby.getEncodedPath() + ROOT + SETTINGS + ROOT + HOBBY;
     }
 
     @PostMapping(HOBBY + ROOT + TITLE)
@@ -264,7 +259,7 @@ public class HobbySettingsController {
 
         hobbyService.updateHobbyTitle(hobby, newTitle);
         redirectAttributes.addFlashAttribute("message", "Hobby title updated successfully.");
-        return "redirect:/" + HOBBY + ROOT + hobby.getEncodedPath(path) + ROOT + SETTINGS + ROOT + HOBBY;
+        return "redirect:/" + HOBBY + ROOT + hobby.getEncodedPath() + ROOT + SETTINGS + ROOT + HOBBY;
     }
 
 

@@ -43,4 +43,8 @@ public class Event {
 
     @Enumerated(EnumType.STRING)
     private EventType eventType;
+
+    public void setCreatedDateTime(LocalDateTime now) {
+        this.createDateTime = now;
+    }
 }

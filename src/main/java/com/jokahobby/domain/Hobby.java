@@ -31,7 +31,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 @Getter
 @Setter
 @EqualsAndHashCode(of = "id")
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Hobby {
@@ -153,7 +152,7 @@ public class Hobby {
         this.getMembers().remove(account);
     }
 
-    public String getEncodedPath(String path) {
-        return URLEncoder.encode(path, UTF_8);
+    public String getEncodedPath() {
+        return URLEncoder.encode(this.path, UTF_8);
     }
 }
