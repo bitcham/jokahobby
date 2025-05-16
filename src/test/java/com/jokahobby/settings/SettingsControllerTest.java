@@ -213,7 +213,7 @@ class SettingsControllerTest {
         mockMvc.perform(get(ROOT + SETTINGS + TAGS))
                 .andExpect(view().name(SETTINGS + TAGS))
                 .andExpect(model().attributeExists("account"))
-                .andExpect(model().attributeExists("whitelist"))
+                .andExpect(model().attributeExists("chamlist"))
                 .andExpect(model().attributeExists("tags"));
     }
 
@@ -263,7 +263,7 @@ class SettingsControllerTest {
         mockMvc.perform(get(ROOT + SETTINGS + ZONES))
                 .andExpect(view().name(SETTINGS + ZONES))
                 .andExpect(model().attributeExists("account"))
-                .andExpect(model().attributeExists("whitelist"))
+                .andExpect(model().attributeExists("chamlist"))
                 .andExpect(model().attributeExists("zones"));
     }
 

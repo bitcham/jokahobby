@@ -110,6 +110,21 @@ public class HobbyControllerTest {
                 .andExpect(model().attributeExists("hobby"));
     }
 
+    protected Hobby createHobby(String path, Account manager) {
+        Hobby hobby = new Hobby();
+        hobby.setPath(path);
+        hobbyService.createNewHobby(hobby, manager);
+        return hobby;
+    }
+
+    protected Account createAccount(String nickname) {
+        Account whiteship = new Account();
+        whiteship.setNickname(nickname);
+        whiteship.setEmail(nickname + "@email.com");
+        accountRepository.save(whiteship);
+        return whiteship;
+    }
+
 
 
 }

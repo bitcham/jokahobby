@@ -29,4 +29,6 @@ public interface HobbyRepository extends JpaRepository<Hobby, Long> {
 
     @EntityGraph(value = "Hobby.withMembers", type = EntityGraph.EntityGraphType.FETCH)
     Hobby findHobbyWithMembersByPath(String path);
+
+    Hobby findHobbyOnlyByPath(String path);
 }

@@ -2,10 +2,9 @@ package com.jokahobby.domain;
 
 import com.jokahobby.account.UserAccount;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
 import lombok.*;
-
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @NamedEntityGraph(
@@ -46,7 +45,7 @@ public class Event {
     private Integer limitOfEnrollments;
 
     @OneToMany(mappedBy = "event")
-    private List<Enrollment> enrollments;
+    private List<Enrollment> enrollments = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private EventType eventType;
@@ -96,5 +95,65 @@ public class Event {
 
     public long getNumberOfAcceptedEnrollments() {
         return this.enrollments.stream().filter(Enrollment::isAccepted).count();
+    }
+
+    public boolean isAbleToAcceptWaitingEnrollment() {
+        return this.eventType == EventType.FCFS && this.getNumberOfAcceptedEnrollments() < this.limitOfEnrollments;
+    }
+
+    public void addEnrollment(Enrollment enrollment) {
+        this.enrollments.add(enrollment);
+        enrollment.setEvent(this);
+    }
+
+    public void removeEnrollment(Enrollment enrollment) {
+        this.enrollments.remove(enrollment);
+        enrollment.setEvent(null);
+    }
+
+    public void acceptNextWaitingEnrollment() {
+        if(this.isAbleToAcceptWaitingEnrollment()) {
+            Enrollment enrollmentToAccept = this.getTheFirstWaitingEnrollment();
+            if(enrollmentToAccept != null) {
+                enrollmentToAccept.setAccepted(true);
+            }
+        }
+    }
+
+    private Enrollment getTheFirstWaitingEnrollment() {
+        for (Enrollment enrollment : this.enrollments) {
+            if (!enrollment.isAccepted()) {
+                return enrollment;
+            }
+        }
+        return null;
+    }
+
+    private List<Enrollment> getWaitingList() {
+        return this.enrollments.stream().filter(enrollment -> !enrollment.isAccepted()).toList();
+    }
+
+    public void acceptWaitingList() {
+        if(this.isAbleToAcceptWaitingEnrollment()){
+            var waitingList = getWaitingList();
+            int numberToAccept = (int) Math.min(this.limitOfEnrollments - this.getNumberOfAcceptedEnrollments(), waitingList.size());
+            waitingList.subList(0, numberToAccept).forEach(enrollment -> {
+                enrollment.setAccepted(true);
+            });
+        }
+    }
+
+    public boolean canAccept(Enrollment enrollment) {
+        return this.eventType == EventType.CONFIRMATIVE
+                && this.enrollments.contains(enrollment)
+                && !enrollment.isAttended()
+                && !enrollment.isAccepted();
+    }
+
+    public boolean canReject(Enrollment enrollment) {
+        return this.eventType == EventType.CONFIRMATIVE
+                && this.enrollments.contains(enrollment)
+                && !enrollment.isAttended()
+                && enrollment.isAccepted();
     }
 }

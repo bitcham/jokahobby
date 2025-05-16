@@ -20,7 +20,7 @@
                         <div class="alert alert-info" role="alert">
                             Register the main topics covered in this hobby group as tags. Enter tags followed by a comma (,) or press Enter.
                         </div>
-                        <div id="whitelist" th:text="${whitelist}" hidden>
+                        <div id="chamlist" th:text="${chamlist}" hidden>
                         </div>
                         <input id="tags" type="text" name="tags" th:value="${#strings.listJoin(tags, ',')}"
                                class="tagify-outside" aria-describedby="tagHelp">

@@ -158,4 +158,10 @@ public class HobbyService {
     public void removeMember(Hobby hobby, Account account) {
         hobby.removeMember(account);
     }
+
+    public Hobby getHobbyToEnroll(String path) {
+        Hobby hobby = hobbyRepository.findHobbyOnlyByPath(path);
+        checkIfExistingHobby(path, hobby);
+        return hobby;
+    }
 }
