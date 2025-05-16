@@ -86,8 +86,40 @@ public class EventController {
         model.addAttribute("newEvents", newEvents);
         model.addAttribute("oldEvents", oldEvents);
         return "hobby/events";
+    }
 
-        
+    @GetMapping("/events/{id}/edit")
+    public String updateEventForm(@CurrentAccount Account account, @PathVariable String path,
+                                  @PathVariable Long id, Model model) {
+        Hobby hobby = hobbyService.getHobbyToUpdate(account, path);
+        Event event= eventRepository.findById(id).orElseThrow();
+        model.addAttribute(account);
+        model.addAttribute(hobby);
+        model.addAttribute(event);
+        model.addAttribute(modelMapper.map(event, EventForm.class));
+        return "event/update-form";
+    }
+
+    @PostMapping("/events/{id}/edit")
+    public String updateEventSubmit(@CurrentAccount Account account, @PathVariable String path,
+                                  @PathVariable Long id, @Valid EventForm eventForm, Errors errors, Model model) {
+        Hobby hobby = hobbyService.getHobbyToUpdate(account, path);
+        Event event = eventRepository.findById(id).orElseThrow();
+        eventForm.setEventType(event.getEventType());
+
+        if (eventForm.getLimitOfEnrollments() < event.getNumberOfAcceptedEnrollments()) {
+            errors.rejectValue("limitOfEnrollments", "invalid.limitOfEnrollments", "Limit of enrollments must be at least " + event.getNumberOfAcceptedEnrollments() + ".");
+        }
+
+        if(errors.hasErrors()) {
+            model.addAttribute(account);
+            model.addAttribute(hobby);
+            model.addAttribute(event);
+            return "event/update-form";
+        }
+
+        eventService.updateEvent(event, eventForm);
+        return "redirect:/hobby/" + hobby.getEncodedPath() + "/events/" + event.getId();
     }
 
 

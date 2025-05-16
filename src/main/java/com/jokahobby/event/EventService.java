@@ -5,7 +5,9 @@ import com.jokahobby.domain.Event;
 import com.jokahobby.domain.Hobby;
 import com.jokahobby.event.form.EventForm;
 import com.jokahobby.event.validator.EventValidator;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.WebDataBinder;
@@ -19,6 +21,7 @@ import java.time.LocalDateTime;
 public class EventService {
 
     private final EventRepository eventRepository;
+    private final ModelMapper modelMapper;
 
 
 
@@ -27,5 +30,9 @@ public class EventService {
         event.setCreatedDateTime(LocalDateTime.now());
         event.setHobby(hobby);
         return eventRepository.save(event);
+    }
+
+    public void updateEvent(Event event, @Valid EventForm eventForm) {
+        modelMapper.map(eventForm, event);
     }
 }

@@ -2,6 +2,7 @@ package com.jokahobby.domain;
 
 import com.jokahobby.account.UserAccount;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -91,5 +92,9 @@ public class Event {
         return this.limitOfEnrollments - (int) this.enrollments.stream()
                 .filter(Enrollment::isAccepted)
                 .count();
+    }
+
+    public long getNumberOfAcceptedEnrollments() {
+        return this.enrollments.stream().filter(Enrollment::isAccepted).count();
     }
 }

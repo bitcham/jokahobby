@@ -1,10 +1,13 @@
 package com.jokahobby.event.validator;
 
+import com.jokahobby.domain.Event;
 import com.jokahobby.event.form.EventForm;
+import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
 import java.time.LocalDateTime;
+
 
 public class EventValidator implements Validator {
 
@@ -46,4 +49,6 @@ public class EventValidator implements Validator {
     private static boolean IsNotValidEndDateTime(EventForm eventForm) {
         return eventForm.getEndDateTime().isBefore(eventForm.getStartDateTime()) || eventForm.getEndDateTime().isBefore(eventForm.getEndEnrollmentDateTime());
     }
+
+
 }
