@@ -18,7 +18,7 @@
                             Please register regions where you can mainly attend hobbies. You can receive notifications when hobbies are created in those regions.<br/>
                             You can only select regions that are registered in the system.
                         </div>
-                        <div id="chamlist" th:text="${chamlist}" hidden></div>
+                        <div id="whitelist" th:text="${whitelist}" hidden></div>
                         <input id="zones" type="text" name="zones" th:value="${#strings.listJoin(zones, ',')}"
                                class="tagify-outside" aria-describedby="zoneHelp"/>
                     </div>
@@ -27,6 +27,6 @@
         </div>
     </div>
     <script th:replace="~{fragments.html :: ajax-csrf-header}"></script>
-    <script th:replace="fragments.html :: update-zones(baseUrl='/settings/zones')"></script>
+    <script th:replace="~{fragments.html :: update-zones(baseUrl='/settings/zones')}"></script>
 </body>
 </html>

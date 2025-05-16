@@ -319,7 +319,7 @@
         var tagInput = document.querySelector("#tags");
         var tagify = new Tagify(tagInput, {
             pattern: /^.{0,20}$/,
-            chamlist: JSON.parse(document.querySelector("#chamlist").textContent),
+            whitelist: JSON.parse(document.querySelector("#whitelist").textContent),
             dropdown : {
                 enabled: 1, // suggest tags after a single character input
             } // map tags
@@ -364,7 +364,7 @@
             var tagInput = document.querySelector("#tags");
             var tagify = new Tagify(tagInput, {
                 pattern: /^.{0,20}$/,
-                chamlist: JSON.parse(document.querySelector("#chamlist").textContent),
+                whitelist: JSON.parse(document.querySelector("#whitelist").textContent),
                 dropdown : {
                     enabled: 1, // suggest tags after a single character input
                 } // map tags
@@ -410,8 +410,8 @@
             var tagInput = document.querySelector("#zones");
 
             var tagify = new Tagify(tagInput, {
-                enforcechamlist: true,
-                chamlist: JSON.parse(document.querySelector("#chamlist").textContent),
+                enforcewhitelist: true,
+                whitelist: JSON.parse(document.querySelector("#whitelist").textContent),
                 dropdown : {
                     enabled: 1, // suggest tags after a single character input
                 } // map tags

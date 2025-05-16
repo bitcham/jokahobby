@@ -113,7 +113,7 @@ public class HobbySettingsController {
 
         model.addAttribute("tags", hobby.getTags().stream().map(Tag::getTitle).toList());
         List<String> allTagTitles = tagRepository.findAll().stream().map(Tag::getTitle).toList();
-        model.addAttribute("chamlist", objectMapper.writeValueAsString(allTagTitles));
+        model.addAttribute("whitelist", objectMapper.writeValueAsString(allTagTitles));
         return HOBBY + ROOT + SETTINGS + ROOT + TAGS;
     }
 
@@ -144,10 +144,9 @@ public class HobbySettingsController {
         Hobby hobby = hobbyService.getHobbyToUpdate(account,path);
         model.addAttribute(account);
         model.addAttribute(hobby);
-
         model.addAttribute("zones", hobby.getZones().stream().map(Zone::toString).toList());
         List<String> allZones = zoneRepository.findAll().stream().map(Zone::toString).toList();
-        model.addAttribute("chamlist", objectMapper.writeValueAsString(allZones));
+        model.addAttribute("whitelist", objectMapper.writeValueAsString(allZones));
         return HOBBY + ROOT + SETTINGS + ROOT + ZONES;
     }
 

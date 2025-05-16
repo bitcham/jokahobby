@@ -159,7 +159,7 @@ public class SettingsController {
         model.addAttribute("tags", tags.stream().map(Tag::getTitle).toList());
 
         List<String> allTags = tagRepository.findAll().stream().map(Tag::getTitle).toList();
-        model.addAttribute("chamlist", objectMapper.writeValueAsString(allTags));
+        model.addAttribute("whitelist", objectMapper.writeValueAsString(allTags));
 
         return SETTINGS + TAGS;
     }
@@ -184,7 +184,7 @@ public class SettingsController {
         model.addAttribute("zones", zones.stream().map(Zone::toString).toList());
 
         List<String> allZones = zoneRepository.findAll().stream().map(Zone::toString).toList();
-        model.addAttribute("chamlist", objectMapper.writeValueAsString(allZones));
+        model.addAttribute("whitelist", objectMapper.writeValueAsString(allZones));
 
         return SETTINGS + ZONES;
     }

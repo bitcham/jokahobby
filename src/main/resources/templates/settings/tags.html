@@ -17,7 +17,7 @@
                         <div class="alert alert-info" role="alert">
                             Please enter hobby topics you're interested in. You can receive notifications when hobbies related to these topics are created. Enter tags separated by commas (,) or press Enter.
                         </div>
-                        <div id="chamlist" th:text="${chamlist}" hidden></div>
+                        <div id="whitelist" th:text="${whitelist}" hidden></div>
                         <input id="tags" type="text" name="tags" th:value="${#strings.listJoin(tags, ',')}" class="tagify-outside" aria-describedby="tagHelp"/>
                     </div>
                 </div>

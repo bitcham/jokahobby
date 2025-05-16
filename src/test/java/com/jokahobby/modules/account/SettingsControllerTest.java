@@ -204,7 +204,7 @@ class SettingsControllerTest extends AbstractContainerBaseTest {
         mockMvc.perform(get(ROOT + SETTINGS + TAGS))
                 .andExpect(view().name(SETTINGS + TAGS))
                 .andExpect(model().attributeExists("account"))
-                .andExpect(model().attributeExists("chamlist"))
+                .andExpect(model().attributeExists("whitelist"))
                 .andExpect(model().attributeExists("tags"));
     }
 
@@ -254,7 +254,7 @@ class SettingsControllerTest extends AbstractContainerBaseTest {
         mockMvc.perform(get(ROOT + SETTINGS + ZONES))
                 .andExpect(view().name(SETTINGS + ZONES))
                 .andExpect(model().attributeExists("account"))
-                .andExpect(model().attributeExists("chamlist"))
+                .andExpect(model().attributeExists("whitelist"))
                 .andExpect(model().attributeExists("zones"));
     }
 
