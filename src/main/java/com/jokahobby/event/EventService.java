@@ -35,4 +35,8 @@ public class EventService {
     public void updateEvent(Event event, @Valid EventForm eventForm) {
         modelMapper.map(eventForm, event);
     }
+
+    public void deleteEvent(Event event) {
+        eventRepository.delete(event);
+    }
 }
