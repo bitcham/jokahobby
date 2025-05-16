@@ -122,7 +122,7 @@ public class EventController {
         return "redirect:/hobby/" + hobby.getEncodedPath() + "/events/" + event.getId();
     }
 
-    @DeleteMapping("/events/{id}")
+    @PostMapping("/events/{id}/delete")
     public String cancelEvent(@CurrentAccount Account account, @PathVariable String path,
                                   @PathVariable Long id, Model model) {
         Hobby hobby = hobbyService.getHobbyToUpdateStatus(account, path);
