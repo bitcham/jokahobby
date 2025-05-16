@@ -1,0 +1,15 @@
+package com.jokahobby.modules.account;
+
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+
+@Retention(RUNTIME)
+@Target(PARAMETER)
+@AuthenticationPrincipal(expression = "#this == 'anonymousUser' ? null : account")
+public @interface CurrentAccount {
+}
