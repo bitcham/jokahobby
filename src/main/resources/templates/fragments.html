@@ -410,7 +410,7 @@
             var tagInput = document.querySelector("#zones");
 
             var tagify = new Tagify(tagInput, {
-                enforcewhitelist: true,
+                enforceWhitelist: true,
                 whitelist: JSON.parse(document.querySelector("#whitelist").textContent),
                 dropdown : {
                     enabled: 1, // suggest tags after a single character input
@@ -422,7 +422,7 @@
 
             // add a class to Tagify's input element
             tagify.DOM.input.classList.add('form-control');
-            // re-place Tagify's input element outside of the  element (tagify.DOM.scope), just before it
+            // re-place Tagify's input element outside of the element (tagify.DOM.scope), just before it
             tagify.DOM.scope.parentNode.insertBefore(tagify.DOM.input, tagify.DOM.scope);
         });
     </script>
