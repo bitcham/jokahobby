@@ -1,12 +1,14 @@
 package com.jokahobby.modules.hobby;
 
 import com.jokahobby.modules.account.Account;
+import com.jokahobby.modules.hobby.event.HobbyCreatedEvent;
 import com.jokahobby.modules.tag.Tag;
 import com.jokahobby.modules.zone.Zone;
 import com.jokahobby.modules.hobby.form.HobbyDescriptionForm;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,10 +22,12 @@ public class HobbyService {
 
     private final HobbyRepository hobbyRepository;
     private final ModelMapper modelMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     public Hobby createNewHobby(Hobby hobby, Account account) {
         Hobby newHobby = hobbyRepository.save(hobby);
         newHobby.addManager(account);
+        eventPublisher.publishEvent(new HobbyCreatedEvent(newHobby));
         return newHobby;
     }
 
