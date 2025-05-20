@@ -9,7 +9,7 @@ public class HobbyCreatedEvent {
 
     private Hobby hobby;
 
-    public HobbyCreatedEvent(Hobby newHobby) {
-        this.hobby = newHobby;
+    public HobbyCreatedEvent(Hobby hobby) {
+        this.hobby = hobby;
     }
 }

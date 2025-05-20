@@ -27,7 +27,6 @@ public class HobbyService {
     public Hobby createNewHobby(Hobby hobby, Account account) {
         Hobby newHobby = hobbyRepository.save(hobby);
         newHobby.addManager(account);
-        eventPublisher.publishEvent(new HobbyCreatedEvent(newHobby));
         return newHobby;
     }
 
@@ -133,6 +132,7 @@ public class HobbyService {
 
     public void publish(Hobby hobby) {
         hobby.publish();
+        eventPublisher.publishEvent(new HobbyCreatedEvent(hobby));
     }
 
     public void close(Hobby hobby) {

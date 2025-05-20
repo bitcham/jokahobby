@@ -31,6 +31,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
         @NamedAttributeNode("managers")})
 @NamedEntityGraph(name = "Hobby.withMembers", attributeNodes = {
         @NamedAttributeNode("members")})
+@NamedEntityGraph(name = "Hobby.withTagsAndZones", attributeNodes = {
+        @NamedAttributeNode("tags"),
+        @NamedAttributeNode("zones")})
 @Entity
 @Getter
 @Setter

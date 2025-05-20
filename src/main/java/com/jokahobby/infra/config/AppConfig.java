@@ -1,5 +1,8 @@
 package com.jokahobby.infra.config;
 
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.NameTokenizers;
 import org.modelmapper.spi.NameTokenizer;
@@ -13,7 +16,10 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 import org.springframework.security.web.context.SecurityContextRepository;
 
 @Configuration
+@RequiredArgsConstructor
 public class AppConfig {
+
+    private final EntityManager entityManager;
 
     @Bean
     public PasswordEncoder passwordEncoder(){
@@ -37,6 +43,11 @@ public class AppConfig {
         modelMapper.getConfiguration().setDestinationNameTokenizer(NameTokenizers.UNDERSCORE)
                 .setSourceNameTokenizer(NameTokenizers.UNDERSCORE);
         return modelMapper;
+    }
+
+    @Bean
+    public JPAQueryFactory jpaQueryFactory() {
+        return new JPAQueryFactory(entityManager);
     }
 
 }

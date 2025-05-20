@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments.html :: head}"></head>
+<body class="bg-light">
+    <nav th:replace="~{fragments.html :: main-nav}"></nav>
+    <div class="container">
+        <div class="row py-5 text-center">
+            <div class="col-3">
+                <ul class="list-group">
+                    <a href="#" th:href="@{/notifications}" th:classappend="${isNew}? active"
+                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        Unread Notifications
+                        <span th:text="${numberOfNotChecked}">3</span>
+                    </a>
+                    <a href="#" th:href="@{/notifications/old}" th:classappend="${!isNew}? active"
+                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        Read Notifications
+                        <span th:text="${numberOfChecked}">0</span>
+                    </a>
+                </ul>
+
+                <ul class="list-group mt-4">
+                    <a href="#" th:if="${newHobbyNotifications.size() > 0}"
+                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        New Hobby Notifications
+                        <span th:text="${newHobbyNotifications.size()}">3</span>
+                    </a>
+                    <a href="#" th:if="${eventEnrollmentNotifications.size() > 0}"
+                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        Meeting Enrollment Notifications
+                        <span th:text="${eventEnrollmentNotifications.size()}">0</span>
+                    </a>
+                    <a href="#" th:if="${watchingHobbyNotifications.size() > 0}"
+                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        Interested Hobby Notifications
+                        <span th:text="${watchingHobbyNotifications.size()}">0</span>
+                    </a>
+                </ul>
+
+                <ul class="list-group mt-4" th:if="${numberOfChecked > 0}">
+                    <form th:action="@{/notifications}" th:method="delete">
+                        <button type="submit" class="btn btn-block btn-outline-warning" aria-describedby="deleteHelp">
+                            Delete Read Notifications
+                        </button>
+                        <small id="deleteHelp">Notifications older than a month will be deleted automatically.</small>
+                    </form>
+                </ul>
+            </div>
+            <div class="col-9">
+                <div class="card" th:if="${notifications.size() == 0}">
+                    <div class="card-header">
+                        There are no notifications.
+                    </div>
+                </div>
+
+                <div class="card" th:if="${newHobbyNotifications.size() > 0}">
+                    <div class="card-header">
+                        New hobbies have been created in your area with topics you're interested in.
+                    </div>
+                    <div th:replace="~{fragments.html :: notification-list (notifications=${newHobbyNotifications})}"></div>
+                </div>
+
+                <div class="card mt-4" th:if="${eventEnrollmentNotifications.size() > 0}">
+                    <div class="card-header">
+                        There are updates related to meeting enrollment applications.
+                    </div>
+                    <div th:replace="~{fragments.html :: notification-list (notifications=${eventEnrollmentNotifications})}"></div>
+                </div>
+
+                <div class="card mt-4" th:if="${watchingHobbyNotifications.size() > 0}">
+                    <div class="card-header">
+                        There are updates about the hobbies you're participating in.
+                    </div>
+                    <div th:replace="~{fragments.html :: notification-list (notifications=${watchingHobbyNotifications})}"></div>
+                </div>
+            </div>
+        </div>
+        <div th:replace="~{fragments.html :: footer}"></div>
+    </div>
+    <script th:replace="~{fragments.html :: date-time}"></script>
+</body>
+</html>

@@ -139,8 +139,8 @@
             <dl class="col-3 pt-3 text-right">
                 <dt class="font-weight-light">Registration Method</dt>
                 <dd>
-                    <span th:if="${event.eventType == T(com.jokahobby.domain.EventType).FCFS}">First Come First Served</span>
-                    <span th:if="${event.eventType == T(com.jokahobby.domain.EventType).CONFIRMATIVE}">Admin Confirmation</span>
+                    <span th:if="${event.eventType == T(com.jokahobby.modules.event.EventType).FCFS}">First Come First Served</span>
+                    <span th:if="${event.eventType == T(com.jokahobby.modules.event.EventType).CONFIRMATIVE}">Admin Confirmation</span>
                 </dd>
 
                 <dt class="font-weight-light">Capacity</dt>
