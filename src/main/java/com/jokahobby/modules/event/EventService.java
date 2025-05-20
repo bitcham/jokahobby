@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @Transactional
@@ -35,6 +36,8 @@ public class EventService {
     }
 
     public void deleteEvent(Event event) {
+        List<Enrollment> enrollments = enrollmentRepository.findByEvent(event);
+        enrollmentRepository.deleteAll(enrollments);
         eventRepository.delete(event);
     }
 
