@@ -4,8 +4,10 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Transactional(readOnly = true)
-public interface HobbyRepository extends JpaRepository<Hobby, Long> {
+public interface HobbyRepository extends JpaRepository<Hobby, Long>, HobbyRepositoryExtension {
 
     boolean existsByPath(String path);
 
@@ -33,4 +35,5 @@ public interface HobbyRepository extends JpaRepository<Hobby, Long> {
 
     @EntityGraph(value = "Hobby.withManagersAndMembers", type = EntityGraph.EntityGraphType.FETCH)
     Hobby findHobbyWithManagersAndMembersById(Long id);
+
 }

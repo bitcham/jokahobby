@@ -33,7 +33,7 @@ public class SecurityConfig {
                 .requestMatchers(
                         mvcMatcherBuilder.pattern("/"), mvcMatcherBuilder.pattern("/login"), mvcMatcherBuilder.pattern("/sign-up")
                         , mvcMatcherBuilder.pattern("/check-email-token"), mvcMatcherBuilder.pattern("/email-login")
-                        ,mvcMatcherBuilder.pattern("/check-email-login"), mvcMatcherBuilder.pattern("/login-link"), mvcMatcherBuilder.pattern("/profile/*")
+                        , mvcMatcherBuilder.pattern("/login-by-email"), mvcMatcherBuilder.pattern("/search/hobby")
                 ).permitAll()
                 .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/profile/*")).permitAll()
                 .anyRequest().authenticated()
