@@ -222,6 +222,21 @@ public class HobbySettingsController {
         return "redirect:/" + HOBBY + ROOT + hobby.getEncodedPath() + ROOT + SETTINGS + ROOT + HOBBY;
     }
 
+    @PostMapping(RECRUIT + "/stop")
+    public String stopRecruit(@CurrentAccount Account account, @PathVariable String path, Model model,
+                              RedirectAttributes attributes) {
+        Hobby hobby = hobbyService.getHobbyToUpdate(account, path);
+        if (!hobby.canUpdateRecruiting()) {
+            attributes.addFlashAttribute("message", "Within 1 hour of the last update, you cannot change the recruiting status.");
+            return "redirect:/" + HOBBY + ROOT + hobby.getEncodedPath() + ROOT + SETTINGS + ROOT + HOBBY;
+        }
+
+        hobbyService.stopRecruit(hobby);
+        attributes.addFlashAttribute("message", "Recruiting has stopped.");
+        return "redirect:/" + HOBBY + ROOT + hobby.getEncodedPath() + ROOT + SETTINGS + ROOT + HOBBY;
+    }
+
+
     @PostMapping(HOBBY + ROOT + PATH)
     public String updateHobbyPath(@CurrentAccount Account account, @PathVariable String path, String newPath,
             Model model, RedirectAttributes redirectAttributes) {

@@ -2,6 +2,7 @@ package com.jokahobby.modules.hobby;
 
 import com.jokahobby.modules.account.Account;
 import com.jokahobby.modules.hobby.event.HobbyCreatedEvent;
+import com.jokahobby.modules.hobby.event.HobbyUpdateEvent;
 import com.jokahobby.modules.tag.Tag;
 import com.jokahobby.modules.zone.Zone;
 import com.jokahobby.modules.hobby.form.HobbyDescriptionForm;
@@ -44,6 +45,7 @@ public class HobbyService {
 
     public void updateHobbyDescription(Hobby hobby, @Valid HobbyDescriptionForm hobbyDescriptionForm) {
        modelMapper.map(hobbyDescriptionForm, hobby);
+       eventPublisher.publishEvent(new HobbyUpdateEvent(hobby, "Hobby description updated"));
     }
 
     public void updateHobbyImage(Hobby hobby, String image) {
@@ -137,10 +139,17 @@ public class HobbyService {
 
     public void close(Hobby hobby) {
         hobby.close();
+        eventPublisher.publishEvent(new HobbyUpdateEvent(hobby, "Hobby closed"));
     }
 
     public void startRecruit(Hobby hobby) {
         hobby.startRecruit();
+        eventPublisher.publishEvent(new HobbyUpdateEvent(hobby, "Hobby recruitment started"));
+    }
+
+    public void stopRecruit(Hobby hobby) {
+        hobby.stopRecruit();
+        eventPublisher.publishEvent(new HobbyUpdateEvent(hobby, "Hobby recruitment stopped"));
     }
 
     public void remove(Hobby hobby) {

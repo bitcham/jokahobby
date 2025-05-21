@@ -34,6 +34,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 @NamedEntityGraph(name = "Hobby.withTagsAndZones", attributeNodes = {
         @NamedAttributeNode("tags"),
         @NamedAttributeNode("zones")})
+@NamedEntityGraph(name = "Hobby.withManagersAndMembers", attributeNodes = {
+        @NamedAttributeNode("managers"),
+        @NamedAttributeNode("members")})
 @Entity
 @Getter
 @Setter
@@ -144,6 +147,15 @@ public class Hobby {
             this.recruitingUpdatedDateTime = LocalDateTime.now();
         } else {
             throw new RuntimeException("Recruiting cannot be started. Please publish the hobby or try again after one hour.");
+        }
+    }
+
+    public void stopRecruit() {
+        if(canUpdateRecruiting()) {
+            this.recruiting = false;
+            this.recruitingUpdatedDateTime = LocalDateTime.now();
+        } else {
+            throw new RuntimeException("Recruiting cannot be stopped. Please publish the hobby or try again after one hour.");
         }
     }
 
