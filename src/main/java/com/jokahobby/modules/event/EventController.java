@@ -52,7 +52,7 @@ public class EventController {
             model.addAttribute(hobby);
             return "event/form";
         }
-        Event event = eventService.createNewEvent(modelMapper.map(eventForm, Event.class), hobby, account);
+        Event event = eventService.createEvent(modelMapper.map(eventForm, Event.class), hobby, account);
         return "redirect:/hobby/" + hobby.getEncodedPath() + "/events/" + event.getId();
     }
 
