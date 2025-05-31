@@ -79,5 +79,4 @@ public class HobbyController {
         return "redirect:/hobby/" + hobby.getEncodedPath() + "/members";
     }
 
-
 }

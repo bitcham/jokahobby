@@ -4,15 +4,21 @@ import com.jokahobby.modules.account.Account;
 import com.jokahobby.modules.hobby.event.HobbyCreatedEvent;
 import com.jokahobby.modules.hobby.event.HobbyUpdateEvent;
 import com.jokahobby.modules.tag.Tag;
+import com.jokahobby.modules.tag.TagRepository;
+import com.jokahobby.modules.tag.TagService;
 import com.jokahobby.modules.zone.Zone;
 import com.jokahobby.modules.hobby.form.HobbyDescriptionForm;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.internal.bytebuddy.utility.RandomString;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashSet;
+import java.util.Optional;
 
 import static com.jokahobby.modules.hobby.form.HobbyForm.*;
 
@@ -173,4 +179,5 @@ public class HobbyService {
         checkIfExistingHobby(path, hobby);
         return hobby;
     }
+
 }

@@ -21,7 +21,7 @@ public class PackageDependencyTests {
     public void some_architecture_rule() {
         JavaClasses importedClasses = new ClassFileImporter().importPackages("com.jokahobby");
 
-        ArchRule hobbyPackageRule = classes().that().resideInAPackage("..modules.hobby..")
+        ArchRule hobbyPackageRule = classes().that().resideInAnyPackage("..modules.hobby..")
                 .should().onlyBeAccessed().byClassesThat()
                 .resideInAnyPackage(HOBBY, EVENT);
 

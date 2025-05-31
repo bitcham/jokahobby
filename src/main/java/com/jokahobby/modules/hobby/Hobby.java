@@ -41,6 +41,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 @Getter
 @Setter
 @EqualsAndHashCode(of = "id")
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Hobby {
@@ -91,12 +92,22 @@ public class Hobby {
 
     private boolean useBanner;
 
+    private int memberCount;
+
+
     public void addManager(Account account) {
         this.managers.add(account);
+        this.memberCount++;
     }
 
-    public void addMemeber(Account account) {
-        this.members.add(account);
+    public void addMember(Account account) {
+        this.getMembers().add(account);
+        this.memberCount++;
+    }
+
+    public void removeMember(Account account) {
+        this.getMembers().remove(account);
+        this.memberCount--;
     }
 
     public boolean isJoinable(UserAccount userAccount) {
@@ -161,14 +172,6 @@ public class Hobby {
 
     public boolean isRemovable() {
         return !this.published || this.closed;
-    }
-
-    public void addMember(Account account) {
-        this.getMembers().add(account);
-    }
-
-    public void removeMember(Account account) {
-        this.getMembers().remove(account);
     }
 
     public String getEncodedPath() {

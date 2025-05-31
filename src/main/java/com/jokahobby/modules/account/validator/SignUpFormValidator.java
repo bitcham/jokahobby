@@ -29,6 +29,10 @@ public class SignUpFormValidator implements Validator {
             errors.rejectValue("nickname", "invalid.nickname", new Object[]{signUpForm.getNickname()}, "This nickname is already in use.");
         }
 
+        if(!signUpForm.getPassword().equals(signUpForm.getConfirmPassword())) {
+            errors.rejectValue("confirmPassword", "Unmatched password", new Object[]{signUpForm.getConfirmPassword()}, "Passwords do not match.");
+        }
+
 
     }
 

@@ -50,7 +50,7 @@ class HobbyTest {
     void isJoinable_false_for_member() {
         hobby.setPublished(true);
         hobby.setRecruiting(true);
-        hobby.addMemeber(account);
+        hobby.addMember(account);
 
         assertFalse(hobby.isJoinable(userAccount));
     }
@@ -79,7 +79,7 @@ class HobbyTest {
     @DisplayName("Check if user is a hobby member")
     @Test
     void isMember() {
-        hobby.addMemeber(account);
+        hobby.addMember(account);
         assertTrue(hobby.isMember(userAccount));
     }
 

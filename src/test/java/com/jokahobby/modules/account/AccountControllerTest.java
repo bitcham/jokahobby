@@ -89,6 +89,7 @@ class AccountControllerTest extends AbstractContainerBaseTest {
                         .param("nickname", "cham")
                         .param("email", "chambit.oh@email.com")
                         .param("password", "12345678")
+                        .param("confirmPassword", "12345678")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(view().name("redirect:/"));

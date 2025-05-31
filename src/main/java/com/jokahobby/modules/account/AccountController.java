@@ -24,7 +24,6 @@ public class AccountController {
     private final SignUpFormValidator signUpFormValidator;
     private final AccountService accountService;
     private final AccountRepository accountRepository;
-    private final ModelMapper modelMapper;
 
 
     @InitBinder("signUpForm")
@@ -131,10 +130,6 @@ public class AccountController {
         accountService.login(account);
         return view;
     }
-
-
-
-
 
 
 }

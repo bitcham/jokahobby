@@ -45,6 +45,19 @@
             </div>
 
             <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input id="confirmPassword" type="password" th:field="*{confirmPassword}" class="form-control"
+                       required minlength="8" maxlength="50">
+                <small class="invalid-feedback">Please confirm your password.</small>
+                <small id="confirmPasswordError" class="form-text text-danger" style="display: none;">
+                    Passwords do not match.
+                </small>
+                <small class="form-text text-danger" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}">
+                    Confirm Password Error
+                </small>
+            </div>
+
+            <div class="form-group">
                 <button class="btn btn-primary btn-block" type="submit"
                         aria-describedby="submitHelp">Sign Up</button>
                 <small id="submitHelp" class="form-text text-muted">

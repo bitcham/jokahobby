@@ -5,18 +5,33 @@
     <div th:replace="~{fragments.html :: main-nav}"></div>
     <div class="container">
         <div class="py-5 text-center">
-            <p class="lead" th:if="${#lists.isEmpty(hobbyList)}">
+            <p class="lead" th:if="${hobbyPage.getTotalElements() == 0}">
                 No hobbies found matching <strong th:text="${keyword}" id="keyword" class="context"></strong>.
             </p>
-            <p class="lead" th:if="${!#lists.isEmpty(hobbyList)}">
-                <span th:text="${hobbyList.size()}"></span> hobbies matching
+            <p class="lead" th:if="${hobbyPage.getTotalElements() > 0}">
+                <span th:text="${hobbyPage.getTotalElements()}"></span> hobbies matching
                 <strong th:text="${keyword}" id="keyword" class="context"></strong> found.
             </p>
+            <div class="dropdown">
+                <button class="btn btn-light dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Sort search results by
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <a class="dropdown-item" th:classappend="${#strings.equals(sortProperty, 'publishedDateTime')}? active"
+                       th:href="@{'/search/hobby?sort=publishedDateTime,desc&keyword=' + ${keyword}}">
+                        Hobby publication date
+                    </a>
+                    <a class="dropdown-item" th:classappend="${#strings.equals(sortProperty, 'memberCount')}? active"
+                       th:href="@{'/search/hobby?sort=memberCount,desc&keyword=' + ${keyword}}">
+                        Number of members
+                    </a>
+                </div>
+            </div>
         </div>
         <div class="row justify-content-center">
             <div class="col-sm-10">
                 <div class="row">
-                    <div class="col-md-4" th:each="hobby: ${hobbyList}">
+                    <div class="col-md-4" th:each="hobby: ${hobbyPage.getContent()}">
                         <div class="card mb-4 shadow-sm">
                             <img th:src="${hobby.image}" class="context card-img-top" th:alt="${hobby.title}" >
                             <div class="card-body">
@@ -26,20 +41,20 @@
                                 <p class="card-text" th:text="${hobby.shortDescription}">Short description</p>
                                 <p class="card-text context">
                                     <span th:each="tag: ${hobby.tags}" class="font-weight-light text-monospace badge badge-pill badge-info mr-3">
-                                        <a th:href="@{'/search/tag/' + ${tag.title}}" class="text-decoration-none text-white">
+                                        <a  class="text-decoration-none text-white">
                                             <i class="fa fa-tag"></i> <span th:text="${tag.title}">Tag</span>
                                         </a>
                                     </span>
                                     <span th:each="zone: ${hobby.zones}" class="font-weight-light text-monospace badge badge-primary mr-3">
-                                        <a th:href="@{'/search/zone/' + ${zone.id}}" class="text-decoration-none text-white">
-                                            <i class="fa fa-globe"></i><span th:text="${zone.localNameOfCity != none ? zone.localNameOfCity : zone.city}" class="text-white">City</span>
+                                        <a class="text-decoration-none text-white">
+                                            <i class="fa fa-globe"></i><span th:text="${zone.localNameOfCity != 'none' ? zone.localNameOfCity : zone.city}" class="text-white">City</span>
                                         </a>
                                     </span>
                                 </p>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <small class="text-muted">
                                         <i class="fa fa-user-circle"></i>
-                                        <span th:text="${hobby.members.size()}"></span> members
+                                        <span th:text="${hobby.members.size() + hobby.managers.size()}"></span> members
                                     </small>
                                     <small class="text-muted date" th:text="${hobby.publishedDateTime}">9 mins</small>
                                 </div>
@@ -49,8 +64,60 @@
                 </div>
             </div>
         </div>
+        <div class="row justify-content-center">
+            <div class="col-sm-10">
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${!hobbyPage.hasPrevious()}? disabled">
+                            <a th:href="@{'/search/hobby?keyword=' + ${keyword} + '&sort=' + ${sortProperty} + ',desc&page=' + ${hobbyPage.getNumber() - 1}}"
+                               class="page-link" tabindex="-1" aria-disabled="true">
+                                Previous
+                            </a>
+                        </li>
+                        <li class="page-item" th:classappend="${i == hobbyPage.getNumber()}? active"
+                            th:each="i: ${#numbers.sequence(0, hobbyPage.getTotalPages() - 1)}">
+                            <a th:href="@{'/search/hobby?keyword=' + ${keyword} + '&sort=' + ${sortProperty} + ',desc&page=' + ${i}}"
+                               class="page-link" href="#" th:text="${i + 1}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${!hobbyPage.hasNext()}? disabled">
+                            <a th:href="@{'/search/hobby?keyword=' + ${keyword} + '&sort=' + ${sortProperty} + ',desc&page=' + ${hobbyPage.getNumber() + 1}}"
+                               class="page-link">
+                                Next
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
     </div>
     <div th:replace="~{fragments.html :: footer}"></div>
     <script th:replace="~{fragments.html :: date-time}"></script>
+    <script src="/node_modules/mark.js/dist/jquery.mark.min.js"></script>
+    <script type="application/javascript">
+        $(function(){
+            var mark = function() {
+                // Read the keyword
+                var keyword = $("#keyword").text();
+
+                // Determine selected options
+                var options = {
+                    "each": function(element) {
+                        setTimeout(function() {
+                            $(element).addClass("animate");
+                        }, 150);
+                    }
+                };
+
+                // Mark the keyword inside the context
+                $(".context").unmark({
+                    done: function() {
+                        $(".context").mark(keyword, options);
+                    }
+                });
+            };
+
+            mark();
+        });
+    </script>
 </body>
 </html>

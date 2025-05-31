@@ -5,6 +5,10 @@ import com.jokahobby.modules.account.Account;
 import com.jokahobby.modules.hobby.Hobby;
 import com.jokahobby.modules.hobby.HobbyRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,10 +36,12 @@ public class MainController {
    }
 
    @GetMapping("/search/hobby")
-    public String searchHobby(String keyword, Model model){
-       List<Hobby> hobbyList = hobbyRepository.findByKeyword(keyword);
-       model.addAttribute("hobbyList", hobbyList);
+    public String searchHobby(@PageableDefault(size = 9, sort = "publishedDateTime",
+           direction = Sort.Direction.DESC) Pageable pageable, String keyword, Model model){
+       Page<Hobby> hobbyPage = hobbyRepository.findByKeyword(keyword, pageable);
+       model.addAttribute("hobbyPage", hobbyPage);
        model.addAttribute("keyword", keyword);
+       model.addAttribute("sortProperty", pageable.getSort().toString().contains("publishedDateTime") ? "publishedDateTime" : "memberCount");
        return "search";
    }
 }
