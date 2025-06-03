@@ -27,6 +27,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Noto Sans KR", "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            background-color: #faf8f5 !important;
         }
 
         body,
@@ -47,7 +48,7 @@
         mark {
             padding: 0;
             background: transparent;
-            background: linear-gradient(to right, #f0ad4e 50%, transparent 50%);
+            background: linear-gradient(to right, #d4ac7b 50%, transparent 50%);
             background-position: right bottom;
             background-size: 200% 100%;
             transition: all .5s ease;
@@ -57,6 +58,134 @@
         mark.animate {
             background-position: left bottom;
             color: #000;
+        }
+
+        /* 브라운 계열 파스텔 색상 커스텀 클래스 */
+        .bg-brown-light {
+            background-color: #f5f0e8 !important;
+        }
+
+        .bg-brown-pastel {
+            background-color: #e6d7c3 !important;
+        }
+
+        .navbar-brown {
+            background-color: #c19a6b !important;
+        }
+
+        .btn-brown-primary {
+            background-color: #b8956a;
+            border-color: #b8956a;
+            color: white;
+        }
+
+        .btn-brown-primary:hover {
+            background-color: #a0835c;
+            border-color: #a0835c;
+            color: white;
+        }
+
+        .btn-outline-brown {
+            color: #b8956a;
+            border-color: #b8956a;
+        }
+
+        .btn-outline-brown:hover {
+            background-color: #b8956a;
+            border-color: #b8956a;
+            color: white;
+        }
+
+        .badge-brown-info {
+            background-color: #d4ac7b !important;
+        }
+
+        .badge-brown-primary {
+            background-color: #b8956a !important;
+        }
+
+        .text-brown {
+            color: #8b6f3e !important;
+        }
+
+        /* Bootstrap 클래스 오버라이드 */
+        .bg-light {
+            background-color: #f5f0e8 !important;
+        }
+
+        .bg-dark {
+            background-color: #c19a6b !important;
+        }
+
+        .btn-primary {
+            background-color: #b8956a;
+            border-color: #b8956a;
+        }
+
+        .btn-primary:hover {
+            background-color: #a0835c;
+            border-color: #a0835c;
+        }
+
+        .btn-outline-primary {
+            color: #b8956a;
+            border-color: #b8956a;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: #b8956a;
+            border-color: #b8956a;
+            color: white;
+        }
+
+        .badge-info {
+            background-color: #d4ac7b !important;
+        }
+
+        .badge-primary {
+            background-color: #b8956a !important;
+        }
+
+        .text-info {
+            color: #cd853f !important;
+        }
+
+        .btn-success {
+            background-color: #9db374;
+            border-color: #9db374;
+        }
+
+        .btn-success:hover {
+            background-color: #8aa162;
+            border-color: #8aa162;
+        }
+
+        .alert-info {
+            background-color: #f0ead6;
+            border-color: #e6d7c3;
+            color: #8b6f3e;
+        }
+
+        .card {
+            background-color: #faf8f5;
+            border-color: #e6d7c3;
+        }
+
+        /* Notification 벨 아이콘 강조 */
+        .notification-bell {
+            color: #d2691e !important;
+            animation: bell-ring 1s infinite;
+        }
+
+        @keyframes bell-ring {
+            0%, 50%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(5deg); }
+            75% { transform: rotate(-5deg); }
+        }
+
+        .jumbotron {
+            background-color: #f5f0e8 !important;
+            border-bottom: 1px solid #e6d7c3;
         }
     </style>
 </head>
@@ -88,7 +217,7 @@
             <li class="nav-item" sec:authorize="isAuthenticated()">
                 <a class="nav-link" th:href="@{/notifications}">
                     <i th:if="${!hasNotification}" class="fa fa-bell-o"></i>
-                    <span class="text-info" th:if="${hasNotification}"><i  class="fa fa-bell"></i></span>
+                    <span th:if="${hasNotification}"><i class="fa fa-bell notification-bell"></i></span>
                 </a>
             </li>
             <li class="nav-item" sec:authorize="isAuthenticated()">
