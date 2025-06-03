@@ -30,7 +30,7 @@ class HobbySettingsControllerTest extends AbstractContainerBaseTest {
 
     @Test
     @WithAccount("cutedog")
-    @DisplayName("View study description edit form - Failed (Unauthorized user)")
+    @DisplayName("View Hobby description edit form - Failed (Unauthorized user)")
     void updateDescriptionForm_fail() throws Exception {
         Account cham = accountFactory.createAccount("cham");
         Hobby hobby = hobbyFactory.createHobby("test-hobby", cham);
@@ -41,7 +41,7 @@ class HobbySettingsControllerTest extends AbstractContainerBaseTest {
 
     @Test
     @WithAccount("cutedog")
-    @DisplayName("View study description edit form - Success")
+    @DisplayName("View Hobby description edit form - Success")
     void updateDescriptionForm_success() throws Exception {
         Account cutedog = accountRepository.findByNickname("cutedog");
         Hobby hobby = hobbyFactory.createHobby("test-hobby", cutedog);
@@ -56,7 +56,7 @@ class HobbySettingsControllerTest extends AbstractContainerBaseTest {
 
     @Test
     @WithAccount("cutedog")
-    @DisplayName("Update study description - Success")
+    @DisplayName("Update Hobby description - Success")
     void updateDescription_success() throws Exception {
         Account cutedog = accountRepository.findByNickname("cutedog");
         Hobby hobby = hobbyFactory.createHobby("test-hobby", cutedog);
@@ -73,7 +73,7 @@ class HobbySettingsControllerTest extends AbstractContainerBaseTest {
 
     @Test
     @WithAccount("cutedog")
-    @DisplayName("Update study description - Failed")
+    @DisplayName("Update Hobby description - Failed")
     void updateDescription_fail() throws Exception {
         Account cutedog = accountRepository.findByNickname("cutedog");
         Hobby hobby = hobbyFactory.createHobby("test-hobby", cutedog);

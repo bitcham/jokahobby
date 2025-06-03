@@ -53,7 +53,7 @@ public class EnrollmentEventListener {
     private void sendEnrollmentResultEmail(Account account, Hobby hobby, Event event, EnrollmentEvent enrollmentEvent) {
         Context context = new Context();
         context.setVariable("nickname", account.getNickname());
-        context.setVariable("link", "/study/" + hobby.getEncodedPath() + "/events/" + event.getId());
+        context.setVariable("link", "/hobby/" + hobby.getEncodedPath() + "/events/" + event.getId());
         context.setVariable("linkName", hobby.getTitle());
         context.setVariable("message", enrollmentEvent.getMessage());
         context.setVariable("host", appProperties.getHost());

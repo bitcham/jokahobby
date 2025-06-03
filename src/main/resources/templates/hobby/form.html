@@ -13,7 +13,7 @@
                 <div class="form-group">
                     <label for="path">Hobby URL</label>
                     <input id="path" type="text" th:field="*{path}" class="form-control"
-                           placeholder="e.g.) study-path" aria-describedby="pathHelp" required min="3" max="20">
+                           placeholder="e.g.) hobby-path" aria-describedby="pathHelp" required min="3" max="20">
                     <small id="pathHelp" class="form-text text-muted">
                         Enter at least 3 characters and up to 20 characters using only letters, numbers, dashes(-) and underscores(_) without spaces. This will be used for the hobby home address. e.g.) /hobby/<b>hobby-path</b>
                     </small>
@@ -24,9 +24,9 @@
                 <div class="form-group">
                     <label for="title">Hobby Room Name</label>
                     <input id="title" type="text" th:field="*{title}" class="form-control"
-                           placeholder="Study Name" aria-describedby="titleHelp" required max="50">
+                           placeholder="Hobby Name" aria-describedby="titleHelp" required max="50">
                     <small id="titleHelp" class="form-text text-muted">
-                        Enter the study name within 50 characters.
+                        Enter the hobby name within 50 characters.
                     </small>
                     <small class="invalid-feedback">Please enter a hobby room name.</small>
                     <small class="form-text text-danger" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">Title Error</small>
@@ -35,9 +35,9 @@
                 <div class="form-group">
                     <label for="shortDescription">Brief Introduction</label>
                     <textarea id="shortDescription" type="textarea" th:field="*{shortDescription}" class="form-control"
-                              placeholder="Briefly introduce your study." aria-describedby="shortDescriptionHelp" required maxlength="150"></textarea>
+                              placeholder="Briefly introduce your hobby." aria-describedby="shortDescriptionHelp" required maxlength="150"></textarea>
                     <small id="shortDescriptionHelp" class="form-text text-muted">
-                        Please provide a brief introduction of your study within 150 characters.
+                        Please provide a brief introduction of your hobby within 150 characters.
                     </small>
                     <small class="invalid-feedback">Please enter a brief introduction.</small>
                     <small class="form-text text-danger" th:if="${#fields.hasErrors('shortDescription')}" th:errors="*{shortDescription}">ShortDescription Error</small>
@@ -46,7 +46,7 @@
                 <div class="form-group">
                     <label for="fullDescription">Detailed Description</label>
                     <textarea id="fullDescription" type="textarea" th:field="*{fullDescription}" class="form-control"
-                              placeholder="Describe your study in detail." aria-describedby="fullDescriptionHelp" required maxlength="500"></textarea>
+                              placeholder="Describe your hobby in detail." aria-describedby="fullDescriptionHelp" required maxlength="500"></textarea>
                     <small id="fullDescriptionHelp" class="form-text text-muted">
                         Please describe in detail about the hobby room to be used, and hobby members being recruited.
                     </small>
@@ -69,7 +69,7 @@
         $(function () {
             $('#fullDescription').summernote({
                 fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', 'Noto Sans KR', 'Merriweather'],
-                placeholder: 'Please describe in detail about the study\'s goals, schedule, process, textbooks or online courses to be used, and study members being recruited.',
+                placeholder: 'Please describe in detail about the hobby\'s goals, schedule, process, textbooks or online courses to be used, and hobby members being recruited.',
                 tabsize: 2,
                 height: 300
             });

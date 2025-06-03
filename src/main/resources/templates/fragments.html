@@ -677,7 +677,7 @@
             <div class="card mb-4 shadow-sm">
                 <img th:src="${hobby.image}" class="card-img-top" th:alt="${hobby.title}" >
                 <div class="card-body">
-                    <a th:href="@{'/study/' + ${hobby.path}}" class="text-decoration-none">
+                    <a th:href="@{'/hobby/' + ${hobby.path}}" class="text-decoration-none">
                         <h5 class="card-title context" th:text="${hobby.title}"></h5>
                     </a>
                     <p class="card-text" th:text="${hobby.shortDescription}">Short description</p>
@@ -696,7 +696,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <small class="text-muted">
                             <i class="fa fa-user-circle"></i>
-                            <span th:text="${hobby.memberCount}"></span>명
+                            <span th:text="${hobby.memberCount == 1 ? hobby.memberCount + ' person' : hobby.memberCount + ' people'}"></span>
                         </small>
                         <small class="text-muted date" th:text="${hobby.publishedDateTime}">9 mins</small>
                     </div>
