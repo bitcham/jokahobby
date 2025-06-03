@@ -36,7 +36,7 @@ class HobbySettingsControllerTest extends AbstractContainerBaseTest {
         Hobby hobby = hobbyFactory.createHobby("test-hobby", cham);
 
         mockMvc.perform(get("/hobby/" + hobby.getPath() + "/settings/description"))
-                .andExpect(status().isForbidden());
+                .andExpect(view().name("error"));
     }
 
     @Test
