@@ -1,16 +1,20 @@
 package com.jokahobby.modules.event;
 
 import com.jokahobby.modules.account.Account;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+@NamedEntityGraph(
+        name = "Enrollment.withEventAndHobby",
+        attributeNodes = {
+                @NamedAttributeNode(value = "event", subgraph = "hobby")
+        },
+        subgraphs = @NamedSubgraph(name = "hobby", attributeNodes = @NamedAttributeNode("hobby"))
+)
 @Entity
 @Getter @Setter @EqualsAndHashCode(of = "id")
 public class Enrollment {

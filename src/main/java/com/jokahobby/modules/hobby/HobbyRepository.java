@@ -1,10 +1,14 @@
 package com.jokahobby.modules.hobby;
 
+import com.jokahobby.modules.account.Account;
+import com.jokahobby.modules.tag.Tag;
+import com.jokahobby.modules.zone.Zone;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @Transactional(readOnly = true)
 public interface HobbyRepository extends JpaRepository<Hobby, Long>, HobbyRepositoryExtension {
@@ -36,4 +40,10 @@ public interface HobbyRepository extends JpaRepository<Hobby, Long>, HobbyReposi
     @EntityGraph(value = "Hobby.withManagersAndMembers", type = EntityGraph.EntityGraphType.FETCH)
     Hobby findHobbyWithManagersAndMembersById(Long id);
 
+    @EntityGraph(attributePaths = {"zones", "tags"})
+    List<Hobby> findFirst9ByPublishedAndClosedOrderByPublishedDateTimeDesc(boolean published, boolean closed);
+
+    List<Hobby> findFirst5ByManagersContainingAndClosedOrderByPublishedDateTimeDesc(Account account, boolean closed);
+
+    List<Hobby> findFirst5ByMembersContainingAndClosedOrderByPublishedDateTimeDesc(Account account, boolean closed);
 }

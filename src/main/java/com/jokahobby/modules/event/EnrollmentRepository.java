@@ -1,6 +1,7 @@
 package com.jokahobby.modules.event;
 
 import com.jokahobby.modules.account.Account;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,4 +14,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     Enrollment findByEventAndAccount(Event event, Account account);
 
     List<Enrollment> findByEvent(Event event);
+
+    @EntityGraph("Enrollment.withEventAndHobby")
+    List<Enrollment> findByAccountAndAcceptedOrderByEnrolledAtDesc(Account accountLoaded, boolean b);
 }
