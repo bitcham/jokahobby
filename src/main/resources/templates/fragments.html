@@ -811,12 +811,12 @@
                     <p class="card-text" th:text="${hobby.shortDescription}">Short description</p>
                     <p class="card-text context">
                                 <span th:each="tag: ${hobby.tags}" class="font-weight-light text-monospace badge badge-pill badge-info mr-3">
-                                    <a th:href="@{'/search/tag/' + ${tag.title}}" class="text-decoration-none text-white">
+                                    <a class="text-decoration-none text-white">
                                         <i class="fa fa-tag"></i> <span th:text="${tag.title}">Tag</span>
                                     </a>
                                 </span>
                         <span th:each="zone: ${hobby.zones}" class="font-weight-light text-monospace badge badge-primary mr-3">
-                                    <a th:href="@{'/search/zone/' + ${zone.id}}" class="text-decoration-none text-white">
+                                    <a class="text-decoration-none text-white">
                                         <i class="fa fa-globe"></i><span th:text="${zone.localNameOfCity != 'none' ? zone.localNameOfCity : zone.city}" class="text-white">City</span>
                                     </a>
                                 </span>

@@ -21,7 +21,7 @@
                 <h5 class="mt-3 font-weight-light">Main Activity Areas</h5>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item" th:each="zone: ${account.zones}">
-                        <i class="fa fa-globe"></i> <span th:text="${zone.getLocalNameOfCity()}">Zone</span>
+                        <i class="fa fa-globe"></i><span th:text="${zone.localNameOfCity != 'none'} ? ${zone.localNameOfCity} : ${zone.city}">City</span>
                     </li>
                     <li class="list-group-item" th:if="${account.zones.size() == 0}">
                         Please register <a th:href="@{/settings/zones}" class="btn-text">main activity areas</a>.
