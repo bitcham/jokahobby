@@ -32,9 +32,9 @@ public class HobbyService {
     private final ApplicationEventPublisher eventPublisher;
 
     public Hobby createNewHobby(Hobby hobby, Account account) {
-        Hobby newHobby = hobbyRepository.save(hobby);
-        newHobby.addManager(account);
-        return newHobby;
+        hobby.addManager(account);
+
+        return hobbyRepository.save(hobby);
     }
 
     public Hobby getHobby(String path) {
