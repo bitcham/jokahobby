@@ -1,8 +1,10 @@
-# JokaHobby(Migration is on progress)
+# JokaHobby
+
 ## Hobby Meetup Platform for Community Building
 
-### Overview
 Connect people with shared interests by providing a platform to create, discover, and join hobby groups in their local area.
+
+> **Migration Status**: SSR (Thymeleaf) to SPA (React) + REST API migration in progress. 
 
 ---
 
@@ -10,107 +12,126 @@ Connect people with shared interests by providing a platform to create, discover
 
 ```mermaid
 flowchart TB
-    Client["🧑‍💻 Client"]
+    Client["Client (React SPA)"]
 
-    subgraph AWS["☁️ AWS Cloud"]
-        R53["🌐 Route 53<br/>DNS"]
-
-        subgraph EC2["💻 EC2 Instance"]
-            subgraph SpringBoot["Spring Boot"]
-                SEC["🔐 Spring Security"]
-                TH["🍃 Thymeleaf"]
-                JPA["📊 Spring Data JPA<br/>+ QueryDSL"]
-                MAIL["📧 Spring Mail"]
-            end
-        end
-
-        RDS[("🐘 RDS<br/>PostgreSQL")]
-        S3["📦 S3<br/>Image Storage"]
+    subgraph Backend["Spring Boot 4.0.2"]
+        SEC["Spring Security 7 JWT + OAuth2"]
+        API["REST API (@RestController)"]
+        JPA["Spring Data JPA + QueryDSL"]
+        MAIL["Spring Mail"]
     end
 
-    GH["🐙 GitHub"]
+    subgraph Infra["Infrastructure"]
+        PG[("PostgreSQL 17")]
+        S3["AWS S3 Image Storage"]
+    end
 
-    Client --> R53
-    R53 --> EC2
-    JPA --> RDS
-    SpringBoot --> S3
-    GH -.->|Deploy| EC2
+    Client -->|"HTTP/JSON\nBearer JWT"| API
+    API --> SEC
+    API --> JPA
+    API --> MAIL
+    JPA --> PG
+    Backend --> S3
 ```
 
-### Tech Stack
+---
+
+## Tech Stack
+
 | Layer | Technology |
 |-------|------------|
-| **Backend** | Java 25, Spring Boot 4.0.2 |
-| **Security** | Spring Security 6 |
-| **Database** | PostgreSQL, JPA, QueryDSL |
-| **Template** | Thymeleaf |
+| **Backend** | Java 25, Spring Boot 4.0.2, Spring Framework 7.0 |
+| **Security** | Spring Security 7.0.2, JWT (JJWT 0.12.6), OAuth2 (Google) |
+| **Database** | PostgreSQL 17, Spring Data JPA, QueryDSL 5.1, Flyway |
+| **Frontend** | React 19, TypeScript, Vite, TailwindCSS |
+| **State Management** | Zustand, TanStack React Query |
 | **Cloud** | AWS EC2, RDS, S3, Route 53 |
-| **Email** | Spring Mail |
-| **Testing** | JUnit 5, TestContainers, ArchUnit |
+| **Email** | Spring Mail (Gmail SMTP) |
+| **Testing** | JUnit 5, TestContainers, ArchUnit, Vitest, Playwright |
+| **Containerization** | Docker Compose |
 
 ---
 
 ## Key Features
 
-### 1. User Management
-- **Email Verification**: Secure registration with email token validation
-- **Profile Customization**: Bio, profile image, occupation, location
-- **Notification Preferences**: Configurable email/web notifications
+### User Management
+- JWT-based authentication (Access Token + Refresh Token with rotation)
+- OAuth2 social login (Google)
+- Profile customization (bio, image, location)
+- Configurable email/web notification preferences
+- Multi-device support (up to 5 concurrent sessions)
 
-### 2. Hobby Group System
-- **Create & Manage**: Users can create hobby groups as managers
-- **Member Management**: Join/leave groups, member count tracking
-- **Publishing Workflow**: Draft → Published → Closed lifecycle
-- **Recruiting Control**: Time-limited recruiting status updates
+### Hobby Group System
+- Create and manage hobby groups as a manager
+- Member join/leave with count tracking
+- Publishing workflow: Draft -> Published -> Closed
+- Recruiting control with time-limited status
+- Tag and zone-based categorization
 
-### 3. Event & Enrollment
-- **Event Creation**: Schedule meetups within hobby groups
-- **Enrollment System**: Apply to join events
-- **Async Notifications**: Event-driven enrollment updates
+### Event & Enrollment
+- FCFS (first-come-first-served) and Confirmative event types
+- Enrollment with auto-accept (FCFS) or manager approval (Confirmative)
+- Check-in system for event attendance
+- Async notifications via Spring Events
 
-### 4. Discovery System
-- **Tag-Based Search**: Find hobbies by interest tags
-- **Location Filtering**: Zone-based geographic search
+### Discovery
+- Keyword-based hobby search with pagination
+- Personalized recommendations based on interest tags
 
 ---
 
 ## Project Structure
+
 ```
-src/main/java/com/jokahobby/
-├── infra/
-│   ├── config/          # App, Security, Web, Async configs
-│   └── mail/            # Email services
-└── modules/
-    ├── account/         # User authentication & settings
-    ├── hobby/           # Hobby CRUD & management
-    ├── event/           # Event & enrollment
-    ├── tag/             # Tag management
-    ├── zone/            # Location management
-    ├── notification/    # Notification system
-    └── main/            # Main controller
+jokahobby/
+├── src/main/java/com/jokahobby/
+│   ├── api/
+│   │   ├── controller/        # REST API controllers
+│   │   ├── dto/               # Request/Response DTOs (Java records)
+│   │   │   ├── request/
+│   │   │   └── response/
+│   │   └── exception/         # Global exception handler
+│   ├── infra/
+│   │   ├── config/            # App, Security, CORS configs
+│   │   ├── exception/         # ErrorCode enum, business exceptions
+│   │   ├── mail/              # Email services
+│   │   ├── scheduler/         # Token cleanup scheduler
+│   │   └── security/
+│   │       ├── jwt/           # JwtProvider, JwtFilter, JwtProperties
+│   │       └── oauth2/        # OAuth2 handlers, CustomOAuth2UserService
+│   └── modules/
+│       ├── account/           # Account entity, AuthService, RefreshToken
+│       ├── hobby/             # Hobby CRUD & management
+│       ├── event/             # Event & enrollment
+│       ├── tag/               # Tag management
+│       ├── zone/              # Location management
+│       └── notification/      # Notification system
+├── frontend/
+│   └── src/
+│       ├── api/               # Axios client + API service layer
+│       ├── components/        # Reusable React components
+│       ├── hooks/             # Custom React hooks
+│       ├── pages/             # Route-mapped page components
+│       ├── store/             # Zustand auth store
+│       ├── types/             # TypeScript type definitions
+│       └── utils/             # Validation schemas, formatters
+├── docker-compose.yml
+├── build.gradle.kts
+└── .env.example
 ```
+
+
+## API Overview
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/auth/signup` | Register new account |
+| POST | `/api/v1/auth/login` | Login (returns JWT) |
+| POST | `/api/v1/auth/refresh` | Refresh access token (cookie) |
+| POST | `/api/v1/auth/logout` | Revoke refresh token |
+| GET | `/api/v1/accounts/{nickname}` | Public profile |
+| GET | `/api/v1/hobbies/search` | Search hobbies |
+| POST | `/api/v1/hobbies` | Create hobby |
+| POST | `/api/v1/hobbies/{path}/events` | Create event |
 
 ---
-
-## Getting Started
-
-### Prerequisites
-- Java 25
-- PostgreSQL
-- Node.js 20.x
-
-### Build & Run
-```bash
-# Full build (includes frontend)
-./gradlew build
-
-# Run application
-./gradlew bootRun
-```
-
-### Testing
-```bash
-./gradlew test
-```
-
-
