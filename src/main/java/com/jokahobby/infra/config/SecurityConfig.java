@@ -56,18 +56,10 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint((req, res, e) -> {
-                            res.setStatus(401);
-                            res.setContentType("application/json");
-                            res.getWriter().write(
-                                    "{\"success\":false,\"data\":null,\"error\":{\"code\":\"AUTH_001\",\"message\":\"Authentication is required.\",\"fieldErrors\":null}}");
-                        })
-                        .accessDeniedHandler((req, res, e) -> {
-                            res.setStatus(403);
-                            res.setContentType("application/json");
-                            res.getWriter().write(
-                                    "{\"success\":false,\"data\":null,\"error\":{\"code\":\"AUTH_010\",\"message\":\"Access denied.\",\"fieldErrors\":null}}");
-                        })
+                        .authenticationEntryPoint((req, res, e) ->
+                                SecurityExceptionHandler.writeErrorResponse(res, ErrorCode.UNAUTHORIZED))
+                        .accessDeniedHandler((req, res, e) ->
+                                SecurityExceptionHandler.writeErrorResponse(res, ErrorCode.FORBIDDEN))
                 );
 
         return http.build();
