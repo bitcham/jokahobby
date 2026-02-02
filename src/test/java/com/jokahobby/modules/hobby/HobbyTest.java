@@ -2,7 +2,6 @@ package com.jokahobby.modules.hobby;
 
 
 import com.jokahobby.modules.account.Account;
-import com.jokahobby.modules.account.UserAccount;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,16 +13,12 @@ class HobbyTest {
 
     Hobby hobby;
     Account account;
-    UserAccount userAccount;
 
     @BeforeEach
     void beforeEach() {
         hobby = new Hobby();
         account = new Account();
         account.setNickname("cutedog");
-        account.setPassword("123");
-        userAccount = new UserAccount(account);
-
     }
 
     @DisplayName("Can join the hobby if it's public, recruiting members, and the user is neither a member nor a manager")
@@ -32,7 +27,7 @@ class HobbyTest {
         hobby.setPublished(true);
         hobby.setRecruiting(true);
 
-        assertTrue(hobby.isJoinable(userAccount));
+        assertTrue(hobby.isJoinable(account));
     }
 
     @DisplayName("Hobby managers don't need to join the hobby even if it's public and recruiting")
@@ -42,7 +37,7 @@ class HobbyTest {
         hobby.setRecruiting(true);
         hobby.addManager(account);
 
-        assertFalse(hobby.isJoinable(userAccount));
+        assertFalse(hobby.isJoinable(account));
     }
 
     @DisplayName("Hobby members don't need to rejoin the hobby even if it's public and recruiting")
@@ -52,7 +47,7 @@ class HobbyTest {
         hobby.setRecruiting(true);
         hobby.addMember(account);
 
-        assertFalse(hobby.isJoinable(userAccount));
+        assertFalse(hobby.isJoinable(account));
     }
 
     @DisplayName("Cannot join the hobby if it's not public or not recruiting")
@@ -61,28 +56,26 @@ class HobbyTest {
         hobby.setPublished(true);
         hobby.setRecruiting(false);
 
-        assertFalse(hobby.isJoinable(userAccount));
+        assertFalse(hobby.isJoinable(account));
 
         hobby.setPublished(false);
         hobby.setRecruiting(true);
 
-        assertFalse(hobby.isJoinable(userAccount));
+        assertFalse(hobby.isJoinable(account));
     }
 
     @DisplayName("Check if user is a hobby manager")
     @Test
     void isManager() {
         hobby.addManager(account);
-        assertTrue(hobby.isManager(userAccount));
+        assertTrue(hobby.isManager(account));
     }
 
     @DisplayName("Check if user is a hobby member")
     @Test
     void isMember() {
         hobby.addMember(account);
-        assertTrue(hobby.isMember(userAccount));
+        assertTrue(hobby.isMember(account));
     }
-
-
 
 }

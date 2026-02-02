@@ -1,7 +1,7 @@
 package com.jokahobby.modules.notification;
 
 import com.jokahobby.modules.account.Account;
-import com.jokahobby.modules.account.UserAccount;
+import com.jokahobby.infra.security.oauth2.OAuth2UserPrincipal;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +21,8 @@ public class NotificationInterceptor implements HandlerInterceptor {
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if(modelAndView != null && !isRedirectView(modelAndView) && authentication != null && authentication.getPrincipal() instanceof UserAccount) {
-            Account account = ((UserAccount) authentication.getPrincipal()).getAccount();
+        if(modelAndView != null && !isRedirectView(modelAndView) && authentication != null && authentication.getPrincipal() instanceof OAuth2UserPrincipal) {
+            Account account = ((OAuth2UserPrincipal) authentication.getPrincipal()).getAccount();
             long count = notificationRepository.countByAccountAndChecked(account, false);
             modelAndView.addObject("hasNotification", count > 0);
         }

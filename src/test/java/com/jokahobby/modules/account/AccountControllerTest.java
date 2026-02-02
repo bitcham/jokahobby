@@ -2,103 +2,37 @@ package com.jokahobby.modules.account;
 
 import com.jokahobby.infra.AbstractContainerBaseTest;
 import com.jokahobby.infra.MockMvcTest;
-import com.jokahobby.infra.mail.EmailMessage;
-import com.jokahobby.infra.mail.EmailService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.then;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
-import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @MockMvcTest
 class AccountControllerTest extends AbstractContainerBaseTest {
 
     @Autowired private MockMvc mockMvc;
-    @Autowired private AccountRepository accountRepository;
-    @MockBean EmailService emailService;
 
-    @DisplayName("Check Email Token - Incorrect Input")
+    @DisplayName("OAuth2 authorization endpoint redirects to Google")
     @Test
-    void checkEmailToken_with_wrong_input() throws Exception {
-        mockMvc.perform(get("/check-email-token")
-                        .param("token", "wrong.token")
-                        .param("email", "email@email.com"))
-                .andExpect(status().isOk())
-                .andExpect(model().attributeExists("error"))
-                .andExpect(view().name("account/checked-email"))
-                .andExpect(unauthenticated());
+    void oauth2AuthorizationEndpoint() throws Exception {
+        mockMvc.perform(get("/oauth2/authorization/google"))
+                .andExpect(status().is3xxRedirection());
     }
 
-    @DisplayName("Check Email Token - Correct Input")
+    @DisplayName("Signup endpoint no longer exists")
     @Test
-    void checkEmailToken_with_correct_input() throws Exception {
-        Account account = Account.builder()
-                .email("test@email.com")
-                .password("12345678")
-                .nickname("cham")
-                .build();
-        Account newAccount = accountRepository.save(account);
-        newAccount.generateEmailCheckToken();
-
-        mockMvc.perform(get("/check-email-token")
-                        .param("token", newAccount.getEmailCheckToken())
-                        .param("email", newAccount.getEmail()))
-                        .andExpect(status().isOk())
-                        .andExpect(model().attributeDoesNotExist("error"))
-                        .andExpect(model().attributeExists("nickname"))
-                        .andExpect(model().attributeExists("numberOfUser"))
-                        .andExpect(view().name("account/checked-email"))
-                        .andExpect(authenticated().withUsername("cham"));
+    void signupEndpointRemoved() throws Exception {
+        mockMvc.perform(get("/api/v1/auth/signup"))
+                .andExpect(status().isUnauthorized());
     }
 
-    @DisplayName("Sign Up Page")
+    @DisplayName("Login endpoint no longer exists")
     @Test
-    void signUpForm() throws Exception {
-        mockMvc.perform(get("/sign-up"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("account/sign-up"))
-                .andExpect(model().attributeExists("signUpForm"));
+    void loginEndpointRemoved() throws Exception {
+        mockMvc.perform(get("/api/v1/auth/login"))
+                .andExpect(status().isUnauthorized());
     }
-
-    @DisplayName("Sign Up Handle - Input Value error")
-    //@Test
-    void signUpSubmit_with_wrong_input() throws Exception {
-        mockMvc.perform(post("/sign-up")
-                .param("nickname", "mmmm")
-                .param("email", "emaiaaa")
-                .param("password", "123")
-                .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(view().name("account/sign-up"));
-
-    }
-
-    @DisplayName("Sign Up Handle - Input value correct")
-    @Test
-    void signUpSubmit_with_correct_input() throws Exception {
-        mockMvc.perform(post("/sign-up")
-                        .param("nickname", "cham")
-                        .param("email", "chambit.oh@email.com")
-                        .param("password", "12345678")
-                        .param("confirmPassword", "12345678")
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(view().name("redirect:/"));
-
-
-        Account account = accountRepository.findByEmail("chambit.oh@email.com");
-        assertNotNull(account);
-        assertNotNull(account.getPassword(), "12345678");
-        then(emailService).should().sendEmail(any(EmailMessage.class));
-    }
-
 }

@@ -4,12 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jokahobby.modules.account.form.NicknameForm;
 import com.jokahobby.modules.account.form.Notifications;
-import com.jokahobby.modules.account.form.PasswordForm;
 import com.jokahobby.modules.account.form.Profile;
 import com.jokahobby.modules.tag.Tag;
 import com.jokahobby.modules.zone.Zone;
 import com.jokahobby.modules.account.validator.NicknameValidator;
-import com.jokahobby.modules.account.validator.PasswordFormValidator;
 import com.jokahobby.modules.tag.TagForm;
 import com.jokahobby.modules.tag.TagRepository;
 import com.jokahobby.modules.tag.TagService;
@@ -46,18 +44,12 @@ public class SettingsController {
     static final String ROOT = "/";
     static final String SETTINGS = "settings";
     static final String PROFILE = "/profile";
-    static final String PASSWORD = "/password";
     static final String NOTIFICATIONS = "/notifications";
     static final String ACCOUNT = "/account";
     static final String TAGS = "/tags";
     static final String ZONES = "/zones";
 
 
-
-    @InitBinder("passwordForm")
-    public void initBinder(WebDataBinder webDataBinder) {
-        webDataBinder.addValidators(new PasswordFormValidator());
-    }
 
     @InitBinder("nicknameForm")
     public void initBinderNickname(WebDataBinder webDataBinder) {
@@ -82,26 +74,6 @@ public class SettingsController {
         redirectAttributes.addFlashAttribute("message", "Your profile updated successfully.");
         return "redirect:/" + SETTINGS + PROFILE;
 
-    }
-
-    @GetMapping(PASSWORD)
-    public String passwordUpdateForm(@CurrentAccount Account account, Model model) {
-        model.addAttribute(account);
-        model.addAttribute(new PasswordForm());
-        return SETTINGS + PASSWORD;
-    }
-
-    @PostMapping(PASSWORD)
-    public String passwordUpdate(@CurrentAccount Account account, @Valid PasswordForm passwordForm, Errors errors,
-                                 Model model, RedirectAttributes redirectAttributes) {
-        if (errors.hasErrors()) {
-            model.addAttribute(account);
-            return SETTINGS + PASSWORD;
-        }
-
-        accountService.updatePassword(account, passwordForm.getNewPasswordConfirm());
-        redirectAttributes.addFlashAttribute("message", "Your password updated successfully.");
-        return "redirect:/" + SETTINGS + PASSWORD;
     }
 
     @GetMapping(NOTIFICATIONS)

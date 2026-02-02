@@ -1,7 +1,6 @@
 package com.jokahobby.modules.hobby;
 
 import com.jokahobby.modules.account.Account;
-import com.jokahobby.modules.account.UserAccount;
 import com.jokahobby.modules.tag.Tag;
 import com.jokahobby.modules.zone.Zone;
 import jakarta.persistence.*;
@@ -110,18 +109,17 @@ public class Hobby {
         this.memberCount--;
     }
 
-    public boolean isJoinable(UserAccount userAccount) {
-        Account account = userAccount.getAccount();
+    public boolean isJoinable(Account account) {
         return this.isPublished() && this.isRecruiting()
                 && !this.members.contains(account) && !this.managers.contains(account);
     }
 
-    public boolean isMember(UserAccount userAccount) {
-        return this.members.contains(userAccount.getAccount());
+    public boolean isMember(Account account) {
+        return this.members.contains(account);
     }
 
-    public boolean isManager(UserAccount userAccount) {
-        return this.managers.contains(userAccount.getAccount());
+    public boolean isManager(Account account) {
+        return this.managers.contains(account);
     }
 
     public String getImage() {

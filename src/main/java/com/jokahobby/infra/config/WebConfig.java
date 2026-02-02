@@ -2,14 +2,11 @@ package com.jokahobby.infra.config;
 
 import com.jokahobby.modules.notification.NotificationInterceptor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.security.StaticResourceLocation;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Configuration
 @RequiredArgsConstructor
@@ -19,13 +16,12 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        List<String> staticResourcesPath = Arrays.stream(StaticResourceLocation.values())
-                .flatMap(StaticResourceLocation::getPatterns)
-                .collect(Collectors.toList());
-        staticResourcesPath.add("/node_modules/**");
+        List<String> excludePatterns = List.of(
+                "/css/**", "/js/**", "/images/**", "/webjars/**",
+                "/favicon.ico", "/node_modules/**", "/api/**", "/oauth2/**"
+        );
 
         registry.addInterceptor(notificationInterceptor)
-                .excludePathPatterns(staticResourcesPath);
-
+                .excludePathPatterns(excludePatterns);
     }
 }

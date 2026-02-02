@@ -15,7 +15,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 
@@ -39,8 +38,6 @@ class SettingsControllerTest extends AbstractContainerBaseTest {
     private AccountService accountService;
     @Autowired
     private AccountRepository accountRepository;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
@@ -106,52 +103,6 @@ class SettingsControllerTest extends AbstractContainerBaseTest {
 
         Account cutedog = accountRepository.findByNickname("cutedog");
         assertThat(cutedog.getBio()).isNull();
-    }
-
-    @WithAccount("cutedog")
-    @DisplayName("Password update form")
-    @Test
-    void passwordUpdateForm() throws Exception{
-        mockMvc.perform(get(ROOT + SETTINGS + PASSWORD))
-                .andExpect(status().isOk())
-                .andExpect(model().attributeExists("account"))
-                .andExpect(model().attributeExists("passwordForm"));
-    }
-
-    @WithAccount("cutedog")
-    @DisplayName("Password update - correct data")
-    @Test
-    void passwordUpdate() throws Exception {
-        String newPassword = "newPassword";
-        mockMvc.perform(post(ROOT + SETTINGS + PASSWORD)
-                        .param("newPassword", newPassword)
-                        .param("newPasswordConfirm", newPassword)
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(ROOT + SETTINGS + PASSWORD))
-                .andExpect(flash().attributeExists("message"));
-
-        Account cutedog = accountRepository.findByNickname("cutedog");
-        assertThat(passwordEncoder.matches(newPassword, cutedog.getPassword())).isTrue();
-    }
-
-    @WithAccount("cutedog")
-    @DisplayName("Password update - incorrect data")
-    @Test
-    void passwordUpdate_error() throws Exception {
-        String newPassword = "newPassword";
-        mockMvc.perform(post(ROOT + SETTINGS + PASSWORD)
-                        .param("newPassword", newPassword)
-                        .param("newPasswordConfirm", "wrongPassword")
-                        .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(view().name( SETTINGS + PASSWORD))
-                .andExpect(model().attributeExists("account"))
-                .andExpect(model().attributeExists("passwordForm"))
-                .andExpect(model().hasErrors());
-
-        Account cutedog = accountRepository.findByNickname("cutedog");
-        assertThat(passwordEncoder.matches(newPassword, cutedog.getPassword())).isFalse();
     }
 
     @WithAccount("cutedog")

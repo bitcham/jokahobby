@@ -1,22 +1,22 @@
 package com.jokahobby.modules.account;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.jpa.repository.EntityGraph;
+
+import java.util.Optional;
+import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional(readOnly = true)
-public interface AccountRepository extends JpaRepository<Account, Long>, QuerydslPredicateExecutor<Account> {
-    boolean existsByEmail(@Email @NotBlank String email);
+public interface AccountRepository extends JpaRepository<Account, UUID>, QuerydslPredicateExecutor<Account> {
 
-    boolean existsByNickname(@NotBlank String nickname);
-
-    Account findByEmail(String mail);
+    boolean existsByNickname(String nickname);
 
     Account findByNickname(String nickname);
 
+    Optional<Account> findByProviderAndProviderId(String provider, String providerId);
+
     @EntityGraph(attributePaths = {"tags", "zones"})
-    Account findAccountWithTagsAndZonesById(Long id);
+    Account findAccountWithTagsAndZonesById(UUID id);
 }

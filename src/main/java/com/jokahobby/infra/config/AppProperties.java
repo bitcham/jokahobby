@@ -9,4 +9,5 @@ import org.springframework.stereotype.Component;
 @Data
 public class AppProperties {
     private String host;
+    private String frontendUrl;
 }

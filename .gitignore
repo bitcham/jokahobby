@@ -43,3 +43,28 @@ src/main/resources/static/node
 src/main/resources/application-dev.properties
 src/main/resources/application.properties
 src/main/resources/application-prod.properties
+
+### Environment ###
+.env
+!.env
+
+### Docs ###
+docs/
+checkpoints/
+
+### Security ###
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+credentials.json
+secrets.json
+*-credentials.json
+*-secrets.json
+serviceAccountKey.json
+
+migration.md
+migration/
+.claude/
+CLAUDE.md

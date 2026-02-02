@@ -1,7 +1,6 @@
 package com.jokahobby.modules.event;
 
 import com.jokahobby.modules.account.Account;
-import com.jokahobby.modules.account.UserAccount;
 import com.jokahobby.modules.hobby.Hobby;
 import jakarta.persistence.*;
 import lombok.*;
@@ -61,16 +60,15 @@ public class Event {
         return this.endEnrollmentDateTime.isAfter(LocalDateTime.now());
     }
 
-    public boolean isEnrollableFor(UserAccount userAccount) {
-        return isNotClosed() && !isAttended(userAccount) && !isAlreadyEnrolled(userAccount);
+    public boolean isEnrollableFor(Account account) {
+        return isNotClosed() && !isAttended(account) && !isAlreadyEnrolled(account);
     }
 
-    public boolean isDisenrollableFor(UserAccount userAccount) {
-        return isNotClosed() && !isAttended(userAccount) && isAlreadyEnrolled(userAccount);
+    public boolean isDisenrollableFor(Account account) {
+        return isNotClosed() && !isAttended(account) && isAlreadyEnrolled(account);
     }
 
-    public boolean isAttended(UserAccount userAccount) {
-        Account account = userAccount.getAccount();
+    public boolean isAttended(Account account) {
         for (Enrollment e : this.enrollments) {
             if (e.getAccount().equals(account) && e.isAttended()) {
                 return true;
@@ -80,8 +78,7 @@ public class Event {
         return false;
     }
 
-    private boolean isAlreadyEnrolled(UserAccount userAccount) {
-        Account account = userAccount.getAccount();
+    private boolean isAlreadyEnrolled(Account account) {
         for (Enrollment e : this.enrollments) {
             if (e.getAccount().equals(account)) {
                 return true;

@@ -40,7 +40,7 @@ flowchart TB
 ### Tech Stack
 | Layer | Technology |
 |-------|------------|
-| **Backend** | Java 21, Spring Boot 3.3.4 |
+| **Backend** | Java 25, Spring Boot 4.0.2 |
 | **Security** | Spring Security 6 |
 | **Database** | PostgreSQL, JPA, QueryDSL |
 | **Template** | Thymeleaf |
@@ -95,7 +95,7 @@ src/main/java/com/jokahobby/
 ## Getting Started
 
 ### Prerequisites
-- Java 21
+- Java 25
 - PostgreSQL
 - Node.js 20.x
 

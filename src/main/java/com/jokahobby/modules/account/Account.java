@@ -1,6 +1,5 @@
 package com.jokahobby.modules.account;
 
-import com.jokahobby.modules.hobby.Hobby;
 import com.jokahobby.modules.tag.Tag;
 import com.jokahobby.modules.zone.Zone;
 import jakarta.persistence.*;
@@ -18,28 +17,25 @@ import static jakarta.persistence.FetchType.*;
 @Builder @AllArgsConstructor @NoArgsConstructor
 public class Account {
 
-    @Id @GeneratedValue
-    private Long id;
+    @Id @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
-    @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true)
     private String nickname;
 
-    private String password;
+    @Column(nullable = false, length = 20)
+    private String provider;
 
-    private boolean emailVerified;
-
-    private String emailCheckToken;
+    @Column(nullable = false)
+    private String providerId;
 
     private LocalDateTime joinedAt;
 
     private String bio;
 
     private String url;
-
-    private String occupation;
 
     private String location;
 
@@ -58,30 +54,10 @@ public class Account {
 
     private boolean hobbyUpdatedByWeb = true;
 
-    private LocalDateTime emailCheckTokenGeneratedAt;
-
     @ManyToMany
     private Set<Tag> tags = new HashSet<>();
 
     @ManyToMany
     private Set<Zone> zones = new HashSet<>();
-
-    public void generateEmailCheckToken() {
-        this.emailCheckToken = UUID.randomUUID().toString();
-        this.emailCheckTokenGeneratedAt = LocalDateTime.now();
-    }
-
-    public void completeSignUp() {
-        this.setEmailVerified(true);
-        this.setJoinedAt(LocalDateTime.now());
-    }
-
-    public boolean isValidToken(String token) {
-        return this.emailCheckToken.equals(token);
-    }
-
-    public boolean canSendConfirmEmail() {
-        return this.emailCheckTokenGeneratedAt.isBefore(LocalDateTime.now().minusHours(1));
-    }
 
 }
