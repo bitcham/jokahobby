@@ -1,7 +1,7 @@
 package com.jokahobby.modules.account;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import com.jokahobby.modules.account.form.NicknameForm;
 import com.jokahobby.modules.account.form.Notifications;
 import com.jokahobby.modules.account.form.Profile;
@@ -26,7 +26,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Controller
 @RequestMapping("/settings")
@@ -125,9 +124,9 @@ public class SettingsController {
     }
 
     @GetMapping(TAGS)
-    public String updateTags(@CurrentAccount Account account, Model model) throws JsonProcessingException {
+    public String updateTags(@CurrentAccount Account account, Model model) throws JacksonException {
         model.addAttribute(account);
-        Set<Tag> tags = accountService.getTags(account);
+        List<Tag> tags = accountService.getTags(account);
         model.addAttribute("tags", tags.stream().map(Tag::getTitle).toList());
 
         List<String> allTags = tagRepository.findAll().stream().map(Tag::getTitle).toList();
@@ -150,9 +149,9 @@ public class SettingsController {
     }
 
     @GetMapping(ZONES)
-    public String updateZones(@CurrentAccount Account account, Model model) throws JsonProcessingException {
+    public String updateZones(@CurrentAccount Account account, Model model) throws JacksonException {
         model.addAttribute(account);
-        Set<Zone> zones = accountService.getZones(account);
+        List<Zone> zones = accountService.getZones(account);
         model.addAttribute("zones", zones.stream().map(Zone::toString).toList());
 
         List<String> allZones = zoneRepository.findAll().stream().map(Zone::toString).toList();

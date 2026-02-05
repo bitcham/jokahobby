@@ -1,59 +1,28 @@
 package com.jokahobby.modules.hobby;
 
-import com.jokahobby.modules.account.Account;
-import com.jokahobby.modules.tag.Tag;
-import com.jokahobby.modules.zone.Zone;
+import com.jokahobby.infra.exception.BusinessException;
+import com.jokahobby.infra.exception.ErrorCode;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.net.URLEncoder;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
-import static jakarta.persistence.FetchType.*;
+import static jakarta.persistence.FetchType.EAGER;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-@NamedEntityGraph(name = "Hobby.withAll", attributeNodes = {
-        @NamedAttributeNode("tags"),
-        @NamedAttributeNode("zones"),
-        @NamedAttributeNode("managers"),
-        @NamedAttributeNode("members")})
-@NamedEntityGraph(name = "Hobby.withTagsAndManagers", attributeNodes = {
-        @NamedAttributeNode("tags"),
-        @NamedAttributeNode("managers")})
-@NamedEntityGraph(name = "Hobby.withZonesAndManagers", attributeNodes = {
-        @NamedAttributeNode("zones"),
-        @NamedAttributeNode("managers")})
-@NamedEntityGraph(name = "Hobby.withManagers", attributeNodes = {
-        @NamedAttributeNode("managers")})
-@NamedEntityGraph(name = "Hobby.withMembers", attributeNodes = {
-        @NamedAttributeNode("members")})
-@NamedEntityGraph(name = "Hobby.withTagsAndZones", attributeNodes = {
-        @NamedAttributeNode("tags"),
-        @NamedAttributeNode("zones")})
-@NamedEntityGraph(name = "Hobby.withManagersAndMembers", attributeNodes = {
-        @NamedAttributeNode("managers"),
-        @NamedAttributeNode("members")})
 @Entity
 @Getter
 @Setter
 @EqualsAndHashCode(of = "id")
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Hobby {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @ManyToMany
-    private Set<Account> managers = new HashSet<>();
-
-    @ManyToMany
-    private Set<Account> members =  new HashSet<>();
 
     @Column(unique = true)
     private String path;
@@ -70,12 +39,6 @@ public class Hobby {
     @Lob
     @Basic(fetch = EAGER)
     private String image;
-
-    @ManyToMany
-    private Set<Tag> tags = new HashSet<>();
-
-    @ManyToMany
-    private Set<Zone> zones = new HashSet<>();
 
     private LocalDateTime publishedDateTime;
 
@@ -94,32 +57,12 @@ public class Hobby {
     private int memberCount;
 
 
-    public void addManager(Account account) {
-        this.managers.add(account);
+    public void incrementMemberCount() {
         this.memberCount++;
     }
 
-    public void addMember(Account account) {
-        this.getMembers().add(account);
-        this.memberCount++;
-    }
-
-    public void removeMember(Account account) {
-        this.getMembers().remove(account);
+    public void decrementMemberCount() {
         this.memberCount--;
-    }
-
-    public boolean isJoinable(Account account) {
-        return this.isPublished() && this.isRecruiting()
-                && !this.members.contains(account) && !this.managers.contains(account);
-    }
-
-    public boolean isMember(Account account) {
-        return this.members.contains(account);
-    }
-
-    public boolean isManager(Account account) {
-        return this.managers.contains(account);
     }
 
     public String getImage() {
@@ -131,8 +74,8 @@ public class Hobby {
         if(!this.closed && !this.published) {
             this.published = true;
             this.publishedDateTime = LocalDateTime.now();
-        } else{
-            throw new RuntimeException("Hobby is already published or closed.");
+        } else {
+            throw new BusinessException(ErrorCode.HOBBY_ALREADY_PUBLISHED);
         }
     }
 
@@ -140,14 +83,14 @@ public class Hobby {
         if(this.published && !this.closed) {
             this.closed = true;
             this.closedDateTime = LocalDateTime.now();
-        } else{
-            throw new RuntimeException("Hobby is already closed or not published.");
+        } else {
+            throw new BusinessException(ErrorCode.HOBBY_NOT_PUBLISHED);
         }
     }
 
     public boolean canUpdateRecruiting() {
-        return this.published && this.recruitingUpdatedDateTime == null
-                || this.recruitingUpdatedDateTime.isBefore(LocalDateTime.now().minusHours(1));
+        return this.published && (this.recruitingUpdatedDateTime == null
+                || this.recruitingUpdatedDateTime.isBefore(LocalDateTime.now().minusHours(1)));
     }
 
     public void startRecruit() {
@@ -155,7 +98,7 @@ public class Hobby {
             this.recruiting = true;
             this.recruitingUpdatedDateTime = LocalDateTime.now();
         } else {
-            throw new RuntimeException("Recruiting cannot be started. Please publish the hobby or try again after one hour.");
+            throw new BusinessException(ErrorCode.HOBBY_RECRUIT_COOLDOWN);
         }
     }
 
@@ -164,7 +107,7 @@ public class Hobby {
             this.recruiting = false;
             this.recruitingUpdatedDateTime = LocalDateTime.now();
         } else {
-            throw new RuntimeException("Recruiting cannot be stopped. Please publish the hobby or try again after one hour.");
+            throw new BusinessException(ErrorCode.HOBBY_RECRUIT_COOLDOWN);
         }
     }
 
@@ -176,7 +119,4 @@ public class Hobby {
         return URLEncoder.encode(this.path, UTF_8);
     }
 
-    public boolean isManagedBy(Account account) {
-        return this.managers.contains(account);
-    }
 }

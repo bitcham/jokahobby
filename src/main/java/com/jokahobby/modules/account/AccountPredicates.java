@@ -9,8 +9,19 @@ import java.util.Set;
 public class AccountPredicates {
 
     public static Predicate findByTagsAndZones(Set<Tag> tags, Set<Zone> zones) {
+        QAccountTag accountTag = QAccountTag.accountTag;
+        QAccountZone accountZone = QAccountZone.accountZone;
         QAccount account = QAccount.account;
-        return QAccount.account.zones.any().in(zones).and(account.tags.any().in(tags));
+
+        return account.id.in(
+                com.querydsl.jpa.JPAExpressions.select(accountZone.account.id)
+                        .from(accountZone)
+                        .where(accountZone.zone.in(zones))
+        ).and(account.id.in(
+                com.querydsl.jpa.JPAExpressions.select(accountTag.account.id)
+                        .from(accountTag)
+                        .where(accountTag.tag.in(tags))
+        ));
     }
 
 }

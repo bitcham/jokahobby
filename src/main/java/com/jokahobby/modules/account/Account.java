@@ -1,20 +1,16 @@
 package com.jokahobby.modules.account;
 
-import com.jokahobby.modules.tag.Tag;
-import com.jokahobby.modules.zone.Zone;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 import static jakarta.persistence.FetchType.*;
 
 @Entity
 @Getter @Setter @EqualsAndHashCode(of = "id")
-@Builder @AllArgsConstructor @NoArgsConstructor
+@Builder @AllArgsConstructor @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Account {
 
     @Id @GeneratedValue(strategy = GenerationType.UUID)
@@ -53,11 +49,5 @@ public class Account {
     private boolean hobbyUpdatedByEmail;
 
     private boolean hobbyUpdatedByWeb = true;
-
-    @ManyToMany
-    private Set<Tag> tags = new HashSet<>();
-
-    @ManyToMany
-    private Set<Zone> zones = new HashSet<>();
 
 }

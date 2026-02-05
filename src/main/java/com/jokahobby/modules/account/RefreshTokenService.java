@@ -11,13 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 @Slf4j
 public class RefreshTokenService {
 
@@ -26,6 +24,7 @@ public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtProperties jwtProperties;
 
+    @Transactional
     public RefreshToken createRefreshToken(UUID accountId, String tokenHash,
                                            String deviceInfo, String ipAddress) {
         long activeCount = refreshTokenRepository.countByAccountIdAndRevokedFalse(accountId);
@@ -53,6 +52,7 @@ public class RefreshTokenService {
         return refreshTokenRepository.save(rt);
     }
 
+    @Transactional
     public RefreshToken rotateRefreshToken(String oldTokenHash, String newTokenHash,
                                            String deviceInfo, String ipAddress) {
         RefreshToken old = refreshTokenRepository.findByTokenHash(oldTokenHash)
@@ -95,6 +95,7 @@ public class RefreshTokenService {
         throw new BusinessException(ErrorCode.REFRESH_TOKEN_EXPIRED);
     }
 
+    @Transactional
     public void revokeToken(String tokenHash) {
         refreshTokenRepository.findByTokenHash(tokenHash)
                 .ifPresent(rt -> {
@@ -103,6 +104,7 @@ public class RefreshTokenService {
                 });
     }
 
+    @Transactional
     public void revokeAllTokens(UUID accountId) {
         int count = refreshTokenRepository.revokeAllByAccountId(accountId);
         log.info("All tokens revoked for accountId={}, count={}", accountId, count);

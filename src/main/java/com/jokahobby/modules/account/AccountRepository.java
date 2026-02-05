@@ -1,7 +1,5 @@
 package com.jokahobby.modules.account;
 
-import org.springframework.data.jpa.repository.EntityGraph;
-
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,7 +14,4 @@ public interface AccountRepository extends JpaRepository<Account, UUID>, Queryds
     Account findByNickname(String nickname);
 
     Optional<Account> findByProviderAndProviderId(String provider, String providerId);
-
-    @EntityGraph(attributePaths = {"tags", "zones"})
-    Account findAccountWithTagsAndZonesById(UUID id);
 }

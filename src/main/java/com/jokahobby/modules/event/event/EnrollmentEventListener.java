@@ -24,7 +24,6 @@ import java.time.LocalDateTime;
 @Slf4j
 @Async
 @Component
-@Transactional
 @RequiredArgsConstructor
 public class EnrollmentEventListener {
 
@@ -34,6 +33,7 @@ public class EnrollmentEventListener {
     private final EmailService emailService;
 
     @EventListener
+    @Transactional
     public void handleEnrollmentEvent(EnrollmentEvent enrollmentEvent) {
         Enrollment enrollment = enrollmentEvent.getEnrollment();
         Account account = enrollment.getAccount();

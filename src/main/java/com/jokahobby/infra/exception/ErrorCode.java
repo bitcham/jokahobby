@@ -22,6 +22,12 @@ public enum ErrorCode {
     INVALID_INPUT("VALID_001", "Invalid input value.", 400),
     DUPLICATE_NICKNAME("VALID_003", "Nickname already exists.", 409),
 
+    // Hobby
+    HOBBY_ALREADY_PUBLISHED("HOBBY_001", "Hobby is already published or closed.", 400),
+    HOBBY_NOT_PUBLISHED("HOBBY_002", "Hobby is already closed or not published.", 400),
+    HOBBY_RECRUIT_COOLDOWN("HOBBY_003", "Cannot update recruiting. Please try again after one hour.", 400),
+    HOBBY_NOT_REMOVABLE("HOBBY_004", "Hobby cannot be removed.", 400),
+
     // Resource
     ACCOUNT_NOT_FOUND("RESOURCE_001", "Account not found.", 404),
     HOBBY_NOT_FOUND("RESOURCE_002", "Hobby not found.", 404),

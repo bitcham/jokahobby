@@ -6,8 +6,7 @@ import com.jokahobby.infra.mail.EmailService;
 import com.jokahobby.modules.account.Account;
 import com.jokahobby.modules.account.AccountPredicates;
 import com.jokahobby.modules.account.AccountRepository;
-import com.jokahobby.modules.hobby.Hobby;
-import com.jokahobby.modules.hobby.HobbyRepository;
+import com.jokahobby.modules.hobby.*;
 import com.jokahobby.modules.notification.Notification;
 import com.jokahobby.modules.notification.NotificationRepository;
 import com.jokahobby.modules.notification.NotificationType;
@@ -23,16 +22,20 @@ import org.thymeleaf.context.Context;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Slf4j
 @Async
 @Component
-@Transactional
 @RequiredArgsConstructor
 public class HobbyEventListener {
 
     private final HobbyRepository hobbyRepository;
+    private final HobbyTagRepository hobbyTagRepository;
+    private final HobbyZoneRepository hobbyZoneRepository;
+    private final HobbyManagerRepository hobbyManagerRepository;
+    private final HobbyMemberRepository hobbyMemberRepository;
     private final AccountRepository accountRepository;
     private final EmailService emailService;
     private final TemplateEngine templateEngine;
@@ -40,9 +43,14 @@ public class HobbyEventListener {
     private final NotificationRepository notificationRepository;
 
     @EventListener
+    @Transactional
     public void handleHobbyCreatedEvent(HobbyCreatedEvent event) {
-        Hobby hobby = hobbyRepository.findHobbyWithTagsAndZonesById(event.getHobby().getId());
-        Iterable<Account> accounts = accountRepository.findAll(AccountPredicates.findByTagsAndZones(hobby.getTags(), hobby.getZones()));
+        Hobby hobby = hobbyRepository.findById(event.getHobby().getId()).orElseThrow();
+        Set<com.jokahobby.modules.tag.Tag> tags = hobbyTagRepository.findAllByHobbyId(hobby.getId()).stream()
+                .map(HobbyTag::getTag).collect(Collectors.toSet());
+        Set<com.jokahobby.modules.zone.Zone> zones = hobbyZoneRepository.findAllByHobbyId(hobby.getId()).stream()
+                .map(HobbyZone::getZone).collect(Collectors.toSet());
+        Iterable<Account> accounts = accountRepository.findAll(AccountPredicates.findByTagsAndZones(tags, zones));
         accounts.forEach(account -> {
             if (account.isHobbyCreatedByEmail()) {
                 sendHobbyCreatedEmail(account, hobby,
@@ -55,11 +63,14 @@ public class HobbyEventListener {
     }
 
     @EventListener
+    @Transactional
     public void handleHobbyUpdateEvent(HobbyUpdateEvent hobbyUpdateEvent) {
-        Hobby hobby = hobbyRepository.findHobbyWithManagersAndMembersById(hobbyUpdateEvent.getHobby().getId());
+        Hobby hobby = hobbyRepository.findById(hobbyUpdateEvent.getHobby().getId()).orElseThrow();
         Set<Account> accounts = new HashSet<>();
-        accounts.addAll(hobby.getManagers());
-        accounts.addAll(hobby.getMembers());
+        accounts.addAll(hobbyManagerRepository.findAllByHobbyId(hobby.getId()).stream()
+                .map(HobbyManager::getAccount).toList());
+        accounts.addAll(hobbyMemberRepository.findAllByHobbyId(hobby.getId()).stream()
+                .map(HobbyMember::getAccount).toList());
         accounts.forEach(account -> {
             if (account.isHobbyUpdatedByEmail()) {
                 sendHobbyCreatedEmail(account, hobby, hobbyUpdateEvent.getMessage(), "JokaHobby, '" + hobby.getTitle() + "' has new event.");

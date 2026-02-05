@@ -1,11 +1,8 @@
 package com.jokahobby.modules.hobby;
 
-import com.jokahobby.modules.account.QAccount;
-import com.jokahobby.modules.tag.QTag;
 import com.jokahobby.modules.tag.Tag;
-import com.jokahobby.modules.zone.QZone;
 import com.jokahobby.modules.zone.Zone;
-import com.querydsl.core.QueryResults;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -24,28 +21,46 @@ public class HobbyRepositoryExtensionImpl extends QuerydslRepositorySupport impl
     @Override
     public Page<Hobby> findByKeyword(String keyword, Pageable pageable) {
         QHobby hobby = QHobby.hobby;
+        QHobbyTag hobbyTag = QHobbyTag.hobbyTag;
+        QHobbyZone hobbyZone = QHobbyZone.hobbyZone;
+
         JPQLQuery<Hobby> query = from(hobby).where(hobby.published.isTrue()
                         .and(hobby.title.containsIgnoreCase(keyword))
-                        .or(hobby.tags.any().title.containsIgnoreCase(keyword))
-                        .or(hobby.zones.any().city.containsIgnoreCase(keyword))
-                        .or(hobby.zones.any().localNameOfCity.containsIgnoreCase(keyword)))
-                        .leftJoin(hobby.tags, QTag.tag).fetchJoin()
-                        .leftJoin(hobby.zones, QZone.zone).fetchJoin()
-                        .distinct();
+                        .or(hobby.id.in(
+                                JPAExpressions.select(hobbyTag.hobby.id)
+                                        .from(hobbyTag)
+                                        .where(hobbyTag.tag.title.containsIgnoreCase(keyword))))
+                        .or(hobby.id.in(
+                                JPAExpressions.select(hobbyZone.hobby.id)
+                                        .from(hobbyZone)
+                                        .where(hobbyZone.zone.city.containsIgnoreCase(keyword))))
+                        .or(hobby.id.in(
+                                JPAExpressions.select(hobbyZone.hobby.id)
+                                        .from(hobbyZone)
+                                        .where(hobbyZone.zone.localNameOfCity.containsIgnoreCase(keyword)))))
+                .distinct();
+        long total = query.fetchCount();
         JPQLQuery<Hobby> pageableQuery = getQuerydsl().applyPagination(pageable, query);
-        QueryResults<Hobby> fetchResults = pageableQuery.fetchResults();
-        return new PageImpl<>(fetchResults.getResults(), pageable, fetchResults.getTotal());
+        List<Hobby> content = pageableQuery.fetch();
+        return new PageImpl<>(content, pageable, total);
     }
 
     @Override
     public List<Hobby> findByAccount(Set<Tag> tags, Set<Zone> zones) {
         QHobby hobby = QHobby.hobby;
+        QHobbyTag hobbyTag = QHobbyTag.hobbyTag;
+        QHobbyZone hobbyZone = QHobbyZone.hobbyZone;
+
         JPQLQuery<Hobby> query = from(hobby).where(hobby.published.isTrue()
                         .and(hobby.closed.isFalse())
-                        .and(hobby.tags.any().in(tags))
-                        .and(hobby.zones.any().in(zones)))
-                .leftJoin(hobby.tags, QTag.tag).fetchJoin()
-                .leftJoin(hobby.zones, QZone.zone).fetchJoin()
+                        .and(hobby.id.in(
+                                JPAExpressions.select(hobbyTag.hobby.id)
+                                        .from(hobbyTag)
+                                        .where(hobbyTag.tag.in(tags))))
+                        .and(hobby.id.in(
+                                JPAExpressions.select(hobbyZone.hobby.id)
+                                        .from(hobbyZone)
+                                        .where(hobbyZone.zone.in(zones)))))
                 .orderBy(hobby.publishedDateTime.desc())
                 .distinct()
                 .limit(9);
