@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLRestriction;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 import static jakarta.persistence.FetchType.*;
@@ -29,7 +29,7 @@ public class Account extends SoftDeletableEntity {
     @Column(nullable = false)
     private String providerId;
 
-    private LocalDateTime joinedAt;
+    private Instant joinedAt;
 
     private String bio;
 

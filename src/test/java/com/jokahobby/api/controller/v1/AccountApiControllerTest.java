@@ -17,7 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,7 +42,7 @@ class AccountApiControllerTest extends AbstractContainerBaseTest {
                 .nickname("testuser")
                 .provider("google")
                 .providerId("google-123")
-                .joinedAt(LocalDateTime.now())
+                .joinedAt(Instant.now())
                 .bio("Hello")
                 .hobbyCreatedByWeb(true)
                 .hobbyEnrollmentResultByWeb(true)
@@ -261,7 +261,7 @@ class AccountApiControllerTest extends AbstractContainerBaseTest {
                     .nickname("existing")
                     .provider("google")
                     .providerId("google-456")
-                    .joinedAt(LocalDateTime.now())
+                    .joinedAt(Instant.now())
                     .build());
 
             assertThat(mockMvc.put().uri("/api/v1/accounts/me/nickname")

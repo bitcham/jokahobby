@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,7 +38,7 @@ class HobbyTagRepositoryTest extends AbstractContainerBaseTest {
                 .nickname("manager")
                 .provider("google")
                 .providerId("google-mgr")
-                .joinedAt(LocalDateTime.now())
+                .joinedAt(Instant.now())
                 .build());
         hobby = hobbyRepository.save(Hobby.builder()
                 .path("test-hobby")

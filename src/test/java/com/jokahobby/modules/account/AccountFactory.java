@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Component
 @RequiredArgsConstructor
@@ -18,7 +18,7 @@ public class AccountFactory {
                 .email(nickname + "@email.com")
                 .provider("GOOGLE")
                 .providerId("test-" + nickname)
-                .joinedAt(LocalDateTime.now())
+                .joinedAt(Instant.now())
                 .build();
         accountRepository.save(account);
         return account;

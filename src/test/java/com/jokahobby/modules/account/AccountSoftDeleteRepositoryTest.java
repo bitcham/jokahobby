@@ -8,7 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,7 +29,7 @@ class AccountSoftDeleteRepositoryTest extends AbstractContainerBaseTest {
                 .nickname(nickname)
                 .provider("google")
                 .providerId("google-" + nickname)
-                .joinedAt(LocalDateTime.now())
+                .joinedAt(Instant.now())
                 .build());
     }
 

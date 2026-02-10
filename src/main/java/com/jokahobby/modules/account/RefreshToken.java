@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -39,10 +39,10 @@ public class RefreshToken extends BaseEntity {
     private String ipAddress;
 
     @Column(name = "issued_at", nullable = false)
-    private LocalDateTime issuedAt;
+    private Instant issuedAt;
 
     @Column(name = "expires_at", nullable = false)
-    private LocalDateTime expiresAt;
+    private Instant expiresAt;
 
     @Column(nullable = false)
     private boolean revoked;
@@ -51,7 +51,7 @@ public class RefreshToken extends BaseEntity {
     private String replacedByHash;
 
     public boolean isExpired() {
-        return LocalDateTime.now().isAfter(this.expiresAt);
+        return Instant.now().isAfter(this.expiresAt);
     }
 
     public boolean isUsable() {
@@ -71,6 +71,6 @@ public class RefreshToken extends BaseEntity {
         if (!this.revoked || this.replacedByHash == null) {
             return false;
         }
-        return Duration.between(this.issuedAt, LocalDateTime.now()).toSeconds() < graceWindowSeconds;
+        return Duration.between(this.issuedAt, Instant.now()).toSeconds() < graceWindowSeconds;
     }
 }

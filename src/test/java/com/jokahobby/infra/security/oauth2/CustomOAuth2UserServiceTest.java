@@ -9,7 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,7 +33,7 @@ class CustomOAuth2UserServiceTest extends AbstractContainerBaseTest {
                 .providerId("google-sub-123")
                 .email("test@gmail.com")
                 .nickname("testuser")
-                .joinedAt(LocalDateTime.now())
+                .joinedAt(Instant.now())
                 .build();
         accountRepository.save(account);
 
@@ -56,7 +56,7 @@ class CustomOAuth2UserServiceTest extends AbstractContainerBaseTest {
                 .provider("GOOGLE")
                 .providerId("new-sub-456")
                 .email("newuser@gmail.com")
-                .joinedAt(LocalDateTime.now())
+                .joinedAt(Instant.now())
                 .build();
         Account saved = accountRepository.save(account);
 
@@ -74,7 +74,7 @@ class CustomOAuth2UserServiceTest extends AbstractContainerBaseTest {
                 .providerId("sub-789")
                 .email("wrap@gmail.com")
                 .nickname("wrapuser")
-                .joinedAt(LocalDateTime.now())
+                .joinedAt(Instant.now())
                 .build();
         accountRepository.save(account);
 

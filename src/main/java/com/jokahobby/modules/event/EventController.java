@@ -15,7 +15,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,7 +75,7 @@ public class EventController {
         List<Event> newEvents = new ArrayList<>();
         List<Event> oldEvents = new ArrayList<>();
         events.forEach(e -> {
-            if (e.getEndDateTime().isBefore(LocalDateTime.now())){
+            if (e.getEndDateTime().isBefore(Instant.now())){
                 oldEvents.add(e);
             } else {
                 newEvents.add(e);

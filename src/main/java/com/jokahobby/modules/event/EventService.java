@@ -13,7 +13,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +27,7 @@ public class EventService {
     @Transactional
     public Event createEvent(Event event, Hobby hobby, Account account) {
         event.setCreatedBy(account);
-        event.setCreatedDateTime(LocalDateTime.now());
+        event.setCreatedDateTime(Instant.now());
         event.setHobby(hobby);
         eventPublisher.publishEvent(new HobbyUpdateEvent(event.getHobby(),
                 "'" + event.getTitle() + "' event created"));
@@ -54,7 +54,7 @@ public class EventService {
     public void newEnrollment(Event event, Account account) {
         if (!enrollmentRepository.existsByEventAndAccount(event, account)) {
             Enrollment enrollment = new Enrollment();
-            enrollment.setEnrolledAt(LocalDateTime.now());
+            enrollment.setEnrolledAt(Instant.now());
             enrollment.setAccepted(event.isAbleToAcceptWaitingEnrollment());
             enrollment.setAccount(account);
             event.addEnrollment(enrollment);

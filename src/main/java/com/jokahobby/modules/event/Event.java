@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLRestriction;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,16 +35,16 @@ public class Event extends SoftDeletableEntity {
     private String description;
 
     @Column(nullable = false)
-    private LocalDateTime createDateTime;
+    private Instant createDateTime;
 
     @Column(nullable = false)
-    private LocalDateTime endEnrollmentDateTime;
+    private Instant endEnrollmentDateTime;
 
     @Column(nullable = false)
-    private LocalDateTime startDateTime;
+    private Instant startDateTime;
 
     @Column(nullable = false)
-    private LocalDateTime endDateTime;
+    private Instant endDateTime;
 
     @Column
     private Integer limitOfEnrollments;
@@ -56,12 +56,12 @@ public class Event extends SoftDeletableEntity {
     @Enumerated(EnumType.STRING)
     private EventType eventType;
 
-    public void setCreatedDateTime(LocalDateTime now) {
+    public void setCreatedDateTime(Instant now) {
         this.createDateTime = now;
     }
 
     private boolean isNotClosed() {
-        return this.endEnrollmentDateTime.isAfter(LocalDateTime.now());
+        return this.endEnrollmentDateTime.isAfter(Instant.now());
     }
 
     public boolean isEnrollableFor(Account account) {

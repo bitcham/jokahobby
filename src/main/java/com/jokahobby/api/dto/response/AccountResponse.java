@@ -2,7 +2,7 @@ package com.jokahobby.api.dto.response;
 
 import com.jokahobby.modules.account.Account;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 public record AccountResponse(
@@ -14,7 +14,7 @@ public record AccountResponse(
         String url,
         String location,
         String profileImage,
-        LocalDateTime joinedAt,
+        Instant joinedAt,
         boolean hobbyCreatedByEmail,
         boolean hobbyCreatedByWeb,
         boolean hobbyEnrollmentResultByEmail,

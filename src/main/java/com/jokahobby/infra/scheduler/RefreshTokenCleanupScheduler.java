@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Component
 @RequiredArgsConstructor
@@ -19,7 +19,7 @@ public class RefreshTokenCleanupScheduler {
     @Scheduled(cron = "0 0 3 * * *")
     @Transactional
     public void cleanUpExpiredTokens() {
-        int deleted = refreshTokenRepository.deleteExpired(LocalDateTime.now());
+        int deleted = refreshTokenRepository.deleteExpired(Instant.now());
         log.info("Expired refresh tokens cleaned up: {} deleted", deleted);
     }
 }
