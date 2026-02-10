@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -36,14 +36,14 @@ class HobbyManagerMemberTest extends AbstractContainerBaseTest {
                 .nickname("creator")
                 .provider("google")
                 .providerId("google-creator")
-                .joinedAt(LocalDateTime.now())
+                .joinedAt(Instant.now())
                 .build());
         user = accountRepository.save(Account.builder()
                 .email("user@example.com")
                 .nickname("user1")
                 .provider("google")
                 .providerId("google-user")
-                .joinedAt(LocalDateTime.now())
+                .joinedAt(Instant.now())
                 .build());
         hobby = hobbyRepository.save(Hobby.builder()
                 .path("test-hobby")

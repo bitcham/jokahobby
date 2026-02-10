@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.SQLRestriction;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @NamedEntityGraph(
         name = "Enrollment.withEventAndHobby",
@@ -31,7 +31,7 @@ public class Enrollment extends SoftDeletableEntity {
     @ManyToOne
     private Account account;
 
-    private LocalDateTime enrolledAt;
+    private Instant enrolledAt;
 
     private boolean accepted;
 

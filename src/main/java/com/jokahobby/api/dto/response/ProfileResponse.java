@@ -2,7 +2,7 @@ package com.jokahobby.api.dto.response;
 
 import com.jokahobby.modules.account.Account;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public record ProfileResponse(
         String nickname,
@@ -10,7 +10,7 @@ public record ProfileResponse(
         String url,
         String location,
         String profileImage,
-        LocalDateTime joinedAt
+        Instant joinedAt
 ) {
     public static ProfileResponse from(Account account) {
         return new ProfileResponse(

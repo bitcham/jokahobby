@@ -15,7 +15,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,7 +40,7 @@ class OAuth2SuccessHandlerTest extends AbstractContainerBaseTest {
                 .provider("GOOGLE")
                 .providerId("handler-test-sub")
                 .email("handler@gmail.com")
-                .joinedAt(LocalDateTime.now())
+                .joinedAt(Instant.now())
                 .build();
         accountRepository.save(account);
 
@@ -71,7 +71,7 @@ class OAuth2SuccessHandlerTest extends AbstractContainerBaseTest {
                 .providerId("handler-test-sub-2")
                 .email("existing@gmail.com")
                 .nickname("existinguser")
-                .joinedAt(LocalDateTime.now())
+                .joinedAt(Instant.now())
                 .build();
         accountRepository.save(account);
 

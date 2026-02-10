@@ -45,8 +45,7 @@ src/main/resources/application.properties
 src/main/resources/application-prod.properties
 
 ### Environment ###
-.env
-!.env
+*env*
 
 ### Docs ###
 docs/
@@ -68,3 +67,4 @@ migration.md
 migration/
 .claude/
 CLAUDE.md
+analysis/

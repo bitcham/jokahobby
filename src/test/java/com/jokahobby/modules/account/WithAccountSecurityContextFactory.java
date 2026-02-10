@@ -8,7 +8,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Map;
 
 @RequiredArgsConstructor
@@ -25,7 +25,7 @@ public class WithAccountSecurityContextFactory implements WithSecurityContextFac
                 .email(nickname + "@email.com")
                 .provider("GOOGLE")
                 .providerId("test-" + nickname)
-                .joinedAt(LocalDateTime.now())
+                .joinedAt(Instant.now())
                 .build();
         accountRepository.save(account);
 

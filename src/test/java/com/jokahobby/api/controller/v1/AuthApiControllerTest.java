@@ -17,7 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
-import java.time.LocalDateTime;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,7 +43,7 @@ class AuthApiControllerTest extends AbstractContainerBaseTest {
                 .nickname("authuser")
                 .provider("GOOGLE")
                 .providerId("google-auth-123")
-                .joinedAt(LocalDateTime.now())
+                .joinedAt(Instant.now())
                 .build());
     }
 
@@ -58,8 +59,8 @@ class AuthApiControllerTest extends AbstractContainerBaseTest {
                 .generation(0)
                 .deviceInfo("TestAgent")
                 .ipAddress("127.0.0.1")
-                .issuedAt(LocalDateTime.now())
-                .expiresAt(LocalDateTime.now().plusDays(7))
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plus(Duration.ofDays(7)))
                 .revoked(false)
                 .build());
     }

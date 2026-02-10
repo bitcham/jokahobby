@@ -12,7 +12,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.LocalDateTime;
+import java.time.Duration;
+import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,7 +45,7 @@ class EventServiceSoftDeleteTest extends AbstractContainerBaseTest {
                 .nickname("eventuser")
                 .provider("google")
                 .providerId("google-event")
-                .joinedAt(LocalDateTime.now())
+                .joinedAt(Instant.now())
                 .build());
     }
 
@@ -54,10 +55,10 @@ class EventServiceSoftDeleteTest extends AbstractContainerBaseTest {
         Event event = new Event();
         event.setTitle("Test Event");
         event.setCreatedBy(account);
-        event.setCreatedDateTime(LocalDateTime.now());
-        event.setEndEnrollmentDateTime(LocalDateTime.now().plusDays(7));
-        event.setStartDateTime(LocalDateTime.now().plusDays(8));
-        event.setEndDateTime(LocalDateTime.now().plusDays(9));
+        event.setCreatedDateTime(Instant.now());
+        event.setEndEnrollmentDateTime(Instant.now().plus(Duration.ofDays(7)));
+        event.setStartDateTime(Instant.now().plus(Duration.ofDays(8)));
+        event.setEndDateTime(Instant.now().plus(Duration.ofDays(9)));
         event.setLimitOfEnrollments(10);
         event.setEventType(EventType.FCFS);
         event.setHobby(hobby);
@@ -65,7 +66,7 @@ class EventServiceSoftDeleteTest extends AbstractContainerBaseTest {
 
         Enrollment enrollment = new Enrollment();
         enrollment.setAccount(account);
-        enrollment.setEnrolledAt(LocalDateTime.now());
+        enrollment.setEnrolledAt(Instant.now());
         enrollment.setAccepted(true);
         event.addEnrollment(enrollment);
         enrollmentRepository.save(enrollment);

@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,7 +34,7 @@ class AccountZoneRepositoryTest extends AbstractContainerBaseTest {
                 .nickname("tester")
                 .provider("google")
                 .providerId("google-1")
-                .joinedAt(LocalDateTime.now())
+                .joinedAt(Instant.now())
                 .build());
         zone = zoneRepository.findByCityAndProvince("Seoul", "none")
                 .orElseGet(() -> zoneRepository.save(Zone.builder()

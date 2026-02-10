@@ -13,7 +13,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -83,7 +84,7 @@ class RefreshTokenServiceTest {
             RefreshToken oldest = RefreshToken.builder()
                     .accountId(ACCOUNT_ID)
                     .familyId("oldest-family")
-                    .issuedAt(LocalDateTime.now().minusDays(7))
+                    .issuedAt(Instant.now().minus(Duration.ofDays(7)))
                     .build();
             given(refreshTokenRepository.findOldestActiveByAccountId(ACCOUNT_ID))
                     .willReturn(Optional.of(oldest));
@@ -111,8 +112,8 @@ class RefreshTokenServiceTest {
                     .tokenHash(TOKEN_HASH)
                     .familyId("family-1")
                     .generation(2)
-                    .issuedAt(LocalDateTime.now().minusMinutes(10))
-                    .expiresAt(LocalDateTime.now().plusDays(7))
+                    .issuedAt(Instant.now().minus(Duration.ofMinutes(10)))
+                    .expiresAt(Instant.now().plus(Duration.ofDays(7)))
                     .revoked(false)
                     .build();
 
@@ -157,8 +158,8 @@ class RefreshTokenServiceTest {
                     .tokenHash(TOKEN_HASH)
                     .familyId("family-1")
                     .generation(0)
-                    .issuedAt(LocalDateTime.now().minusDays(10))
-                    .expiresAt(LocalDateTime.now().minusDays(3))
+                    .issuedAt(Instant.now().minus(Duration.ofDays(10)))
+                    .expiresAt(Instant.now().minus(Duration.ofDays(3)))
                     .revoked(false)
                     .build();
 
@@ -181,16 +182,16 @@ class RefreshTokenServiceTest {
                     .tokenHash(TOKEN_HASH)
                     .familyId("compromised-family")
                     .generation(1)
-                    .issuedAt(LocalDateTime.now().minusMinutes(30))
-                    .expiresAt(LocalDateTime.now().plusDays(7))
+                    .issuedAt(Instant.now().minus(Duration.ofMinutes(30)))
+                    .expiresAt(Instant.now().plus(Duration.ofDays(7)))
                     .revoked(true)
                     .replacedByHash("replaced-hash")
                     .build();
 
             RefreshToken replacement = RefreshToken.builder()
                     .tokenHash("replaced-hash")
-                    .issuedAt(LocalDateTime.now().minusMinutes(10)) // well past grace window
-                    .expiresAt(LocalDateTime.now().plusDays(7))
+                    .issuedAt(Instant.now().minus(Duration.ofMinutes(10))) // well past grace window
+                    .expiresAt(Instant.now().plus(Duration.ofDays(7)))
                     .revoked(false)
                     .build();
 
@@ -216,8 +217,8 @@ class RefreshTokenServiceTest {
                     .tokenHash(TOKEN_HASH)
                     .familyId("family-1")
                     .generation(1)
-                    .issuedAt(LocalDateTime.now().minusSeconds(2))
-                    .expiresAt(LocalDateTime.now().plusDays(7))
+                    .issuedAt(Instant.now().minus(Duration.ofSeconds(2)))
+                    .expiresAt(Instant.now().plus(Duration.ofDays(7)))
                     .revoked(true)
                     .replacedByHash("grace-replacement-hash")
                     .build();
@@ -227,8 +228,8 @@ class RefreshTokenServiceTest {
                     .familyId("family-1")
                     .generation(2)
                     .accountId(ACCOUNT_ID)
-                    .issuedAt(LocalDateTime.now().minusSeconds(1)) // within 5s grace
-                    .expiresAt(LocalDateTime.now().plusDays(7))
+                    .issuedAt(Instant.now().minus(Duration.ofSeconds(1))) // within 5s grace
+                    .expiresAt(Instant.now().plus(Duration.ofDays(7)))
                     .revoked(false)
                     .build();
 
@@ -253,8 +254,8 @@ class RefreshTokenServiceTest {
                     .tokenHash(TOKEN_HASH)
                     .familyId("family-manual")
                     .generation(0)
-                    .issuedAt(LocalDateTime.now().minusMinutes(5))
-                    .expiresAt(LocalDateTime.now().plusDays(7))
+                    .issuedAt(Instant.now().minus(Duration.ofMinutes(5)))
+                    .expiresAt(Instant.now().plus(Duration.ofDays(7)))
                     .revoked(true)
                     .replacedByHash(null)
                     .build();
@@ -285,8 +286,8 @@ class RefreshTokenServiceTest {
                     .tokenHash(TOKEN_HASH)
                     .familyId("family-1")
                     .revoked(false)
-                    .issuedAt(LocalDateTime.now())
-                    .expiresAt(LocalDateTime.now().plusDays(7))
+                    .issuedAt(Instant.now())
+                    .expiresAt(Instant.now().plus(Duration.ofDays(7)))
                     .build();
 
             given(refreshTokenRepository.findByTokenHash(TOKEN_HASH)).willReturn(Optional.of(token));

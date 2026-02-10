@@ -8,7 +8,8 @@ import lombok.*;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.net.URLEncoder;
-import java.time.LocalDateTime;
+import java.time.Duration;
+import java.time.Instant;
 
 import static jakarta.persistence.FetchType.EAGER;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -42,11 +43,11 @@ public class Hobby extends SoftDeletableEntity {
     @Basic(fetch = EAGER)
     private String image;
 
-    private LocalDateTime publishedDateTime;
+    private Instant publishedDateTime;
 
-    private LocalDateTime closedDateTime;
+    private Instant closedDateTime;
 
-    private LocalDateTime recruitingUpdatedDateTime;
+    private Instant recruitingUpdatedDateTime;
 
     private boolean recruiting;
 
@@ -75,7 +76,7 @@ public class Hobby extends SoftDeletableEntity {
     public void publish() {
         if(!this.closed && !this.published) {
             this.published = true;
-            this.publishedDateTime = LocalDateTime.now();
+            this.publishedDateTime = Instant.now();
         } else {
             throw new BusinessException(ErrorCode.HOBBY_ALREADY_PUBLISHED);
         }
@@ -84,21 +85,22 @@ public class Hobby extends SoftDeletableEntity {
     public void close() {
         if(this.published && !this.closed) {
             this.closed = true;
-            this.closedDateTime = LocalDateTime.now();
+            this.closedDateTime = Instant.now();
         } else {
             throw new BusinessException(ErrorCode.HOBBY_NOT_PUBLISHED);
         }
     }
 
     public boolean canUpdateRecruiting() {
+        Instant now = Instant.now();
         return this.published && (this.recruitingUpdatedDateTime == null
-                || this.recruitingUpdatedDateTime.isBefore(LocalDateTime.now().minusHours(1)));
+                || this.recruitingUpdatedDateTime.isBefore(now.minus(Duration.ofHours(1))));
     }
 
     public void startRecruit() {
         if(canUpdateRecruiting()) {
             this.recruiting = true;
-            this.recruitingUpdatedDateTime = LocalDateTime.now();
+            this.recruitingUpdatedDateTime = Instant.now();
         } else {
             throw new BusinessException(ErrorCode.HOBBY_RECRUIT_COOLDOWN);
         }
@@ -107,7 +109,7 @@ public class Hobby extends SoftDeletableEntity {
     public void stopRecruit() {
         if(canUpdateRecruiting()) {
             this.recruiting = false;
-            this.recruitingUpdatedDateTime = LocalDateTime.now();
+            this.recruitingUpdatedDateTime = Instant.now();
         } else {
             throw new BusinessException(ErrorCode.HOBBY_RECRUIT_COOLDOWN);
         }

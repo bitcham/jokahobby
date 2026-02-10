@@ -9,8 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -36,6 +35,7 @@ public class RefreshTokenService {
                     });
         }
 
+        Instant now = Instant.now();
         RefreshToken rt = RefreshToken.builder()
                 .accountId(accountId)
                 .tokenHash(tokenHash)
@@ -43,8 +43,8 @@ public class RefreshTokenService {
                 .generation(0)
                 .deviceInfo(deviceInfo)
                 .ipAddress(ipAddress)
-                .issuedAt(LocalDateTime.now())
-                .expiresAt(LocalDateTime.now().plus(jwtProperties.refreshTokenExpiry(), ChronoUnit.MILLIS))
+                .issuedAt(now)
+                .expiresAt(now.plus(Duration.ofMillis(jwtProperties.refreshTokenExpiry())))
                 .revoked(false)
                 .build();
 
@@ -60,6 +60,7 @@ public class RefreshTokenService {
 
         if (old.isUsable()) {
             old.replaceWith(newTokenHash);
+            Instant now = Instant.now();
             RefreshToken newRt = RefreshToken.builder()
                     .accountId(old.getAccountId())
                     .tokenHash(newTokenHash)
@@ -67,8 +68,8 @@ public class RefreshTokenService {
                     .generation(old.getGeneration() + 1)
                     .deviceInfo(deviceInfo)
                     .ipAddress(ipAddress)
-                    .issuedAt(LocalDateTime.now())
-                    .expiresAt(LocalDateTime.now().plus(jwtProperties.refreshTokenExpiry(), ChronoUnit.MILLIS))
+                    .issuedAt(now)
+                    .expiresAt(now.plus(Duration.ofMillis(jwtProperties.refreshTokenExpiry())))
                     .revoked(false)
                     .build();
 
@@ -81,7 +82,7 @@ public class RefreshTokenService {
                 Optional<RefreshToken> replacement = refreshTokenRepository
                         .findByTokenHash(old.getReplacedByHash());
                 if (replacement.isPresent() && replacement.get().isUsable()
-                        && Duration.between(replacement.get().getIssuedAt(), LocalDateTime.now()).toSeconds() < GRACE_WINDOW_SECONDS) {
+                        && Duration.between(replacement.get().getIssuedAt(), Instant.now()).toSeconds() < GRACE_WINDOW_SECONDS) {
                     log.debug("Idempotent refresh for family={}", old.getFamilyId());
                     return replacement.get();
                 }
