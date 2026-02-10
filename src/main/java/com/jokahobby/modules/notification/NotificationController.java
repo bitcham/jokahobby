@@ -21,7 +21,7 @@ public class NotificationController {
 
     @GetMapping("/notifications")
     public String getNotifications(@CurrentAccount Account account, Model model){
-        List<Notification> notifications = notificationRepository.findByAccountAndCheckedOrderByCreatedDateTimeDesc(account, false);
+        List<Notification> notifications = notificationRepository.findByAccountAndCheckedOrderByCreatedAtDesc(account, false);
         long numberOfChecked = notificationRepository.countByAccountAndChecked(account, true);
         putCategorizedNotifications(model, notifications, numberOfChecked, notifications.size());
         model.addAttribute("isNew", true);
@@ -31,7 +31,7 @@ public class NotificationController {
 
     @GetMapping("/notifications/old")
     public String getOldNotifications(@CurrentAccount Account account, Model model){
-        List<Notification> notifications = notificationRepository.findByAccountAndCheckedOrderByCreatedDateTimeDesc(account, true);
+        List<Notification> notifications = notificationRepository.findByAccountAndCheckedOrderByCreatedAtDesc(account, true);
         long numberOfNotChecked = notificationRepository.countByAccountAndChecked(account, false);
         putCategorizedNotifications(model, notifications, notifications.size(), numberOfNotChecked);
         model.addAttribute("isNew", false);

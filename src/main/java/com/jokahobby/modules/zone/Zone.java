@@ -1,13 +1,14 @@
 package com.jokahobby.modules.zone;
 
+import com.jokahobby.modules.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Getter @Setter @EqualsAndHashCode(of = "id")
+@Getter @Setter @EqualsAndHashCode(of = "id", callSuper = false)
 @Builder @AllArgsConstructor @NoArgsConstructor
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"city", "province"}))
-public class Zone {
+public class Zone extends BaseEntity {
 
     @Id @GeneratedValue
     private Long id;

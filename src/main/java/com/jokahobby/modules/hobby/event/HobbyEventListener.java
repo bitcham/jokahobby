@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -86,7 +85,6 @@ public class HobbyEventListener {
         notification.setTitle( hobby.getTitle());
         notification.setLink("/hobby/" + hobby.getEncodedPath());
         notification.setChecked(false);
-        notification.setCreatedDateTime(LocalDateTime.now());
         notification.setMessage(message);
         notification.setAccount(account);
         notification.setNotificationType(notificationType);

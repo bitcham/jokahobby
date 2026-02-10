@@ -2,8 +2,10 @@ package com.jokahobby.modules.hobby;
 
 import com.jokahobby.infra.exception.BusinessException;
 import com.jokahobby.infra.exception.ErrorCode;
+import com.jokahobby.modules.common.SoftDeletableEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.net.URLEncoder;
 import java.time.LocalDateTime;
@@ -12,22 +14,22 @@ import static jakarta.persistence.FetchType.EAGER;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Entity
+@SQLRestriction("deleted_at IS NULL")
 @Getter
 @Setter
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode(of = "id", callSuper = false)
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Hobby {
+public class Hobby extends SoftDeletableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
     private String path;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String title;
 
     private String shortDescription;

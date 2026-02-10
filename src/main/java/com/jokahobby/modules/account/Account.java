@@ -1,7 +1,9 @@
 package com.jokahobby.modules.account;
 
+import com.jokahobby.modules.common.SoftDeletableEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -9,16 +11,16 @@ import java.util.UUID;
 import static jakarta.persistence.FetchType.*;
 
 @Entity
-@Getter @Setter @EqualsAndHashCode(of = "id")
+@SQLRestriction("deleted_at IS NULL")
+@Getter @Setter @EqualsAndHashCode(of = "id", callSuper = false)
 @Builder @AllArgsConstructor @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Account {
+public class Account extends SoftDeletableEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     private String email;
 
-    @Column(unique = true)
     private String nickname;
 
     @Column(nullable = false, length = 20)

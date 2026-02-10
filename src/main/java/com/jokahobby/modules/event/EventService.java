@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -45,9 +44,8 @@ public class EventService {
 
     @Transactional
     public void deleteEvent(Event event) {
-        List<Enrollment> enrollments = enrollmentRepository.findByEvent(event);
-        enrollmentRepository.deleteAll(enrollments);
-        eventRepository.delete(event);
+        event.getEnrollments().forEach(Enrollment::softDelete);
+        event.softDelete();
         eventPublisher.publishEvent(new HobbyUpdateEvent(event.getHobby(),
                 "'" + event.getTitle() + "' event canceled."));
     }

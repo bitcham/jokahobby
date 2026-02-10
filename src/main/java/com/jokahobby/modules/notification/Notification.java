@@ -1,16 +1,15 @@
 package com.jokahobby.modules.notification;
 
 import com.jokahobby.modules.account.Account;
+import com.jokahobby.modules.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 @Entity
-@Getter @Setter @EqualsAndHashCode(of = "id")
-public class Notification {
+@Getter @Setter @EqualsAndHashCode(of = "id", callSuper = false)
+public class Notification extends BaseEntity {
 
     @Id @GeneratedValue
     private Long id;
@@ -25,8 +24,6 @@ public class Notification {
 
     @ManyToOne
     private Account account;
-
-    private LocalDateTime createdDateTime;
 
     @Enumerated(EnumType.STRING)
     private NotificationType notificationType;

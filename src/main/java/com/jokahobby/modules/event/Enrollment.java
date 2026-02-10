@@ -1,10 +1,12 @@
 package com.jokahobby.modules.event;
 
 import com.jokahobby.modules.account.Account;
+import com.jokahobby.modules.common.SoftDeletableEntity;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 
@@ -16,8 +18,9 @@ import java.time.LocalDateTime;
         subgraphs = @NamedSubgraph(name = "hobby", attributeNodes = @NamedAttributeNode("hobby"))
 )
 @Entity
-@Getter @Setter @EqualsAndHashCode(of = "id")
-public class Enrollment {
+@SQLRestriction("deleted_at IS NULL")
+@Getter @Setter @EqualsAndHashCode(of = "id", callSuper = false)
+public class Enrollment extends SoftDeletableEntity {
 
     @Id @GeneratedValue
     private Long id;

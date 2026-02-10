@@ -1,17 +1,16 @@
 package com.jokahobby.modules.hobby;
 
+import com.jokahobby.modules.common.BaseEntity;
 import com.jokahobby.modules.tag.Tag;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"hobby_id", "tag_id"}))
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EqualsAndHashCode(of = "id")
-public class HobbyTag {
+@EqualsAndHashCode(of = "id", callSuper = false)
+public class HobbyTag extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,13 +24,9 @@ public class HobbyTag {
     @JoinColumn(name = "tag_id", nullable = false)
     private Tag tag;
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
     @Builder
     private HobbyTag(Hobby hobby, Tag tag) {
         this.hobby = hobby;
         this.tag = tag;
-        this.createdAt = LocalDateTime.now();
     }
 }

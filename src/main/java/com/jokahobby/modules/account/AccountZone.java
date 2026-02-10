@@ -1,17 +1,16 @@
 package com.jokahobby.modules.account;
 
+import com.jokahobby.modules.common.BaseEntity;
 import com.jokahobby.modules.zone.Zone;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"account_id", "zone_id"}))
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EqualsAndHashCode(of = "id")
-public class AccountZone {
+@EqualsAndHashCode(of = "id", callSuper = false)
+public class AccountZone extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,13 +24,9 @@ public class AccountZone {
     @JoinColumn(name = "zone_id", nullable = false)
     private Zone zone;
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
     @Builder
     private AccountZone(Account account, Zone zone) {
         this.account = account;
         this.zone = zone;
-        this.createdAt = LocalDateTime.now();
     }
 }

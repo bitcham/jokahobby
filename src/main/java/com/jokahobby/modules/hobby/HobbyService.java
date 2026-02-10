@@ -230,7 +230,7 @@ public class HobbyService {
     @Transactional
     public void remove(Hobby hobby) {
         if(hobby.isRemovable()) {
-            hobbyRepository.delete(hobby);
+            hobby.softDelete();
         } else {
             throw new BusinessException(ErrorCode.HOBBY_NOT_REMOVABLE);
         }

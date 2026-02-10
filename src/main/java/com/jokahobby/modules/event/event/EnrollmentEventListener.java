@@ -19,8 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import java.time.LocalDateTime;
-
 @Slf4j
 @Async
 @Component
@@ -73,7 +71,6 @@ public class EnrollmentEventListener {
         notification.setTitle(hobby.getTitle() + " / " + event.getTitle());
         notification.setLink("/hobby/" + hobby.getEncodedPath() + "/events/" + event.getId());
         notification.setChecked(false);
-        notification.setCreatedDateTime(LocalDateTime.now());
         notification.setMessage(enrollmentEvent.getMessage());
         notification.setAccount(account);
         notification.setNotificationType(NotificationType.EVENT_ENROLLMENT);

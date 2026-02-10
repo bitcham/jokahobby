@@ -1,17 +1,16 @@
 package com.jokahobby.modules.hobby;
 
 import com.jokahobby.modules.account.Account;
+import com.jokahobby.modules.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"hobby_id", "account_id"}))
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EqualsAndHashCode(of = "id")
-public class HobbyManager {
+@EqualsAndHashCode(of = "id", callSuper = false)
+public class HobbyManager extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,13 +24,9 @@ public class HobbyManager {
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
     @Builder
     private HobbyManager(Hobby hobby, Account account) {
         this.hobby = hobby;
         this.account = account;
-        this.createdAt = LocalDateTime.now();
     }
 }
