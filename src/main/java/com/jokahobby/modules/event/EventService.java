@@ -3,16 +3,13 @@ package com.jokahobby.modules.event;
 import com.jokahobby.modules.account.Account;
 import com.jokahobby.modules.event.event.EnrollmentAcceptedEvent;
 import com.jokahobby.modules.event.event.EnrollmentRejectedEvent;
-import com.jokahobby.modules.event.form.EventForm;
 import com.jokahobby.modules.hobby.event.HobbyUpdateEvent;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.time.ZoneOffset;
 
 @Service
 @RequiredArgsConstructor
@@ -30,15 +27,11 @@ public class EventService {
     }
 
     @Transactional
-    public void updateEvent(Event event, @Valid EventForm eventForm) {
-        event.updateDetails(
-                eventForm.getTitle(),
-                eventForm.getDescription(),
-                eventForm.getEndEnrollmentDateTime().toInstant(ZoneOffset.UTC),
-                eventForm.getStartDateTime().toInstant(ZoneOffset.UTC),
-                eventForm.getEndDateTime().toInstant(ZoneOffset.UTC),
-                eventForm.getLimitOfEnrollments()
-        );
+    public void updateEvent(Event event, String title, String description,
+                            Instant endEnrollmentDateTime, Instant startDateTime,
+                            Instant endDateTime, Integer limitOfEnrollments) {
+        event.updateDetails(title, description, endEnrollmentDateTime,
+                startDateTime, endDateTime, limitOfEnrollments);
         event.acceptWaitingList();
         eventPublisher.publishEvent(new HobbyUpdateEvent(event.getHobby(),
                 "'" + event.getTitle() + "' event updated. Please check the details."));

@@ -33,10 +33,19 @@ public enum ErrorCode {
     HOBBY_TITLE_ALREADY_EXISTS("HOBBY_008", "Hobby title already exists.", 409),
     INVALID_HOBBY_PATH("HOBBY_009", "Invalid hobby path format.", 400),
 
+    // Event
+    EVENT_NOT_ENROLLABLE("EVENT_001", "Cannot enroll in this event.", 400),
+    EVENT_NOT_DISENROLLABLE("EVENT_002", "Cannot disenroll from this event.", 400),
+    EVENT_ENROLLMENT_LIMIT_TOO_LOW("EVENT_003", "Enrollment limit cannot be less than current accepted count.", 400),
+    EVENT_CANNOT_ACCEPT("EVENT_004", "Cannot accept this enrollment.", 400),
+    EVENT_CANNOT_REJECT("EVENT_005", "Cannot reject this enrollment.", 400),
+    EVENT_INVALID_DATES("EVENT_006", "Event date constraints are invalid.", 400),
+
     // Resource
     ACCOUNT_NOT_FOUND("RESOURCE_001", "Account not found.", 404),
     HOBBY_NOT_FOUND("RESOURCE_002", "Hobby not found.", 404),
     EVENT_NOT_FOUND("RESOURCE_003", "Event not found.", 404),
+    ENROLLMENT_NOT_FOUND("RESOURCE_004", "Enrollment not found.", 404),
 
     // Server
     INTERNAL_SERVER_ERROR("SERVER_001", "Internal server error.", 500);
