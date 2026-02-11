@@ -10,7 +10,6 @@ import com.jokahobby.modules.zone.Zone;
 import com.jokahobby.modules.hobby.form.HobbyDescriptionForm;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -29,11 +28,16 @@ public class HobbyService {
     private final HobbyZoneRepository hobbyZoneRepository;
     private final HobbyManagerRepository hobbyManagerRepository;
     private final HobbyMemberRepository hobbyMemberRepository;
-    private final ModelMapper modelMapper;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Hobby createNewHobby(Hobby hobby, Account account) {
+        if (hobbyRepository.existsByPath(hobby.getPath())) {
+            throw new BusinessException(ErrorCode.HOBBY_PATH_ALREADY_EXISTS);
+        }
+        if (hobbyRepository.existsByTitle(hobby.getTitle())) {
+            throw new BusinessException(ErrorCode.HOBBY_TITLE_ALREADY_EXISTS);
+        }
         Hobby saved = hobbyRepository.save(hobby);
         addManager(saved, account);
         return saved;
@@ -45,7 +49,7 @@ public class HobbyService {
         return hobby;
     }
 
-    public Hobby getHobbyToUpdate(Account account, String path) {
+    public Hobby getHobbyWithManagerCheck(Account account, String path) {
         Hobby hobby = this.getHobby(path);
         checkIfManager(account, hobby);
         return hobby;
@@ -53,23 +57,23 @@ public class HobbyService {
 
     @Transactional
     public void updateHobbyDescription(Hobby hobby, @Valid HobbyDescriptionForm hobbyDescriptionForm) {
-       modelMapper.map(hobbyDescriptionForm, hobby);
+       hobby.updateDescription(hobbyDescriptionForm.getShortDescription(), hobbyDescriptionForm.getFullDescription());
        eventPublisher.publishEvent(new HobbyUpdateEvent(hobby, "Hobby description updated"));
     }
 
     @Transactional
     public void updateHobbyImage(Hobby hobby, String image) {
-        hobby.setImage(image);
+        hobby.updateImage(image);
     }
 
     @Transactional
     public void enableHobbyBanner(Hobby hobby) {
-        hobby.setUseBanner(true);
+        hobby.enableBanner();
     }
 
     @Transactional
     public void disableHobbyBanner(Hobby hobby) {
-        hobby.setUseBanner(false);
+        hobby.disableBanner();
     }
 
     @Transactional
@@ -171,11 +175,8 @@ public class HobbyService {
         }
     }
 
-    public Hobby getHobbyToUpdateStatus(Account account, String path) {
-        Hobby hobby = hobbyRepository.findByPath(path);
-        checkIfExistingHobby(path, hobby);
-        checkIfManager(account, hobby);
-        return hobby;
+    public boolean isDuplicatedPath(String path) {
+        return hobbyRepository.existsByPath(path);
     }
 
     public boolean isValidPath(String newPath) {
@@ -187,7 +188,13 @@ public class HobbyService {
 
     @Transactional
     public void updateHobbyPath(Hobby hobby, String newPath) {
-        hobby.setPath(newPath);
+        if (!newPath.matches(VALID_PATH_PATTERN)) {
+            throw new BusinessException(ErrorCode.INVALID_HOBBY_PATH);
+        }
+        if (hobbyRepository.existsByPath(newPath)) {
+            throw new BusinessException(ErrorCode.HOBBY_PATH_ALREADY_EXISTS);
+        }
+        hobby.updatePath(newPath);
     }
 
     public boolean isValidTitle(String newTitle) {
@@ -200,7 +207,10 @@ public class HobbyService {
 
     @Transactional
     public void updateHobbyTitle(Hobby hobby, String newTitle) {
-        hobby.setTitle(newTitle);
+        if (hobbyRepository.existsByTitle(newTitle)) {
+            throw new BusinessException(ErrorCode.HOBBY_TITLE_ALREADY_EXISTS);
+        }
+        hobby.updateTitle(newTitle);
     }
 
     @Transactional

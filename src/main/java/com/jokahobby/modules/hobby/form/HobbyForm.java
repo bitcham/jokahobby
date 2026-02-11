@@ -8,7 +8,7 @@ import org.hibernate.validator.constraints.Length;
 @Data
 public class HobbyForm {
 
-    public static final String VALID_PATH_PATTERN = "^[a-zA-Z0-9가-힣äöåÄÖÅ_-]{3,20}$";
+    public static final String VALID_PATH_PATTERN = "^[a-zA-Z0-9äöåÄÖÅ_-]{3,20}$";
 
     @NotBlank
     @Length(min = 3, max = 20)

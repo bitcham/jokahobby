@@ -32,8 +32,8 @@ public class AccountApplicationService {
     }
 
     @Transactional
-    public Account updateNotifications(Account account, NotificationUpdateRequest request) {
-        return accountService.updateNotifications(account,
+    public void updateNotifications(Account account, NotificationUpdateRequest request) {
+        accountService.updateNotifications(account,
                 request.hobbyCreatedByEmail(), request.hobbyCreatedByWeb(),
                 request.hobbyEnrollmentResultByEmail(), request.hobbyEnrollmentResultByWeb(),
                 request.hobbyUpdatedByEmail(), request.hobbyUpdatedByWeb());

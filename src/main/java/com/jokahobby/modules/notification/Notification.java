@@ -3,12 +3,11 @@ package com.jokahobby.modules.notification;
 import com.jokahobby.modules.account.Account;
 import com.jokahobby.modules.common.BaseEntity;
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
-@Getter @Setter @EqualsAndHashCode(of = "id", callSuper = false)
+@Getter @EqualsAndHashCode(of = "id", callSuper = false)
+@Builder @AllArgsConstructor @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Notification extends BaseEntity {
 
     @Id @GeneratedValue
@@ -28,5 +27,7 @@ public class Notification extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private NotificationType notificationType;
 
-
+    public void markAsRead() {
+        this.checked = true;
+    }
 }

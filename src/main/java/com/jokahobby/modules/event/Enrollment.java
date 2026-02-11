@@ -3,9 +3,7 @@ package com.jokahobby.modules.event;
 import com.jokahobby.modules.account.Account;
 import com.jokahobby.modules.common.SoftDeletableEntity;
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.time.Instant;
@@ -19,7 +17,8 @@ import java.time.Instant;
 )
 @Entity
 @SQLRestriction("deleted_at IS NULL")
-@Getter @Setter @EqualsAndHashCode(of = "id", callSuper = false)
+@Getter @EqualsAndHashCode(of = "id", callSuper = false)
+@Builder @AllArgsConstructor @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Enrollment extends SoftDeletableEntity {
 
     @Id @GeneratedValue
@@ -37,5 +36,27 @@ public class Enrollment extends SoftDeletableEntity {
 
     private boolean attended;
 
+    public void accept() {
+        this.accepted = true;
+    }
 
+    public void reject() {
+        this.accepted = false;
+    }
+
+    public void checkIn() {
+        this.attended = true;
+    }
+
+    public void cancelCheckIn() {
+        this.attended = false;
+    }
+
+    void assignEvent(Event event) {
+        this.event = event;
+    }
+
+    void unassignEvent() {
+        this.event = null;
+    }
 }

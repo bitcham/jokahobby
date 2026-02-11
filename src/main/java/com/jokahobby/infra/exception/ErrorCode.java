@@ -27,6 +27,11 @@ public enum ErrorCode {
     HOBBY_NOT_PUBLISHED("HOBBY_002", "Hobby is already closed or not published.", 400),
     HOBBY_RECRUIT_COOLDOWN("HOBBY_003", "Cannot update recruiting. Please try again after one hour.", 400),
     HOBBY_NOT_REMOVABLE("HOBBY_004", "Hobby cannot be removed.", 400),
+    HOBBY_NOT_JOINABLE("HOBBY_005", "Cannot join this hobby.", 400),
+    HOBBY_NOT_MEMBER("HOBBY_006", "Not a member of this hobby.", 400),
+    HOBBY_PATH_ALREADY_EXISTS("HOBBY_007", "Hobby path already exists.", 409),
+    HOBBY_TITLE_ALREADY_EXISTS("HOBBY_008", "Hobby title already exists.", 409),
+    INVALID_HOBBY_PATH("HOBBY_009", "Invalid hobby path format.", 400),
 
     // Resource
     ACCOUNT_NOT_FOUND("RESOURCE_001", "Account not found.", 404),

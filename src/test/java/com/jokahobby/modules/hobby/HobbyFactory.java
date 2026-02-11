@@ -13,9 +13,7 @@ public class HobbyFactory {
     @Autowired HobbyRepository HobbyRepository;
 
     public Hobby createHobby(String path, Account manager) {
-        Hobby hobby = new Hobby();
-        hobby.setTitle("test");
-        hobby.setPath(path);
+        Hobby hobby = Hobby.builder().title("test").path(path).build();
         HobbyService.createNewHobby(hobby, manager);
         return hobby;
     }

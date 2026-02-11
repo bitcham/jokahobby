@@ -8,8 +8,8 @@ import jakarta.persistence.Id;
 import lombok.*;
 
 @Entity
-@Getter @Setter @EqualsAndHashCode(of = "id", callSuper = false)
-@Builder @AllArgsConstructor @NoArgsConstructor
+@Getter @EqualsAndHashCode(of = "id", callSuper = false)
+@Builder @AllArgsConstructor @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Tag extends BaseEntity {
 
     @Id @GeneratedValue

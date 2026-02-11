@@ -126,7 +126,7 @@ class HobbySoftDeleteRepositoryTest extends AbstractContainerBaseTest {
             var originalUpdatedAt = hobby.getUpdatedAt();
 
             Thread.sleep(50);
-            hobby.setShortDescription("updated");
+            hobby.updateDescription("updated", hobby.getFullDescription());
             em.flush();
             em.clear();
 

@@ -17,7 +17,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 @Entity
 @SQLRestriction("deleted_at IS NULL")
 @Getter
-@Setter
 @EqualsAndHashCode(of = "id", callSuper = false)
 @Builder
 @AllArgsConstructor
@@ -123,4 +122,28 @@ public class Hobby extends SoftDeletableEntity {
         return URLEncoder.encode(this.path, UTF_8);
     }
 
+    public void updateDescription(String shortDescription, String fullDescription) {
+        this.shortDescription = shortDescription;
+        this.fullDescription = fullDescription;
+    }
+
+    public void updateImage(String image) {
+        this.image = image;
+    }
+
+    public void enableBanner() {
+        this.useBanner = true;
+    }
+
+    public void disableBanner() {
+        this.useBanner = false;
+    }
+
+    public void updatePath(String newPath) {
+        this.path = newPath;
+    }
+
+    public void updateTitle(String newTitle) {
+        this.title = newTitle;
+    }
 }

@@ -12,7 +12,6 @@ import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.constraints.Length;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,45 +25,42 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final AccountTagRepository accountTagRepository;
     private final AccountZoneRepository accountZoneRepository;
-    private final ModelMapper modelMapper;
 
     @Transactional
     public void updateProfile(Account account, @Valid Profile profile) {
-        modelMapper.map(profile, account);
+        account.updateProfile(profile.getBio(), profile.getUrl(), profile.getLocation(), profile.getProfileImage());
         accountRepository.save(account);
     }
 
     @Transactional
     public Account updateProfile(Account account, String bio, String url, String location, String profileImage) {
-        account.setBio(bio);
-        account.setUrl(url);
-        account.setLocation(location);
-        account.setProfileImage(profileImage);
+        account.updateProfile(bio, url, location, profileImage);
         return accountRepository.save(account);
     }
 
     @Transactional
     public void updateNotifications(Account account, @Valid Notifications notifications) {
-        modelMapper.map(notifications, account);
+        account.updateNotificationPreferences(
+                notifications.isHobbyCreatedByEmail(), notifications.isHobbyCreatedByWeb(),
+                notifications.isHobbyEnrollmentResultByEmail(), notifications.isHobbyEnrollmentResultByWeb(),
+                notifications.isHobbyUpdatedByEmail(), notifications.isHobbyUpdatedByWeb()
+        );
         accountRepository.save(account);
     }
 
     @Transactional
-    public Account updateNotifications(Account account, boolean hobbyCreatedByEmail, boolean hobbyCreatedByWeb,
-                                       boolean hobbyEnrollmentResultByEmail, boolean hobbyEnrollmentResultByWeb,
-                                       boolean hobbyUpdatedByEmail, boolean hobbyUpdatedByWeb) {
-        account.setHobbyCreatedByEmail(hobbyCreatedByEmail);
-        account.setHobbyCreatedByWeb(hobbyCreatedByWeb);
-        account.setHobbyEnrollmentResultByEmail(hobbyEnrollmentResultByEmail);
-        account.setHobbyEnrollmentResultByWeb(hobbyEnrollmentResultByWeb);
-        account.setHobbyUpdatedByEmail(hobbyUpdatedByEmail);
-        account.setHobbyUpdatedByWeb(hobbyUpdatedByWeb);
-        return accountRepository.save(account);
+    public void updateNotifications(Account account, boolean hobbyCreatedByEmail, boolean hobbyCreatedByWeb,
+                                    boolean hobbyEnrollmentResultByEmail, boolean hobbyEnrollmentResultByWeb,
+                                    boolean hobbyUpdatedByEmail, boolean hobbyUpdatedByWeb) {
+        account.updateNotificationPreferences(hobbyCreatedByEmail, hobbyCreatedByWeb,
+                hobbyEnrollmentResultByEmail, hobbyEnrollmentResultByWeb,
+                hobbyUpdatedByEmail, hobbyUpdatedByWeb);
+        accountRepository.save(account);
     }
 
     @Transactional
     public void updateNickname(Account account, @NotBlank @Length(min = 3, max = 20) @Pattern(regexp = "^[a-zA-Z0-9가-힣äöåÄÖÅ]{3,20}$") String nickname) {
-        account.setNickname(nickname);
+        account.updateNickname(nickname);
         accountRepository.save(account);
     }
 
@@ -121,7 +117,7 @@ public class AccountService {
         if (accountRepository.existsByNickname(nickname)) {
             throw new BusinessException(ErrorCode.DUPLICATE_NICKNAME);
         }
-        account.setNickname(nickname);
+        account.updateNickname(nickname);
         return accountRepository.save(account);
     }
 }

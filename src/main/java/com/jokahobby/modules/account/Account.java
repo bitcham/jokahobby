@@ -12,7 +12,7 @@ import static jakarta.persistence.FetchType.*;
 
 @Entity
 @SQLRestriction("deleted_at IS NULL")
-@Getter @Setter @EqualsAndHashCode(of = "id", callSuper = false)
+@Getter @EqualsAndHashCode(of = "id", callSuper = false)
 @Builder @AllArgsConstructor @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Account extends SoftDeletableEntity {
 
@@ -52,4 +52,25 @@ public class Account extends SoftDeletableEntity {
 
     private boolean hobbyUpdatedByWeb = true;
 
+    public void updateProfile(String bio, String url, String location, String profileImage) {
+        this.bio = bio;
+        this.url = url;
+        this.location = location;
+        this.profileImage = profileImage;
+    }
+
+    public void updateNotificationPreferences(boolean hobbyCreatedByEmail, boolean hobbyCreatedByWeb,
+                                              boolean hobbyEnrollmentResultByEmail, boolean hobbyEnrollmentResultByWeb,
+                                              boolean hobbyUpdatedByEmail, boolean hobbyUpdatedByWeb) {
+        this.hobbyCreatedByEmail = hobbyCreatedByEmail;
+        this.hobbyCreatedByWeb = hobbyCreatedByWeb;
+        this.hobbyEnrollmentResultByEmail = hobbyEnrollmentResultByEmail;
+        this.hobbyEnrollmentResultByWeb = hobbyEnrollmentResultByWeb;
+        this.hobbyUpdatedByEmail = hobbyUpdatedByEmail;
+        this.hobbyUpdatedByWeb = hobbyUpdatedByWeb;
+    }
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
 }

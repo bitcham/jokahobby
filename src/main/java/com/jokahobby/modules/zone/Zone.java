@@ -5,8 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Getter @Setter @EqualsAndHashCode(of = "id", callSuper = false)
-@Builder @AllArgsConstructor @NoArgsConstructor
+@Getter @EqualsAndHashCode(of = "id", callSuper = false)
+@Builder @AllArgsConstructor @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"city", "province"}))
 public class Zone extends BaseEntity {
 

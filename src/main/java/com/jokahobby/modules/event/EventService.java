@@ -3,32 +3,27 @@ package com.jokahobby.modules.event;
 import com.jokahobby.modules.account.Account;
 import com.jokahobby.modules.event.event.EnrollmentAcceptedEvent;
 import com.jokahobby.modules.event.event.EnrollmentRejectedEvent;
-import com.jokahobby.modules.hobby.Hobby;
 import com.jokahobby.modules.event.form.EventForm;
 import com.jokahobby.modules.hobby.event.HobbyUpdateEvent;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.ZoneOffset;
 
 @Service
 @RequiredArgsConstructor
 public class EventService {
 
     private final EventRepository eventRepository;
-    private final ModelMapper modelMapper;
     private final EnrollmentRepository enrollmentRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
-    public Event createEvent(Event event, Hobby hobby, Account account) {
-        event.setCreatedBy(account);
-        event.setCreatedDateTime(Instant.now());
-        event.setHobby(hobby);
+    public Event createEvent(Event event) {
         eventPublisher.publishEvent(new HobbyUpdateEvent(event.getHobby(),
                 "'" + event.getTitle() + "' event created"));
         return eventRepository.save(event);
@@ -36,7 +31,14 @@ public class EventService {
 
     @Transactional
     public void updateEvent(Event event, @Valid EventForm eventForm) {
-        modelMapper.map(eventForm, event);
+        event.updateDetails(
+                eventForm.getTitle(),
+                eventForm.getDescription(),
+                eventForm.getEndEnrollmentDateTime().toInstant(ZoneOffset.UTC),
+                eventForm.getStartDateTime().toInstant(ZoneOffset.UTC),
+                eventForm.getEndDateTime().toInstant(ZoneOffset.UTC),
+                eventForm.getLimitOfEnrollments()
+        );
         event.acceptWaitingList();
         eventPublisher.publishEvent(new HobbyUpdateEvent(event.getHobby(),
                 "'" + event.getTitle() + "' event updated. Please check the details."));
@@ -53,10 +55,11 @@ public class EventService {
     @Transactional
     public void newEnrollment(Event event, Account account) {
         if (!enrollmentRepository.existsByEventAndAccount(event, account)) {
-            Enrollment enrollment = new Enrollment();
-            enrollment.setEnrolledAt(Instant.now());
-            enrollment.setAccepted(event.isAbleToAcceptWaitingEnrollment());
-            enrollment.setAccount(account);
+            Enrollment enrollment = Enrollment.builder()
+                    .enrolledAt(Instant.now())
+                    .accepted(event.isAbleToAcceptWaitingEnrollment())
+                    .account(account)
+                    .build();
             event.addEnrollment(enrollment);
             enrollmentRepository.save(enrollment);
         }
@@ -86,11 +89,11 @@ public class EventService {
 
     @Transactional
     public void checkInEnrollment(Enrollment enrollment) {
-        enrollment.setAttended(true);
+        enrollment.checkIn();
     }
 
     @Transactional
     public void cancelCheckInEnrollment(Enrollment enrollment) {
-        enrollment.setAttended(false);
+        enrollment.cancelCheckIn();
     }
 }

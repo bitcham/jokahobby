@@ -52,22 +52,22 @@ class EventServiceSoftDeleteTest extends AbstractContainerBaseTest {
     @Test
     @DisplayName("deleteEvent() soft-deletes event and its enrollments")
     void deleteEventSoftDeletesEventAndEnrollments() {
-        Event event = new Event();
-        event.setTitle("Test Event");
-        event.setCreatedBy(account);
-        event.setCreatedDateTime(Instant.now());
-        event.setEndEnrollmentDateTime(Instant.now().plus(Duration.ofDays(7)));
-        event.setStartDateTime(Instant.now().plus(Duration.ofDays(8)));
-        event.setEndDateTime(Instant.now().plus(Duration.ofDays(9)));
-        event.setLimitOfEnrollments(10);
-        event.setEventType(EventType.FCFS);
-        event.setHobby(hobby);
-        event = eventRepository.save(event);
+        Event event = eventRepository.save(Event.builder()
+                .title("Test Event")
+                .createdBy(account)
+                .endEnrollmentDateTime(Instant.now().plus(Duration.ofDays(7)))
+                .startDateTime(Instant.now().plus(Duration.ofDays(8)))
+                .endDateTime(Instant.now().plus(Duration.ofDays(9)))
+                .limitOfEnrollments(10)
+                .eventType(EventType.FCFS)
+                .hobby(hobby)
+                .build());
 
-        Enrollment enrollment = new Enrollment();
-        enrollment.setAccount(account);
-        enrollment.setEnrolledAt(Instant.now());
-        enrollment.setAccepted(true);
+        Enrollment enrollment = Enrollment.builder()
+                .account(account)
+                .enrolledAt(Instant.now())
+                .accepted(true)
+                .build();
         event.addEnrollment(enrollment);
         enrollmentRepository.save(enrollment);
         em.flush();

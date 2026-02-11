@@ -45,7 +45,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/hobbies").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/hobbies/search").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/hobbies/{path}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/hobbies/{path}/members").permitAll()
                         .requestMatchers("/api/v1/accounts/me", "/api/v1/accounts/me/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/accounts/{nickname}").permitAll()
                         .anyRequest().authenticated()

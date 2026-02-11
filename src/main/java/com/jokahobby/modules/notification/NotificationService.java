@@ -14,7 +14,7 @@ public class NotificationService {
 
     @Transactional
     public void markAsRead(List<Notification> notifications) {
-        notifications.forEach(n -> n.setChecked(true));
+        notifications.forEach(Notification::markAsRead);
         notificationRepository.saveAll(notifications);
     }
 }

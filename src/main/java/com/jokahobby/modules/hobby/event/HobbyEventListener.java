@@ -81,13 +81,14 @@ public class HobbyEventListener {
     }
 
     private void createNotification(Account account, Hobby hobby, String message, NotificationType notificationType) {
-        Notification notification = new Notification();
-        notification.setTitle( hobby.getTitle());
-        notification.setLink("/hobby/" + hobby.getEncodedPath());
-        notification.setChecked(false);
-        notification.setMessage(message);
-        notification.setAccount(account);
-        notification.setNotificationType(notificationType);
+        Notification notification = Notification.builder()
+                .title(hobby.getTitle())
+                .link("/hobby/" + hobby.getEncodedPath())
+                .checked(false)
+                .message(message)
+                .account(account)
+                .notificationType(notificationType)
+                .build();
         notificationRepository.save(notification);
     }
 

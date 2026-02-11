@@ -67,13 +67,14 @@ public class EnrollmentEventListener {
     }
 
     private void createNotification(Account account, Hobby hobby, Event event, EnrollmentEvent enrollmentEvent) {
-        Notification notification = new Notification();
-        notification.setTitle(hobby.getTitle() + " / " + event.getTitle());
-        notification.setLink("/hobby/" + hobby.getEncodedPath() + "/events/" + event.getId());
-        notification.setChecked(false);
-        notification.setMessage(enrollmentEvent.getMessage());
-        notification.setAccount(account);
-        notification.setNotificationType(NotificationType.EVENT_ENROLLMENT);
+        Notification notification = Notification.builder()
+                .title(hobby.getTitle() + " / " + event.getTitle())
+                .link("/hobby/" + hobby.getEncodedPath() + "/events/" + event.getId())
+                .checked(false)
+                .message(enrollmentEvent.getMessage())
+                .account(account)
+                .notificationType(NotificationType.EVENT_ENROLLMENT)
+                .build();
         notificationRepository.save(notification);
     }
 }

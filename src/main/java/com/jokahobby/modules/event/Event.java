@@ -17,7 +17,8 @@ import java.util.List;
 )
 @Entity
 @SQLRestriction("deleted_at IS NULL")
-@Getter @Setter @EqualsAndHashCode(of = "id", callSuper = false)
+@Getter @EqualsAndHashCode(of = "id", callSuper = false)
+@Builder @AllArgsConstructor @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Event extends SoftDeletableEntity {
     @Id @GeneratedValue
     private Long id;
@@ -34,8 +35,9 @@ public class Event extends SoftDeletableEntity {
     @Lob
     private String description;
 
+    @Builder.Default
     @Column(nullable = false)
-    private Instant createDateTime;
+    private Instant createDateTime = Instant.now();
 
     @Column(nullable = false)
     private Instant endEnrollmentDateTime;
@@ -49,6 +51,7 @@ public class Event extends SoftDeletableEntity {
     @Column
     private Integer limitOfEnrollments;
 
+    @Builder.Default
     @OneToMany(mappedBy = "event")
     @OrderBy("enrolledAt")
     private List<Enrollment> enrollments = new ArrayList<>();
@@ -56,8 +59,14 @@ public class Event extends SoftDeletableEntity {
     @Enumerated(EnumType.STRING)
     private EventType eventType;
 
-    public void setCreatedDateTime(Instant now) {
-        this.createDateTime = now;
+    public void updateDetails(String title, String description, Instant endEnrollmentDateTime,
+                              Instant startDateTime, Instant endDateTime, Integer limitOfEnrollments) {
+        this.title = title;
+        this.description = description;
+        this.endEnrollmentDateTime = endEnrollmentDateTime;
+        this.startDateTime = startDateTime;
+        this.endDateTime = endDateTime;
+        this.limitOfEnrollments = limitOfEnrollments;
     }
 
     private boolean isNotClosed() {
@@ -107,19 +116,19 @@ public class Event extends SoftDeletableEntity {
 
     public void addEnrollment(Enrollment enrollment) {
         this.enrollments.add(enrollment);
-        enrollment.setEvent(this);
+        enrollment.assignEvent(this);
     }
 
     public void removeEnrollment(Enrollment enrollment) {
         this.enrollments.remove(enrollment);
-        enrollment.setEvent(null);
+        enrollment.unassignEvent();
     }
 
     public void acceptNextWaitingEnrollment() {
         if(this.isAbleToAcceptWaitingEnrollment()) {
             Enrollment enrollmentToAccept = this.getTheFirstWaitingEnrollment();
             if(enrollmentToAccept != null) {
-                enrollmentToAccept.setAccepted(true);
+                enrollmentToAccept.accept();
             }
         }
     }
@@ -141,9 +150,7 @@ public class Event extends SoftDeletableEntity {
         if(this.isAbleToAcceptWaitingEnrollment()){
             var waitingList = getWaitingList();
             int numberToAccept = (int) Math.min(this.limitOfEnrollments - this.getNumberOfAcceptedEnrollments(), waitingList.size());
-            waitingList.subList(0, numberToAccept).forEach(enrollment -> {
-                enrollment.setAccepted(true);
-            });
+            waitingList.subList(0, numberToAccept).forEach(Enrollment::accept);
         }
     }
 
@@ -163,13 +170,13 @@ public class Event extends SoftDeletableEntity {
 
     public void accept(Enrollment enrollment) {
         if(this.eventType == EventType.CONFIRMATIVE && this.limitOfEnrollments > this.getNumberOfAcceptedEnrollments()) {
-            enrollment.setAccepted(true);
+            enrollment.accept();
         }
     }
 
     public void reject(Enrollment enrollment) {
         if(this.eventType == EventType.CONFIRMATIVE){
-            enrollment.setAccepted(false);
+            enrollment.reject();
         }
     }
 }
