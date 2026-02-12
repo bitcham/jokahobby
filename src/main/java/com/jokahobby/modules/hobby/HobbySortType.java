@@ -1,4 +1,4 @@
-package com.jokahobby.api.dto.request;
+package com.jokahobby.modules.hobby;
 
 public enum HobbySortType {
     LATEST,

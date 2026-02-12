@@ -7,17 +7,18 @@ import com.jokahobby.modules.hobby.event.HobbyCreatedEvent;
 import com.jokahobby.modules.hobby.event.HobbyUpdateEvent;
 import com.jokahobby.modules.tag.Tag;
 import com.jokahobby.modules.zone.Zone;
-import com.jokahobby.modules.hobby.form.HobbyDescriptionForm;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 
-import static com.jokahobby.modules.hobby.form.HobbyForm.*;
+import static com.jokahobby.modules.hobby.Hobby.VALID_PATH_PATTERN;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +44,14 @@ public class HobbyService {
         return saved;
     }
 
+    public Page<Hobby> findPublished(String country, String city, HobbySortType sort, Pageable pageable) {
+        return hobbyRepository.findPublished(country, city, sort, pageable);
+    }
+
+    public Page<Hobby> findByKeyword(String keyword, Pageable pageable) {
+        return hobbyRepository.findByKeyword(keyword, pageable);
+    }
+
     public Hobby getHobby(String path) {
         Hobby hobby = this.hobbyRepository.findByPath(path);
         checkIfExistingHobby(path, hobby);
@@ -56,8 +65,8 @@ public class HobbyService {
     }
 
     @Transactional
-    public void updateHobbyDescription(Hobby hobby, @Valid HobbyDescriptionForm hobbyDescriptionForm) {
-       hobby.updateDescription(hobbyDescriptionForm.getShortDescription(), hobbyDescriptionForm.getFullDescription());
+    public void updateHobbyDescription(Hobby hobby, String shortDescription, String fullDescription) {
+       hobby.updateDescription(shortDescription, fullDescription);
        eventPublisher.publishEvent(new HobbyUpdateEvent(hobby, "Hobby description updated"));
     }
 
@@ -175,17 +184,6 @@ public class HobbyService {
         }
     }
 
-    public boolean isDuplicatedPath(String path) {
-        return hobbyRepository.existsByPath(path);
-    }
-
-    public boolean isValidPath(String newPath) {
-        if (!newPath.matches(VALID_PATH_PATTERN)){
-            return false;
-        }
-        return !hobbyRepository.existsByPath(newPath);
-    }
-
     @Transactional
     public void updateHobbyPath(Hobby hobby, String newPath) {
         if (!newPath.matches(VALID_PATH_PATTERN)) {
@@ -195,14 +193,6 @@ public class HobbyService {
             throw new BusinessException(ErrorCode.HOBBY_PATH_ALREADY_EXISTS);
         }
         hobby.updatePath(newPath);
-    }
-
-    public boolean isValidTitle(String newTitle) {
-         return newTitle.length() <= 50;
-    }
-
-    public boolean isDuplicatedTitle(String newTitle) {
-        return hobbyRepository.existsByTitle(newTitle);
     }
 
     @Transactional
@@ -246,9 +236,4 @@ public class HobbyService {
         }
     }
 
-    public Hobby getHobbyToEnroll(String path) {
-        Hobby hobby = hobbyRepository.findHobbyOnlyByPath(path);
-        checkIfExistingHobby(path, hobby);
-        return hobby;
-    }
 }

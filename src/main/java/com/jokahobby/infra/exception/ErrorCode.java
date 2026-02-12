@@ -46,6 +46,7 @@ public enum ErrorCode {
     HOBBY_NOT_FOUND("RESOURCE_002", "Hobby not found.", 404),
     EVENT_NOT_FOUND("RESOURCE_003", "Event not found.", 404),
     ENROLLMENT_NOT_FOUND("RESOURCE_004", "Enrollment not found.", 404),
+    NOTIFICATION_NOT_FOUND("RESOURCE_005", "Notification not found.", 404),
 
     // Server
     INTERNAL_SERVER_ERROR("SERVER_001", "Internal server error.", 500);

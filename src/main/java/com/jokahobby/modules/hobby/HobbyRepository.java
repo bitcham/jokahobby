@@ -11,6 +11,4 @@ public interface HobbyRepository extends JpaRepository<Hobby, Long>, HobbyReposi
     boolean existsByTitle(String title);
 
     Hobby findByPath(String path);
-
-    Hobby findHobbyOnlyByPath(String path);
 }

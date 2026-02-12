@@ -10,8 +10,4 @@ public interface HobbyManagerRepository extends JpaRepository<HobbyManager, Long
     boolean existsByHobbyAndAccount(Hobby hobby, Account account);
 
     List<HobbyManager> findAllByHobbyId(Long hobbyId);
-
-    List<HobbyManager> findAllByAccountAndHobbyClosedOrderByCreatedAtDesc(Account account, boolean closed);
-
-    void deleteByHobbyAndAccount(Hobby hobby, Account account);
 }

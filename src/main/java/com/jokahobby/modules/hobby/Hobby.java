@@ -23,6 +23,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Hobby extends SoftDeletableEntity {
 
+    public static final String VALID_PATH_PATTERN = "^[a-zA-Z0-9äöåÄÖÅ_-]{3,20}$";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

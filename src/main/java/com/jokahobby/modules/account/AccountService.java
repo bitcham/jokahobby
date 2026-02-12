@@ -2,16 +2,9 @@ package com.jokahobby.modules.account;
 
 import com.jokahobby.infra.exception.BusinessException;
 import com.jokahobby.infra.exception.ErrorCode;
-import com.jokahobby.modules.account.form.Notifications;
-import com.jokahobby.modules.account.form.Profile;
 import com.jokahobby.modules.tag.Tag;
 import com.jokahobby.modules.zone.Zone;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.hibernate.validator.constraints.Length;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +12,6 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class AccountService {
 
     private final AccountRepository accountRepository;
@@ -27,25 +19,9 @@ public class AccountService {
     private final AccountZoneRepository accountZoneRepository;
 
     @Transactional
-    public void updateProfile(Account account, @Valid Profile profile) {
-        account.updateProfile(profile.getBio(), profile.getUrl(), profile.getLocation(), profile.getProfileImage());
-        accountRepository.save(account);
-    }
-
-    @Transactional
     public Account updateProfile(Account account, String bio, String url, String location, String profileImage) {
         account.updateProfile(bio, url, location, profileImage);
         return accountRepository.save(account);
-    }
-
-    @Transactional
-    public void updateNotifications(Account account, @Valid Notifications notifications) {
-        account.updateNotificationPreferences(
-                notifications.isHobbyCreatedByEmail(), notifications.isHobbyCreatedByWeb(),
-                notifications.isHobbyEnrollmentResultByEmail(), notifications.isHobbyEnrollmentResultByWeb(),
-                notifications.isHobbyUpdatedByEmail(), notifications.isHobbyUpdatedByWeb()
-        );
-        accountRepository.save(account);
     }
 
     @Transactional
@@ -55,12 +31,6 @@ public class AccountService {
         account.updateNotificationPreferences(hobbyCreatedByEmail, hobbyCreatedByWeb,
                 hobbyEnrollmentResultByEmail, hobbyEnrollmentResultByWeb,
                 hobbyUpdatedByEmail, hobbyUpdatedByWeb);
-        accountRepository.save(account);
-    }
-
-    @Transactional
-    public void updateNickname(Account account, @NotBlank @Length(min = 3, max = 20) @Pattern(regexp = "^[a-zA-Z0-9가-힣äöåÄÖÅ]{3,20}$") String nickname) {
-        account.updateNickname(nickname);
         accountRepository.save(account);
     }
 

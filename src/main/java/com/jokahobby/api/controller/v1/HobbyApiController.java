@@ -1,7 +1,7 @@
 package com.jokahobby.api.controller.v1;
 
 import com.jokahobby.api.dto.request.HobbyCreateRequest;
-import com.jokahobby.api.dto.request.HobbySortType;
+import com.jokahobby.modules.hobby.HobbySortType;
 import com.jokahobby.api.dto.response.*;
 import com.jokahobby.api.service.HobbyApplicationService;
 import com.jokahobby.modules.account.Account;

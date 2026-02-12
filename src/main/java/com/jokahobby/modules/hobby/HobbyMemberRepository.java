@@ -11,7 +11,5 @@ public interface HobbyMemberRepository extends JpaRepository<HobbyMember, Long> 
 
     List<HobbyMember> findAllByHobbyId(Long hobbyId);
 
-    List<HobbyMember> findAllByAccountAndHobbyClosedOrderByCreatedAtDesc(Account account, boolean closed);
-
     void deleteByHobbyAndAccount(Hobby hobby, Account account);
 }

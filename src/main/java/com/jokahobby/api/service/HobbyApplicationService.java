@@ -6,9 +6,8 @@ import com.jokahobby.infra.exception.BusinessException;
 import com.jokahobby.infra.exception.ErrorCode;
 import com.jokahobby.modules.account.Account;
 import com.jokahobby.modules.hobby.Hobby;
-import com.jokahobby.modules.hobby.HobbyRepository;
 import com.jokahobby.modules.hobby.HobbyService;
-import com.jokahobby.modules.hobby.form.HobbyDescriptionForm;
+import com.jokahobby.modules.hobby.HobbySortType;
 import com.jokahobby.modules.tag.Tag;
 import com.jokahobby.modules.tag.TagService;
 import com.jokahobby.modules.zone.Zone;
@@ -26,14 +25,13 @@ import java.util.List;
 public class HobbyApplicationService {
 
     private final HobbyService hobbyService;
-    private final HobbyRepository hobbyRepository;
     private final TagService tagService;
     private final ZoneService zoneService;
 
     // ===== Public endpoints =====
 
     public Page<HobbyListResponse> getPublishedHobbies(String country, String city, HobbySortType sort, Pageable pageable) {
-        Page<Hobby> hobbies = hobbyRepository.findPublished(country, city, sort, pageable);
+        Page<Hobby> hobbies = hobbyService.findPublished(country, city, sort, pageable);
         return hobbies.map(hobby -> {
             List<Tag> tags = hobbyService.getTags(hobby);
             return HobbyListResponse.from(hobby, tags);
@@ -41,7 +39,7 @@ public class HobbyApplicationService {
     }
 
     public Page<HobbyListResponse> searchHobbies(String keyword, Pageable pageable) {
-        Page<Hobby> hobbies = hobbyRepository.findByKeyword(keyword, pageable);
+        Page<Hobby> hobbies = hobbyService.findByKeyword(keyword, pageable);
         return hobbies.map(hobby -> {
             List<Tag> tags = hobbyService.getTags(hobby);
             return HobbyListResponse.from(hobby, tags);
@@ -113,10 +111,7 @@ public class HobbyApplicationService {
     @Transactional
     public void updateDescription(String path, Account account, HobbyDescriptionUpdateRequest request) {
         Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
-        HobbyDescriptionForm form = new HobbyDescriptionForm();
-        form.setShortDescription(request.shortDescription());
-        form.setFullDescription(request.fullDescription());
-        hobbyService.updateHobbyDescription(hobby, form);
+        hobbyService.updateHobbyDescription(hobby, request.shortDescription(), request.fullDescription());
     }
 
     @Transactional
