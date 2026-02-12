@@ -21,7 +21,7 @@ import java.time.Instant;
 @Builder @AllArgsConstructor @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Enrollment extends SoftDeletableEntity {
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne

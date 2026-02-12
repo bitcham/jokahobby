@@ -1,10 +1,7 @@
 package com.jokahobby.modules.tag;
 
 import com.jokahobby.modules.common.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -12,7 +9,7 @@ import lombok.*;
 @Builder @AllArgsConstructor @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Tag extends BaseEntity {
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(unique = true, nullable = false)

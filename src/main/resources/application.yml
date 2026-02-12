@@ -10,6 +10,8 @@ app:
   frontend-url: ${APP_FRONTEND_URL:http://localhost:5173}
 
 spring:
+  config:
+    import: optional:file:.env[.properties]
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
@@ -35,6 +37,15 @@ spring:
           auth: true
           starttls:
             enable: true
+  cloud:
+    aws:
+      region:
+        static: ${AWS_REGION:ap-northeast-2}
+      credentials:
+        access-key: ${AWS_ACCESS_KEY:}
+        secret-key: ${AWS_SECRET_KEY:}
+      s3:
+        bucket: ${AWS_S3_BUCKET:}
   security:
     oauth2:
       client:
@@ -48,3 +59,4 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.type.descriptor.sql.BasicBinder: trace
+    org.flywaydb: debug

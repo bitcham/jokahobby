@@ -11,7 +11,7 @@ import java.net.URLEncoder;
 import java.time.Duration;
 import java.time.Instant;
 
-import static jakarta.persistence.FetchType.EAGER;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Entity
@@ -36,12 +36,10 @@ public class Hobby extends SoftDeletableEntity {
 
     private String shortDescription;
 
-    @Lob
-    @Basic(fetch = EAGER)
+    @Column(columnDefinition = "text")
     private String fullDescription;
 
-    @Lob
-    @Basic(fetch = EAGER)
+    @Column(columnDefinition = "text")
     private String image;
 
     private Instant publishedDateTime;

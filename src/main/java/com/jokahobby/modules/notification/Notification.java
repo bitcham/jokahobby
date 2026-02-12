@@ -10,7 +10,7 @@ import lombok.*;
 @Builder @AllArgsConstructor @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Notification extends BaseEntity {
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String title;

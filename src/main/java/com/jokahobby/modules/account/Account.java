@@ -8,7 +8,6 @@ import org.hibernate.annotations.SQLRestriction;
 import java.time.Instant;
 import java.util.UUID;
 
-import static jakarta.persistence.FetchType.*;
 
 @Entity
 @SQLRestriction("deleted_at IS NULL")
@@ -37,7 +36,7 @@ public class Account extends SoftDeletableEntity {
 
     private String location;
 
-    @Lob @Basic(fetch = EAGER)
+    @Column(columnDefinition = "text")
     private String profileImage;
 
     private boolean hobbyCreatedByEmail;

@@ -20,7 +20,7 @@ import java.util.List;
 @Getter @EqualsAndHashCode(of = "id", callSuper = false)
 @Builder @AllArgsConstructor @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Event extends SoftDeletableEntity {
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
@@ -32,7 +32,7 @@ public class Event extends SoftDeletableEntity {
     @Column(nullable = false)
     private String title;
 
-    @Lob
+    @Column(columnDefinition = "text")
     private String description;
 
     @Builder.Default

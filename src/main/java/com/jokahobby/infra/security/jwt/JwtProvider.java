@@ -19,7 +19,7 @@ public class JwtProvider {
     private final long refreshTokenExpiry;
 
     public JwtProvider(JwtProperties props) {
-        this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(props.secret()));
+        this.key = Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(props.secret()));
         this.accessTokenExpiry = props.accessTokenExpiry();
         this.refreshTokenExpiry = props.refreshTokenExpiry();
     }

@@ -10,7 +10,7 @@ import lombok.*;
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"city", "province"}))
 public class Zone extends BaseEntity {
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
