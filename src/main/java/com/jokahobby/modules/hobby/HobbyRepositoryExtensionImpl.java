@@ -38,7 +38,7 @@ public class HobbyRepositoryExtensionImpl extends QuerydslRepositorySupport impl
                                 JPAExpressions.select(hobbyZone.hobby.id)
                                         .from(hobbyZone)
                                         .where(hobbyZone.zone.localNameOfCity.containsIgnoreCase(keyword)))))
-                .distinct();
+;
         long total = query.fetchCount();
         JPQLQuery<Hobby> pageableQuery = getQuerydsl().applyPagination(pageable, query);
         List<Hobby> content = pageableQuery.fetch();
@@ -72,7 +72,7 @@ public class HobbyRepositoryExtensionImpl extends QuerydslRepositorySupport impl
             default -> hobby.publishedDateTime.desc();
         };
 
-        JPQLQuery<Hobby> query = from(hobby).where(predicate).orderBy(orderSpecifier).distinct();
+        JPQLQuery<Hobby> query = from(hobby).where(predicate).orderBy(orderSpecifier);
         long total = query.fetchCount();
         JPQLQuery<Hobby> pageableQuery = getQuerydsl().applyPagination(pageable, query);
         List<Hobby> content = pageableQuery.fetch();
