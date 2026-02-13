@@ -12,7 +12,6 @@ public class TagService {
 
     private final TagRepository tagRepository;
 
-    @Transactional
     public Tag findOrCreateNew(String tagTitle) {
         return tagRepository.findByTitle(tagTitle)
                 .orElseGet(() -> tagRepository.save(Tag.builder().title(tagTitle).build()));
