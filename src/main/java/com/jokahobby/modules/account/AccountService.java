@@ -6,7 +6,6 @@ import com.jokahobby.modules.tag.Tag;
 import com.jokahobby.modules.zone.Zone;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -18,13 +17,11 @@ public class AccountService {
     private final AccountTagRepository accountTagRepository;
     private final AccountZoneRepository accountZoneRepository;
 
-    @Transactional
     public Account updateProfile(Account account, String bio, String url, String location, String profileImage) {
         account.updateProfile(bio, url, location, profileImage);
         return accountRepository.save(account);
     }
 
-    @Transactional
     public void updateNotifications(Account account, boolean hobbyCreatedByEmail, boolean hobbyCreatedByWeb,
                                     boolean hobbyEnrollmentResultByEmail, boolean hobbyEnrollmentResultByWeb,
                                     boolean hobbyUpdatedByEmail, boolean hobbyUpdatedByWeb) {
@@ -34,7 +31,6 @@ public class AccountService {
         accountRepository.save(account);
     }
 
-    @Transactional
     public void addTag(Account account, Tag tag) {
         if (accountTagRepository.existsByAccountAndTag(account, tag)) {
             return;
@@ -49,7 +45,6 @@ public class AccountService {
                 .toList();
     }
 
-    @Transactional
     public void removeTag(Account account, Tag tag) {
         accountTagRepository.deleteByAccountAndTag(account, tag);
     }
@@ -60,7 +55,6 @@ public class AccountService {
                 .toList();
     }
 
-    @Transactional
     public void addZone(Account account, Zone zone) {
         if (accountZoneRepository.existsByAccountAndZone(account, zone)) {
             return;
@@ -69,7 +63,6 @@ public class AccountService {
                 .account(account).zone(zone).build());
     }
 
-    @Transactional
     public void removeZone(Account account, Zone zone) {
         accountZoneRepository.deleteByAccountAndZone(account, zone);
     }
@@ -82,7 +75,6 @@ public class AccountService {
         return byNickname;
     }
 
-    @Transactional
     public Account updateNicknameWithDuplicateCheck(Account account, String nickname) {
         if (accountRepository.existsByNickname(nickname)) {
             throw new BusinessException(ErrorCode.DUPLICATE_NICKNAME);

@@ -15,12 +15,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class NotificationApplicationService {
 
     private final NotificationRepository notificationRepository;
     private final NotificationService notificationService;
 
+    @Transactional(readOnly = true)
     public NotificationListResponse getNotifications(Account account, boolean checked) {
         List<Notification> notifications = notificationRepository
                 .findByAccountAndCheckedOrderByCreatedAtDesc(account, checked);
@@ -41,19 +43,18 @@ public class NotificationApplicationService {
         return new NotificationListResponse(items, counts);
     }
 
+    @Transactional(readOnly = true)
     public UnreadCountResponse getUnreadCount(Account account) {
         long count = notificationRepository.countByAccountAndChecked(account, false);
         return new UnreadCountResponse(count);
     }
 
-    @Transactional
     public void markAsRead(Account account) {
         List<Notification> unchecked = notificationRepository
                 .findByAccountAndCheckedOrderByCreatedAtDesc(account, false);
         notificationService.markAsRead(unchecked);
     }
 
-    @Transactional
     public void deleteReadNotifications(Account account) {
         notificationRepository.deleteByAccountAndChecked(account, true);
     }

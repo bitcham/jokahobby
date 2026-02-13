@@ -16,22 +16,22 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class AccountApplicationService {
 
     private final AccountService accountService;
     private final TagService tagService;
     private final ZoneService zoneService;
 
+    @Transactional(readOnly = true)
     public Account getPublicProfile(String nickname) {
         return accountService.getAccount(nickname);
     }
 
-    @Transactional
     public Account updateProfile(Account account, ProfileUpdateRequest request) {
         return accountService.updateProfile(account, request.bio(), request.url(), request.location(), request.profileImage());
     }
 
-    @Transactional
     public void updateNotifications(Account account, NotificationUpdateRequest request) {
         accountService.updateNotifications(account,
                 request.hobbyCreatedByEmail(), request.hobbyCreatedByWeb(),
@@ -39,38 +39,35 @@ public class AccountApplicationService {
                 request.hobbyUpdatedByEmail(), request.hobbyUpdatedByWeb());
     }
 
-    @Transactional
     public Account updateNickname(Account account, String nickname) {
         return accountService.updateNicknameWithDuplicateCheck(account, nickname);
     }
 
+    @Transactional(readOnly = true)
     public List<Tag> getTags(Account account) {
         return accountService.getTags(account);
     }
 
-    @Transactional
     public void addTag(Account account, String tagTitle) {
         Tag tag = tagService.findOrCreateNew(tagTitle);
         accountService.addTag(account, tag);
     }
 
-    @Transactional
     public void removeTag(Account account, String tagTitle) {
         Tag tag = tagService.findByTitle(tagTitle);
         accountService.removeTag(account, tag);
     }
 
+    @Transactional(readOnly = true)
     public List<Zone> getZones(Account account) {
         return accountService.getZones(account);
     }
 
-    @Transactional
     public void addZone(Account account, String zoneName) {
         Zone zone = zoneService.findByZoneName(zoneName);
         accountService.addZone(account, zone);
     }
 
-    @Transactional
     public void removeZone(Account account, String zoneName) {
         Zone zone = zoneService.findByZoneName(zoneName);
         accountService.removeZone(account, zone);

@@ -11,8 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -31,7 +29,6 @@ public class HobbyService {
     private final HobbyMemberRepository hobbyMemberRepository;
     private final ApplicationEventPublisher eventPublisher;
 
-    @Transactional
     public Hobby createNewHobby(Hobby hobby, Account account) {
         if (hobbyRepository.existsByPath(hobby.getPath())) {
             throw new BusinessException(ErrorCode.HOBBY_PATH_ALREADY_EXISTS);
@@ -64,28 +61,23 @@ public class HobbyService {
         return hobby;
     }
 
-    @Transactional
     public void updateHobbyDescription(Hobby hobby, String shortDescription, String fullDescription) {
        hobby.updateDescription(shortDescription, fullDescription);
        eventPublisher.publishEvent(new HobbyUpdateEvent(hobby, "Hobby description updated"));
     }
 
-    @Transactional
     public void updateHobbyImage(Hobby hobby, String image) {
         hobby.updateImage(image);
     }
 
-    @Transactional
     public void enableHobbyBanner(Hobby hobby) {
         hobby.enableBanner();
     }
 
-    @Transactional
     public void disableHobbyBanner(Hobby hobby) {
         hobby.disableBanner();
     }
 
-    @Transactional
     public void addTag(Hobby hobby, Tag tag) {
         if (hobbyTagRepository.existsByHobbyAndTag(hobby, tag)) {
             return;
@@ -93,7 +85,6 @@ public class HobbyService {
         hobbyTagRepository.save(HobbyTag.builder().hobby(hobby).tag(tag).build());
     }
 
-    @Transactional
     public void removeTag(Hobby hobby, Tag tag) {
         hobbyTagRepository.deleteByHobbyAndTag(hobby, tag);
     }
@@ -104,7 +95,6 @@ public class HobbyService {
                 .toList();
     }
 
-    @Transactional
     public void addZone(Hobby hobby, Zone zone) {
         if (hobbyZoneRepository.existsByHobbyAndZone(hobby, zone)) {
             return;
@@ -112,7 +102,6 @@ public class HobbyService {
         hobbyZoneRepository.save(HobbyZone.builder().hobby(hobby).zone(zone).build());
     }
 
-    @Transactional
     public void removeZone(Hobby hobby, Zone zone) {
         hobbyZoneRepository.deleteByHobbyAndZone(hobby, zone);
     }
@@ -123,7 +112,6 @@ public class HobbyService {
                 .toList();
     }
 
-    @Transactional
     public void addManager(Hobby hobby, Account account) {
         if (hobbyManagerRepository.existsByHobbyAndAccount(hobby, account)) {
             return;
@@ -132,7 +120,6 @@ public class HobbyService {
         hobby.incrementMemberCount();
     }
 
-    @Transactional
     public void addMember(Hobby hobby, Account account) {
         if (hobbyMemberRepository.existsByHobbyAndAccount(hobby, account)) {
             return;
@@ -141,7 +128,6 @@ public class HobbyService {
         hobby.incrementMemberCount();
     }
 
-    @Transactional
     public void removeMember(Hobby hobby, Account account) {
         hobbyMemberRepository.deleteByHobbyAndAccount(hobby, account);
         hobby.decrementMemberCount();
@@ -184,7 +170,6 @@ public class HobbyService {
         }
     }
 
-    @Transactional
     public void updateHobbyPath(Hobby hobby, String newPath) {
         if (!newPath.matches(VALID_PATH_PATTERN)) {
             throw new BusinessException(ErrorCode.INVALID_HOBBY_PATH);
@@ -195,7 +180,6 @@ public class HobbyService {
         hobby.updatePath(newPath);
     }
 
-    @Transactional
     public void updateHobbyTitle(Hobby hobby, String newTitle) {
         if (hobbyRepository.existsByTitle(newTitle)) {
             throw new BusinessException(ErrorCode.HOBBY_TITLE_ALREADY_EXISTS);
@@ -203,31 +187,26 @@ public class HobbyService {
         hobby.updateTitle(newTitle);
     }
 
-    @Transactional
     public void publish(Hobby hobby) {
         hobby.publish();
         eventPublisher.publishEvent(new HobbyCreatedEvent(hobby));
     }
 
-    @Transactional
     public void close(Hobby hobby) {
         hobby.close();
         eventPublisher.publishEvent(new HobbyUpdateEvent(hobby, "Hobby closed"));
     }
 
-    @Transactional
     public void startRecruit(Hobby hobby) {
         hobby.startRecruit();
         eventPublisher.publishEvent(new HobbyUpdateEvent(hobby, "Hobby recruitment started"));
     }
 
-    @Transactional
     public void stopRecruit(Hobby hobby) {
         hobby.stopRecruit();
         eventPublisher.publishEvent(new HobbyUpdateEvent(hobby, "Hobby recruitment stopped"));
     }
 
-    @Transactional
     public void remove(Hobby hobby) {
         if(hobby.isRemovable()) {
             hobby.softDelete();

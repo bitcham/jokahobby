@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class EventApplicationService {
 
@@ -25,7 +26,6 @@ public class EventApplicationService {
     private final EventRepository eventRepository;
     private final EnrollmentRepository enrollmentRepository;
 
-    @Transactional
     public EventResponse createEvent(String path, Account account, EventCreateRequest request) {
         Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
         Event event = request.toEntity(hobby, account);
@@ -33,19 +33,20 @@ public class EventApplicationService {
         return EventResponse.from(saved, account);
     }
 
+    @Transactional(readOnly = true)
     public List<EventListResponse> getEvents(String path) {
         Hobby hobby = hobbyService.getHobby(path);
         List<Event> events = eventRepository.findByHobbyOrderByStartDateTime(hobby);
         return events.stream().map(EventListResponse::from).toList();
     }
 
+    @Transactional(readOnly = true)
     public EventResponse getEvent(String path, Long eventId, Account account) {
         Hobby hobby = hobbyService.getHobby(path);
         Event event = getEventOfHobby(eventId, hobby);
         return EventResponse.from(event, account);
     }
 
-    @Transactional
     public EventResponse updateEvent(String path, Long eventId, Account account, EventUpdateRequest request) {
         Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
         Event event = getEventOfHobby(eventId, hobby);
@@ -61,14 +62,12 @@ public class EventApplicationService {
         return EventResponse.from(event, account);
     }
 
-    @Transactional
     public void deleteEvent(String path, Long eventId, Account account) {
         Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
         Event event = getEventOfHobby(eventId, hobby);
         eventService.deleteEvent(event);
     }
 
-    @Transactional
     public void enroll(String path, Long eventId, Account account) {
         Hobby hobby = hobbyService.getHobby(path);
         Event event = getEventOfHobby(eventId, hobby);
@@ -80,7 +79,6 @@ public class EventApplicationService {
         eventService.newEnrollment(event, account);
     }
 
-    @Transactional
     public void disenroll(String path, Long eventId, Account account) {
         Hobby hobby = hobbyService.getHobby(path);
         Event event = getEventOfHobby(eventId, hobby);
@@ -92,7 +90,6 @@ public class EventApplicationService {
         eventService.cancelEnrollment(event, account);
     }
 
-    @Transactional
     public void acceptEnrollment(String path, Long enrollmentId, Account account) {
         hobbyService.getHobbyWithManagerCheck(account, path);
         Enrollment enrollment = getEnrollment(enrollmentId);
@@ -105,7 +102,6 @@ public class EventApplicationService {
         eventService.acceptEnrollment(event, enrollment);
     }
 
-    @Transactional
     public void rejectEnrollment(String path, Long enrollmentId, Account account) {
         hobbyService.getHobbyWithManagerCheck(account, path);
         Enrollment enrollment = getEnrollment(enrollmentId);
@@ -118,14 +114,12 @@ public class EventApplicationService {
         eventService.rejectEnrollment(event, enrollment);
     }
 
-    @Transactional
     public void checkIn(String path, Long enrollmentId, Account account) {
         hobbyService.getHobbyWithManagerCheck(account, path);
         Enrollment enrollment = getEnrollment(enrollmentId);
         eventService.checkInEnrollment(enrollment);
     }
 
-    @Transactional
     public void cancelCheckIn(String path, Long enrollmentId, Account account) {
         hobbyService.getHobbyWithManagerCheck(account, path);
         Enrollment enrollment = getEnrollment(enrollmentId);

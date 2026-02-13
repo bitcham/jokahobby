@@ -7,8 +7,6 @@ import com.jokahobby.modules.hobby.event.HobbyUpdateEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.Instant;
 
 @Service
@@ -19,14 +17,12 @@ public class EventService {
     private final EnrollmentRepository enrollmentRepository;
     private final ApplicationEventPublisher eventPublisher;
 
-    @Transactional
     public Event createEvent(Event event) {
         eventPublisher.publishEvent(new HobbyUpdateEvent(event.getHobby(),
                 "'" + event.getTitle() + "' event created"));
         return eventRepository.save(event);
     }
 
-    @Transactional
     public void updateEvent(Event event, String title, String description,
                             Instant endEnrollmentDateTime, Instant startDateTime,
                             Instant endDateTime, Integer limitOfEnrollments) {
@@ -37,7 +33,6 @@ public class EventService {
                 "'" + event.getTitle() + "' event updated. Please check the details."));
     }
 
-    @Transactional
     public void deleteEvent(Event event) {
         event.getEnrollments().forEach(Enrollment::softDelete);
         event.softDelete();
@@ -45,7 +40,6 @@ public class EventService {
                 "'" + event.getTitle() + "' event canceled."));
     }
 
-    @Transactional
     public void newEnrollment(Event event, Account account) {
         if (!enrollmentRepository.existsByEventAndAccount(event, account)) {
             Enrollment enrollment = Enrollment.builder()
@@ -58,7 +52,6 @@ public class EventService {
         }
     }
 
-    @Transactional
     public void cancelEnrollment(Event event, Account account) {
         Enrollment enrollment = enrollmentRepository.findByEventAndAccount(event, account);
         if(!enrollment.isAttended()){
@@ -68,24 +61,20 @@ public class EventService {
         }
     }
 
-    @Transactional
     public void acceptEnrollment(Event event, Enrollment enrollment) {
         event.accept(enrollment);
         eventPublisher.publishEvent(new EnrollmentAcceptedEvent(enrollment));
     }
 
-    @Transactional
     public void rejectEnrollment(Event event, Enrollment enrollment) {
         event.reject(enrollment);
         eventPublisher.publishEvent(new EnrollmentRejectedEvent(enrollment));
     }
 
-    @Transactional
     public void checkInEnrollment(Enrollment enrollment) {
         enrollment.checkIn();
     }
 
-    @Transactional
     public void cancelCheckInEnrollment(Enrollment enrollment) {
         enrollment.cancelCheckIn();
     }

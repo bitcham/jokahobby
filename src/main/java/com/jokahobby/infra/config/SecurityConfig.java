@@ -5,6 +5,7 @@ import com.jokahobby.infra.security.SecurityExceptionHandler;
 import com.jokahobby.infra.security.jwt.JwtAuthenticationFilter;
 import com.jokahobby.infra.security.jwt.JwtProperties;
 import com.jokahobby.infra.security.oauth2.CustomOAuth2UserService;
+import com.jokahobby.infra.security.oauth2.CustomOidcUserService;
 import com.jokahobby.infra.security.oauth2.OAuth2FailureHandler;
 import com.jokahobby.infra.security.oauth2.OAuth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomOidcUserService customOidcUserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final OAuth2FailureHandler oAuth2FailureHandler;
     private final AppProperties appProperties;
@@ -57,7 +59,8 @@ public class SecurityConfig {
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService))
+                                .userService(customOAuth2UserService)
+                                .oidcUserService(customOidcUserService))
                         .successHandler(oAuth2SuccessHandler)
                         .failureHandler(oAuth2FailureHandler)
                 )
