@@ -1,5 +1,9 @@
 # JokaHobby
 
+<img width="1416" height="596" alt="Image" src="https://github.com/user-attachments/assets/b6641194-818c-4082-a913-359039436f4e" />
+
+<Note: This is a cropped screenshot of a test demo to highlight the main dashboard area>
+
 ## Hobby Meetup Platform for Community Building
 
 Connect people with shared interests by providing a platform to create, discover, and join hobby groups in their local area.
