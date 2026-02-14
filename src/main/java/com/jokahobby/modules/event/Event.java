@@ -124,13 +124,15 @@ public class Event extends SoftDeletableEntity {
         enrollment.unassignEvent();
     }
 
-    public void acceptNextWaitingEnrollment() {
-        if(this.isAbleToAcceptWaitingEnrollment()) {
+    public Enrollment acceptNextWaitingEnrollment() {
+        if (this.isAbleToAcceptWaitingEnrollment()) {
             Enrollment enrollmentToAccept = this.getTheFirstWaitingEnrollment();
-            if(enrollmentToAccept != null) {
+            if (enrollmentToAccept != null) {
                 enrollmentToAccept.accept();
+                return enrollmentToAccept;
             }
         }
+        return null;
     }
 
     private Enrollment getTheFirstWaitingEnrollment() {
@@ -146,12 +148,16 @@ public class Event extends SoftDeletableEntity {
         return this.enrollments.stream().filter(enrollment -> !enrollment.isAccepted()).toList();
     }
 
-    public void acceptWaitingList() {
-        if(this.isAbleToAcceptWaitingEnrollment()){
+    public List<Enrollment> acceptWaitingList() {
+        if (this.isAbleToAcceptWaitingEnrollment()) {
             var waitingList = getWaitingList();
-            int numberToAccept = (int) Math.min(this.limitOfEnrollments - this.getNumberOfAcceptedEnrollments(), waitingList.size());
-            waitingList.subList(0, numberToAccept).forEach(Enrollment::accept);
+            int numberToAccept = (int) Math.min(
+                    this.limitOfEnrollments - this.getNumberOfAcceptedEnrollments(), waitingList.size());
+            List<Enrollment> toAccept = waitingList.subList(0, numberToAccept);
+            toAccept.forEach(Enrollment::accept);
+            return toAccept;
         }
+        return List.of();
     }
 
     public boolean canAccept(Enrollment enrollment) {

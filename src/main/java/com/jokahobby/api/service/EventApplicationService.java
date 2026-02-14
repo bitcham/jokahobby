@@ -8,9 +8,13 @@ import com.jokahobby.infra.exception.BusinessException;
 import com.jokahobby.infra.exception.ErrorCode;
 import com.jokahobby.modules.account.Account;
 import com.jokahobby.modules.event.*;
+import com.jokahobby.modules.event.event.EnrollmentAcceptedEvent;
+import com.jokahobby.modules.event.event.EnrollmentRejectedEvent;
 import com.jokahobby.modules.hobby.Hobby;
 import com.jokahobby.modules.hobby.HobbyService;
+import com.jokahobby.modules.hobby.event.HobbyUpdateEvent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,11 +29,14 @@ public class EventApplicationService {
     private final EventService eventService;
     private final EventRepository eventRepository;
     private final EnrollmentRepository enrollmentRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public EventResponse createEvent(String path, Account account, EventCreateRequest request) {
         Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
         Event event = request.toEntity(hobby, account);
         Event saved = eventService.createEvent(event);
+        eventPublisher.publishEvent(new HobbyUpdateEvent(hobby,
+                "'" + saved.getTitle() + "' event created"));
         return EventResponse.from(saved, account);
     }
 
@@ -55,9 +62,14 @@ public class EventApplicationService {
             throw new BusinessException(ErrorCode.EVENT_ENROLLMENT_LIMIT_TOO_LOW);
         }
 
-        eventService.updateEvent(event, request.title(), request.description(),
+        List<Enrollment> promotedEnrollments = eventService.updateEvent(event, request.title(), request.description(),
                 request.endEnrollmentDateTime(), request.startDateTime(),
                 request.endDateTime(), request.limitOfEnrollments());
+
+        eventPublisher.publishEvent(new HobbyUpdateEvent(hobby,
+                "'" + event.getTitle() + "' event updated. Please check the details."));
+        promotedEnrollments.forEach(enrollment ->
+                eventPublisher.publishEvent(new EnrollmentAcceptedEvent(enrollment)));
 
         return EventResponse.from(event, account);
     }
@@ -66,6 +78,8 @@ public class EventApplicationService {
         Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
         Event event = getEventOfHobby(eventId, hobby);
         eventService.deleteEvent(event);
+        eventPublisher.publishEvent(new HobbyUpdateEvent(hobby,
+                "'" + event.getTitle() + "' event canceled."));
     }
 
     public void enroll(String path, Long eventId, Account account) {
@@ -76,7 +90,10 @@ public class EventApplicationService {
             throw new BusinessException(ErrorCode.EVENT_NOT_ENROLLABLE);
         }
 
-        eventService.newEnrollment(event, account);
+        Enrollment enrollment = eventService.newEnrollment(event, account);
+        if (enrollment != null && enrollment.isAccepted()) {
+            eventPublisher.publishEvent(new EnrollmentAcceptedEvent(enrollment));
+        }
     }
 
     public void disenroll(String path, Long eventId, Account account) {
@@ -87,7 +104,10 @@ public class EventApplicationService {
             throw new BusinessException(ErrorCode.EVENT_NOT_DISENROLLABLE);
         }
 
-        eventService.cancelEnrollment(event, account);
+        Enrollment promotedEnrollment = eventService.cancelEnrollment(event, account);
+        if (promotedEnrollment != null) {
+            eventPublisher.publishEvent(new EnrollmentAcceptedEvent(promotedEnrollment));
+        }
     }
 
     public void acceptEnrollment(String path, Long enrollmentId, Account account) {
@@ -100,6 +120,7 @@ public class EventApplicationService {
         }
 
         eventService.acceptEnrollment(event, enrollment);
+        eventPublisher.publishEvent(new EnrollmentAcceptedEvent(enrollment));
     }
 
     public void rejectEnrollment(String path, Long enrollmentId, Account account) {
@@ -112,6 +133,7 @@ public class EventApplicationService {
         }
 
         eventService.rejectEnrollment(event, enrollment);
+        eventPublisher.publishEvent(new EnrollmentRejectedEvent(enrollment));
     }
 
     public void checkIn(String path, Long enrollmentId, Account account) {

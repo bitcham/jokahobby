@@ -57,8 +57,6 @@ dependencies {
     testCompileOnly("org.projectlombok:lombok")
     testAnnotationProcessor("org.projectlombok:lombok")
 
-    implementation("org.modelmapper:modelmapper:3.2.6")
-
     testImplementation("com.tngtech.archunit:archunit:1.4.1")
     testImplementation("org.junit.jupiter:junit-jupiter")
 

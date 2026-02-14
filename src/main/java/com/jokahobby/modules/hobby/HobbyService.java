@@ -3,12 +3,9 @@ package com.jokahobby.modules.hobby;
 import com.jokahobby.infra.exception.BusinessException;
 import com.jokahobby.infra.exception.ErrorCode;
 import com.jokahobby.modules.account.Account;
-import com.jokahobby.modules.hobby.event.HobbyCreatedEvent;
-import com.jokahobby.modules.hobby.event.HobbyUpdateEvent;
 import com.jokahobby.modules.tag.Tag;
 import com.jokahobby.modules.zone.Zone;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
@@ -27,7 +24,6 @@ public class HobbyService {
     private final HobbyZoneRepository hobbyZoneRepository;
     private final HobbyManagerRepository hobbyManagerRepository;
     private final HobbyMemberRepository hobbyMemberRepository;
-    private final ApplicationEventPublisher eventPublisher;
 
     public Hobby createNewHobby(Hobby hobby, Account account) {
         if (hobbyRepository.existsByPath(hobby.getPath())) {
@@ -62,8 +58,7 @@ public class HobbyService {
     }
 
     public void updateHobbyDescription(Hobby hobby, String shortDescription, String fullDescription) {
-       hobby.updateDescription(shortDescription, fullDescription);
-       eventPublisher.publishEvent(new HobbyUpdateEvent(hobby, "Hobby description updated"));
+        hobby.updateDescription(shortDescription, fullDescription);
     }
 
     public void updateHobbyImage(Hobby hobby, String image) {
@@ -189,22 +184,18 @@ public class HobbyService {
 
     public void publish(Hobby hobby) {
         hobby.publish();
-        eventPublisher.publishEvent(new HobbyCreatedEvent(hobby));
     }
 
     public void close(Hobby hobby) {
         hobby.close();
-        eventPublisher.publishEvent(new HobbyUpdateEvent(hobby, "Hobby closed"));
     }
 
     public void startRecruit(Hobby hobby) {
         hobby.startRecruit();
-        eventPublisher.publishEvent(new HobbyUpdateEvent(hobby, "Hobby recruitment started"));
     }
 
     public void stopRecruit(Hobby hobby) {
         hobby.stopRecruit();
-        eventPublisher.publishEvent(new HobbyUpdateEvent(hobby, "Hobby recruitment stopped"));
     }
 
     public void remove(Hobby hobby) {

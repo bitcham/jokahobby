@@ -12,7 +12,10 @@ import com.jokahobby.modules.tag.Tag;
 import com.jokahobby.modules.tag.TagService;
 import com.jokahobby.modules.zone.Zone;
 import com.jokahobby.modules.zone.ZoneService;
+import com.jokahobby.modules.hobby.event.HobbyCreatedEvent;
+import com.jokahobby.modules.hobby.event.HobbyUpdateEvent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,6 +31,7 @@ public class HobbyApplicationService {
     private final HobbyService hobbyService;
     private final TagService tagService;
     private final ZoneService zoneService;
+    private final ApplicationEventPublisher eventPublisher;
 
     // ===== Public endpoints =====
 
@@ -113,6 +117,7 @@ public class HobbyApplicationService {
     public void updateDescription(String path, Account account, HobbyDescriptionUpdateRequest request) {
         Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
         hobbyService.updateHobbyDescription(hobby, request.shortDescription(), request.fullDescription());
+        eventPublisher.publishEvent(new HobbyUpdateEvent(hobby, "Hobby description updated"));
     }
 
     public void updateBanner(String path, Account account, HobbyBannerUpdateRequest request) {
@@ -169,21 +174,25 @@ public class HobbyApplicationService {
     public void publish(String path, Account account) {
         Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
         hobbyService.publish(hobby);
+        eventPublisher.publishEvent(new HobbyCreatedEvent(hobby));
     }
 
     public void close(String path, Account account) {
         Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
         hobbyService.close(hobby);
+        eventPublisher.publishEvent(new HobbyUpdateEvent(hobby, "Hobby closed"));
     }
 
     public void startRecruit(String path, Account account) {
         Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
         hobbyService.startRecruit(hobby);
+        eventPublisher.publishEvent(new HobbyUpdateEvent(hobby, "Hobby recruitment started"));
     }
 
     public void stopRecruit(String path, Account account) {
         Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
         hobbyService.stopRecruit(hobby);
+        eventPublisher.publishEvent(new HobbyUpdateEvent(hobby, "Hobby recruitment stopped"));
     }
 
     public void updatePath(String path, Account account, HobbyPathUpdateRequest request) {
