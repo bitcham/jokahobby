@@ -132,6 +132,51 @@ jokahobby/
 └── build.gradle.kts
 ```
 
+## API Documentation
+
+Interactive API documentation is available via **Swagger UI** powered by [Springdoc OpenAPI](https://springdoc.org/).
+
+```
+http://localhost:8080/swagger-ui.html
+```
+
+---
+
+## Dev Profile
+
+A `dev` profile is provided for local testing without OAuth2 login.
+
+### What It Does
+- Seeds test data on startup (accounts, hobbies, events, enrollments, notifications)
+- Provides dev-only endpoints to issue JWT tokens for test accounts
+
+### Quick Start
+
+```bash
+./gradlew bootRun --args='--spring.profiles.active=dev'
+```
+
+### Test Accounts
+
+| Nickname | Role | Description |
+|----------|------|-------------|
+| alice | Manager | Creates and manages hobbies |
+| bob | Member | Joins hobbies, enrolls in events |
+| charlie | Observer | Clean state, no associations |
+
+### Dev Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/dev/accounts` | List test accounts |
+| POST | `/api/v1/dev/token/{nickname}` | Generate JWT token for a test account |
+
+### Test Guideline
+
+See [`test-guideline.md`](test-guideline.md) for detailed test scenarios with step-by-step instructions covering all API endpoints.
+
+---
+
 ## API Overview
 
 ### Authentication (OAuth2 flow)

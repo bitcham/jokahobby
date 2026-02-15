@@ -13,8 +13,10 @@ import com.jokahobby.modules.account.CurrentAccount;
 import com.jokahobby.modules.hobby.HobbySortType;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +35,7 @@ public class HobbyApiController {
             @RequestParam(required = false) String country,
             @RequestParam(required = false) String city,
             @RequestParam(required = false) HobbySortType sortType,
-            @PageableDefault(size = 16) Pageable pageable) {
+            @ParameterObject @PageableDefault(size = 16, sort = "publishedDateTime", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<HobbyListResponse> hobbies = hobbyApplicationService.getPublishedHobbies(country, city, sortType, pageable);
         return ResponseEntity.ok(ApiResponse.ok(hobbies));
     }
@@ -42,7 +44,7 @@ public class HobbyApiController {
     @GetMapping("/api/v1/hobbies/search")
     public ResponseEntity<ApiResponse<Page<HobbyListResponse>>> searchHobbies(
             @RequestParam String keyword,
-            @PageableDefault(size = 16) Pageable pageable) {
+            @ParameterObject @PageableDefault(size = 16, sort = "publishedDateTime", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<HobbyListResponse> hobbies = hobbyApplicationService.searchHobbies(keyword, pageable);
         return ResponseEntity.ok(ApiResponse.ok(hobbies));
     }
