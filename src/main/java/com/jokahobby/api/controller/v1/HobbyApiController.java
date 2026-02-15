@@ -5,6 +5,8 @@ import com.jokahobby.api.dto.response.ApiResponse;
 import com.jokahobby.api.dto.response.HobbyListResponse;
 import com.jokahobby.api.dto.response.HobbyMembersResponse;
 import com.jokahobby.api.dto.response.HobbyResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.jokahobby.api.service.HobbyApplicationService;
 import com.jokahobby.modules.account.Account;
 import com.jokahobby.modules.account.CurrentAccount;
@@ -18,12 +20,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Hobby")
 @RestController
 @RequiredArgsConstructor
 public class HobbyApiController {
 
     private final HobbyApplicationService hobbyApplicationService;
 
+    @Operation(summary = "Get published hobbies")
     @GetMapping("/api/v1/hobbies")
     public ResponseEntity<ApiResponse<Page<HobbyListResponse>>> getHobbies(
             @RequestParam(required = false) String country,
@@ -34,6 +38,7 @@ public class HobbyApiController {
         return ResponseEntity.ok(ApiResponse.ok(hobbies));
     }
 
+    @Operation(summary = "Search hobbies by keyword")
     @GetMapping("/api/v1/hobbies/search")
     public ResponseEntity<ApiResponse<Page<HobbyListResponse>>> searchHobbies(
             @RequestParam String keyword,
@@ -42,6 +47,7 @@ public class HobbyApiController {
         return ResponseEntity.ok(ApiResponse.ok(hobbies));
     }
 
+    @Operation(summary = "Create a hobby")
     @PostMapping("/api/v1/hobbies")
     public ResponseEntity<ApiResponse<HobbyResponse>> createHobby(
             @CurrentAccount Account account,
@@ -50,6 +56,7 @@ public class HobbyApiController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(response));
     }
 
+    @Operation(summary = "Get hobby detail by path")
     @GetMapping("/api/v1/hobbies/{path}")
     public ResponseEntity<ApiResponse<HobbyResponse>> getHobby(
             @PathVariable String path,
@@ -58,6 +65,7 @@ public class HobbyApiController {
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
+    @Operation(summary = "Get hobby members")
     @GetMapping("/api/v1/hobbies/{path}/members")
     public ResponseEntity<ApiResponse<HobbyMembersResponse>> getHobbyMembers(
             @PathVariable String path) {
@@ -65,6 +73,7 @@ public class HobbyApiController {
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
+    @Operation(summary = "Join a hobby")
     @PostMapping("/api/v1/hobbies/{path}/members")
     public ResponseEntity<ApiResponse<Void>> joinHobby(
             @PathVariable String path,
@@ -73,6 +82,7 @@ public class HobbyApiController {
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
+    @Operation(summary = "Leave a hobby")
     @DeleteMapping("/api/v1/hobbies/{path}/members")
     public ResponseEntity<ApiResponse<Void>> leaveHobby(
             @PathVariable String path,
@@ -81,6 +91,7 @@ public class HobbyApiController {
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
+    @Operation(summary = "Delete a hobby")
     @DeleteMapping("/api/v1/hobbies/{path}")
     public ResponseEntity<ApiResponse<Void>> deleteHobby(
             @PathVariable String path,

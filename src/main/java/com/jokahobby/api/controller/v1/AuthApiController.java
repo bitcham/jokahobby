@@ -4,6 +4,8 @@ import com.jokahobby.api.dto.request.OAuth2CodeRequest;
 import com.jokahobby.api.dto.response.ApiResponse;
 import com.jokahobby.api.dto.response.OAuth2TokenResponse;
 import com.jokahobby.api.dto.response.TokenResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.jokahobby.infra.exception.AppException;
 import com.jokahobby.infra.exception.ErrorCode;
 import com.jokahobby.infra.security.jwt.CookieUtil;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
+@Tag(name = "Auth")
 @RestController
 @RequiredArgsConstructor
 public class AuthApiController {
@@ -35,6 +38,7 @@ public class AuthApiController {
     private final RefreshTokenService refreshTokenService;
     private final OAuth2AuthorizationCodeStore codeStore;
 
+    @Operation(summary = "Exchange OAuth2 authorization code for tokens")
     @PostMapping("/api/v1/auth/oauth2/token")
     public ResponseEntity<ApiResponse<OAuth2TokenResponse>> exchangeOAuth2Code(
             @Valid @RequestBody OAuth2CodeRequest request,
@@ -73,6 +77,7 @@ public class AuthApiController {
                 .body(ApiResponse.ok(tokenResponse));
     }
 
+    @Operation(summary = "Refresh access token")
     @PostMapping("/api/v1/auth/refresh")
     public ResponseEntity<ApiResponse<TokenResponse>> refresh(
             @CookieValue(name = "refreshToken") String refreshTokenRaw,
@@ -111,6 +116,7 @@ public class AuthApiController {
                 .body(ApiResponse.ok(tokenResponse));
     }
 
+    @Operation(summary = "Logout current session")
     @PostMapping("/api/v1/auth/logout")
     public ResponseEntity<ApiResponse<Void>> logout(
             @CookieValue(name = "refreshToken", required = false) String refreshTokenRaw) {
@@ -127,6 +133,7 @@ public class AuthApiController {
                 .body(ApiResponse.ok());
     }
 
+    @Operation(summary = "Logout all sessions")
     @PostMapping("/api/v1/auth/logout-all")
     public ResponseEntity<ApiResponse<Void>> logoutAll(HttpServletRequest httpRequest) {
 

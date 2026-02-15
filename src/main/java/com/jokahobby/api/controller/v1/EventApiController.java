@@ -5,6 +5,8 @@ import com.jokahobby.api.dto.request.EventUpdateRequest;
 import com.jokahobby.api.dto.response.ApiResponse;
 import com.jokahobby.api.dto.response.EventListResponse;
 import com.jokahobby.api.dto.response.EventResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.jokahobby.api.service.EventApplicationService;
 import com.jokahobby.modules.account.Account;
 import com.jokahobby.modules.account.CurrentAccount;
@@ -16,12 +18,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Event")
 @RestController
 @RequiredArgsConstructor
 public class EventApiController {
 
     private final EventApplicationService eventApplicationService;
 
+    @Operation(summary = "Create an event")
     @PostMapping("/api/v1/hobbies/{path}/events")
     public ResponseEntity<ApiResponse<EventResponse>> createEvent(
             @PathVariable String path,
@@ -31,6 +35,7 @@ public class EventApiController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(response));
     }
 
+    @Operation(summary = "Get events of a hobby")
     @GetMapping("/api/v1/hobbies/{path}/events")
     public ResponseEntity<ApiResponse<List<EventListResponse>>> getEvents(
             @PathVariable String path) {
@@ -38,6 +43,7 @@ public class EventApiController {
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
+    @Operation(summary = "Get event detail")
     @GetMapping("/api/v1/hobbies/{path}/events/{eventId}")
     public ResponseEntity<ApiResponse<EventResponse>> getEvent(
             @PathVariable String path,
@@ -47,6 +53,7 @@ public class EventApiController {
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
+    @Operation(summary = "Update an event")
     @PutMapping("/api/v1/hobbies/{path}/events/{eventId}")
     public ResponseEntity<ApiResponse<EventResponse>> updateEvent(
             @PathVariable String path,
@@ -57,6 +64,7 @@ public class EventApiController {
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
+    @Operation(summary = "Delete an event")
     @DeleteMapping("/api/v1/hobbies/{path}/events/{eventId}")
     public ResponseEntity<ApiResponse<Void>> deleteEvent(
             @PathVariable String path,
@@ -66,6 +74,7 @@ public class EventApiController {
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
+    @Operation(summary = "Enroll in an event")
     @PostMapping("/api/v1/hobbies/{path}/events/{eventId}/enrollments")
     public ResponseEntity<ApiResponse<Void>> enroll(
             @PathVariable String path,
@@ -75,6 +84,7 @@ public class EventApiController {
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
+    @Operation(summary = "Cancel event enrollment")
     @DeleteMapping("/api/v1/hobbies/{path}/events/{eventId}/enrollments")
     public ResponseEntity<ApiResponse<Void>> disenroll(
             @PathVariable String path,
@@ -84,6 +94,7 @@ public class EventApiController {
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
+    @Operation(summary = "Accept an enrollment")
     @PatchMapping("/api/v1/hobbies/{path}/enrollments/{enrollmentId}/accept")
     public ResponseEntity<ApiResponse<Void>> acceptEnrollment(
             @PathVariable String path,
@@ -93,6 +104,7 @@ public class EventApiController {
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
+    @Operation(summary = "Reject an enrollment")
     @PatchMapping("/api/v1/hobbies/{path}/enrollments/{enrollmentId}/reject")
     public ResponseEntity<ApiResponse<Void>> rejectEnrollment(
             @PathVariable String path,
@@ -102,6 +114,7 @@ public class EventApiController {
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
+    @Operation(summary = "Check in an enrollment")
     @PatchMapping("/api/v1/hobbies/{path}/enrollments/{enrollmentId}/checkin")
     public ResponseEntity<ApiResponse<Void>> checkIn(
             @PathVariable String path,
@@ -111,6 +124,7 @@ public class EventApiController {
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
+    @Operation(summary = "Cancel check-in")
     @PatchMapping("/api/v1/hobbies/{path}/enrollments/{enrollmentId}/cancel-checkin")
     public ResponseEntity<ApiResponse<Void>> cancelCheckIn(
             @PathVariable String path,

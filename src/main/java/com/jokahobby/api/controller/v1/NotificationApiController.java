@@ -3,6 +3,8 @@ package com.jokahobby.api.controller.v1;
 import com.jokahobby.api.dto.response.ApiResponse;
 import com.jokahobby.api.dto.response.NotificationListResponse;
 import com.jokahobby.api.dto.response.UnreadCountResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.jokahobby.api.service.NotificationApplicationService;
 import com.jokahobby.modules.account.Account;
 import com.jokahobby.modules.account.CurrentAccount;
@@ -10,12 +12,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Notification")
 @RestController
 @RequiredArgsConstructor
 public class NotificationApiController {
 
     private final NotificationApplicationService notificationApplicationService;
 
+    @Operation(summary = "Get notifications")
     @GetMapping("/api/v1/notifications")
     public ResponseEntity<ApiResponse<NotificationListResponse>> getNotifications(
             @CurrentAccount Account account,
@@ -24,6 +28,7 @@ public class NotificationApiController {
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
+    @Operation(summary = "Get unread notification count")
     @GetMapping("/api/v1/notifications/unread-count")
     public ResponseEntity<ApiResponse<UnreadCountResponse>> getUnreadCount(
             @CurrentAccount Account account) {
@@ -31,6 +36,7 @@ public class NotificationApiController {
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
+    @Operation(summary = "Mark all notifications as read")
     @PatchMapping("/api/v1/notifications/mark-as-read")
     public ResponseEntity<ApiResponse<Void>> markAsRead(
             @CurrentAccount Account account) {
@@ -38,6 +44,7 @@ public class NotificationApiController {
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
+    @Operation(summary = "Delete read notifications")
     @DeleteMapping("/api/v1/notifications")
     public ResponseEntity<ApiResponse<Void>> deleteReadNotifications(
             @CurrentAccount Account account) {
