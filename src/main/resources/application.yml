@@ -8,6 +8,7 @@ jwt:
 app:
   host: ${APP_HOST:http://localhost:8080}
   frontend-url: ${APP_FRONTEND_URL:http://localhost:5173}
+  oauth2-code-ttl: ${APP_OAUTH2_CODE_TTL:30}
 
 spring:
   config:

@@ -11,7 +11,6 @@ import java.net.URLEncoder;
 import java.time.Duration;
 import java.time.Instant;
 
-
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Entity

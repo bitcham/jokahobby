@@ -3,7 +3,6 @@ package com.jokahobby.modules.hobby.event;
 import com.jokahobby.modules.hobby.Hobby;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEvent;
 
 @Getter
 @RequiredArgsConstructor

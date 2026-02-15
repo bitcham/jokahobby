@@ -3,10 +3,8 @@ package com.jokahobby.infra.security.oauth2;
 import com.jokahobby.infra.config.AppProperties;
 import com.jokahobby.infra.security.jwt.CookieUtil;
 import com.jokahobby.infra.security.jwt.JwtProperties;
-import com.jokahobby.infra.security.jwt.JwtProvider;
 import com.jokahobby.infra.security.jwt.TokenHashUtil;
 import com.jokahobby.modules.account.Account;
-import com.jokahobby.modules.account.RefreshTokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -15,17 +13,23 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.security.SecureRandom;
+import java.time.Instant;
+import java.util.HexFormat;
+import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
-    private final JwtProvider jwtProvider;
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
+    private final OAuth2AuthorizationCodeStore codeStore;
     private final JwtProperties jwtProperties;
-    private final RefreshTokenService refreshTokenService;
     private final AppProperties appProperties;
 
     @Override
@@ -33,33 +37,35 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                                         Authentication authentication) throws IOException {
         OAuth2UserPrincipal principal = (OAuth2UserPrincipal) authentication.getPrincipal();
 
-        assert principal != null;
+        Objects.requireNonNull(principal, "OAuth2 principal must not be null");
 
         Account account = principal.getAccount();
 
-        String accessToken = jwtProvider.createAccessToken(account.getId());
-        String refreshTokenRaw = jwtProvider.createRefreshToken(account.getId(), null, 0);
-        String refreshTokenHash = TokenHashUtil.sha256(refreshTokenRaw);
+        byte[] bindingBytes = new byte[32];
+        SECURE_RANDOM.nextBytes(bindingBytes);
+        String binding = HexFormat.of().formatHex(bindingBytes);
+        String bindingHash = TokenHashUtil.sha256(binding);
 
         String deviceInfo = request.getHeader("User-Agent");
         String ipAddress = request.getRemoteAddr();
-        refreshTokenService.createRefreshToken(
-                account.getId(), refreshTokenHash, deviceInfo, ipAddress);
+        boolean nicknameRequired = account.getNickname() == null;
+
+        OAuth2AuthorizationData data = new OAuth2AuthorizationData(
+                account.getId(), nicknameRequired, deviceInfo, ipAddress,
+                bindingHash, Instant.now());
+
+        String code = codeStore.store(data);
 
         response.addHeader(HttpHeaders.SET_COOKIE,
-                CookieUtil.createRefreshTokenCookie(
-                        refreshTokenRaw,
-                        jwtProperties.refreshTokenExpiry(),
-                        jwtProperties.secureCookie()).toString());
+                CookieUtil.createBindingCookie(binding, jwtProperties.secureCookie()).toString());
 
-        long expiresIn = jwtProvider.getAccessTokenExpirySeconds();
-        boolean nicknameRequired = account.getNickname() == null;
-        String redirectUrl = appProperties.getFrontendUrl()
-                + "/oauth2/callback?token=" + accessToken
-                + "&expiresIn=" + expiresIn
-                + "&nicknameRequired=" + nicknameRequired;
+        String redirectUrl = UriComponentsBuilder
+                .fromUriString(appProperties.getFrontendUrl())
+                .path("/oauth2/callback")
+                .queryParam("code", code)
+                .build().toUriString();
 
-        log.info("OAuth2 login success for accountId={}", account.getId());
+        log.info("OAuth2 login success for accountId={}, code issued", account.getId());
         response.sendRedirect(redirectUrl);
     }
 }

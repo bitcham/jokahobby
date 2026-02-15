@@ -28,4 +28,24 @@ public final class CookieUtil {
                 .maxAge(0)
                 .build();
     }
+
+    public static ResponseCookie createBindingCookie(String binding, boolean secure) {
+        return ResponseCookie.from("oauth2_binding", binding)
+                .httpOnly(true)
+                .secure(secure)
+                .sameSite("Lax")
+                .path("/api/v1/auth")
+                .maxAge(60)
+                .build();
+    }
+
+    public static ResponseCookie deleteBindingCookie(boolean secure) {
+        return ResponseCookie.from("oauth2_binding", "")
+                .httpOnly(true)
+                .secure(secure)
+                .sameSite("Lax")
+                .path("/api/v1/auth")
+                .maxAge(0)
+                .build();
+    }
 }

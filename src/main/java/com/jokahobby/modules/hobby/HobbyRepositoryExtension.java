@@ -1,6 +1,5 @@
 package com.jokahobby.modules.hobby;
 
-import com.jokahobby.modules.hobby.HobbySortType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;

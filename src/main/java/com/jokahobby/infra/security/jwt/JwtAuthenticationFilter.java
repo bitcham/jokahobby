@@ -1,8 +1,8 @@
 package com.jokahobby.infra.security.jwt;
 
+import com.jokahobby.infra.security.oauth2.OAuth2UserPrincipal;
 import com.jokahobby.modules.account.Account;
 import com.jokahobby.modules.account.AccountRepository;
-import com.jokahobby.infra.security.oauth2.OAuth2UserPrincipal;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

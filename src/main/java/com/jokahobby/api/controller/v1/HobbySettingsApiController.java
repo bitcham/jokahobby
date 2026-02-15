@@ -1,7 +1,10 @@
 package com.jokahobby.api.controller.v1;
 
 import com.jokahobby.api.dto.request.*;
-import com.jokahobby.api.dto.response.*;
+import com.jokahobby.api.dto.response.ApiResponse;
+import com.jokahobby.api.dto.response.HobbySettingsResponse;
+import com.jokahobby.api.dto.response.TagResponse;
+import com.jokahobby.api.dto.response.ZoneResponse;
 import com.jokahobby.api.service.HobbyApplicationService;
 import com.jokahobby.modules.account.Account;
 import com.jokahobby.modules.account.CurrentAccount;

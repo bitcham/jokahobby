@@ -1,6 +1,5 @@
 package com.jokahobby.modules.hobby;
 
-import com.jokahobby.modules.hobby.HobbySortType;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;

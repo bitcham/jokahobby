@@ -1,24 +1,30 @@
 package com.jokahobby.api.controller.v1;
 
+import com.jokahobby.api.dto.request.OAuth2CodeRequest;
 import com.jokahobby.api.dto.response.ApiResponse;
+import com.jokahobby.api.dto.response.OAuth2TokenResponse;
 import com.jokahobby.api.dto.response.TokenResponse;
-import com.jokahobby.infra.exception.BusinessException;
+import com.jokahobby.infra.exception.AppException;
 import com.jokahobby.infra.exception.ErrorCode;
 import com.jokahobby.infra.security.jwt.CookieUtil;
 import com.jokahobby.infra.security.jwt.JwtProperties;
 import com.jokahobby.infra.security.jwt.JwtProvider;
 import com.jokahobby.infra.security.jwt.TokenHashUtil;
+import com.jokahobby.infra.security.oauth2.OAuth2AuthorizationCodeStore;
+import com.jokahobby.infra.security.oauth2.OAuth2AuthorizationData;
 import com.jokahobby.modules.account.RefreshToken;
 import com.jokahobby.modules.account.RefreshTokenService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
-
-import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,6 +33,45 @@ public class AuthApiController {
     private final JwtProvider jwtProvider;
     private final JwtProperties jwtProperties;
     private final RefreshTokenService refreshTokenService;
+    private final OAuth2AuthorizationCodeStore codeStore;
+
+    @PostMapping("/api/v1/auth/oauth2/token")
+    public ResponseEntity<ApiResponse<OAuth2TokenResponse>> exchangeOAuth2Code(
+            @Valid @RequestBody OAuth2CodeRequest request,
+            @CookieValue(name = "oauth2_binding", required = false) String binding) {
+
+        if (binding == null) {
+            throw new AppException(ErrorCode.INVALID_AUTHORIZATION_CODE);
+        }
+
+        String bindingHash = TokenHashUtil.sha256(binding);
+        OAuth2AuthorizationData data = codeStore.consumeIfValid(request.code(), bindingHash);
+
+        if (data == null) {
+            throw new AppException(ErrorCode.INVALID_AUTHORIZATION_CODE);
+        }
+
+        String accessToken = jwtProvider.createAccessToken(data.accountId());
+        String refreshTokenRaw = jwtProvider.createRefreshToken(data.accountId(), null, 0);
+        String refreshTokenHash = TokenHashUtil.sha256(refreshTokenRaw);
+
+        refreshTokenService.createRefreshToken(
+                data.accountId(), refreshTokenHash, data.deviceInfo(), data.ipAddress());
+
+        OAuth2TokenResponse tokenResponse = new OAuth2TokenResponse(
+                accessToken, jwtProvider.getAccessTokenExpirySeconds(), data.nicknameRequired());
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE,
+                        CookieUtil.createRefreshTokenCookie(
+                                refreshTokenRaw,
+                                jwtProperties.refreshTokenExpiry(),
+                                jwtProperties.secureCookie()).toString())
+                .header(HttpHeaders.SET_COOKIE,
+                        CookieUtil.deleteBindingCookie(jwtProperties.secureCookie()).toString())
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .body(ApiResponse.ok(tokenResponse));
+    }
 
     @PostMapping("/api/v1/auth/refresh")
     public ResponseEntity<ApiResponse<TokenResponse>> refresh(
@@ -34,7 +79,7 @@ public class AuthApiController {
             HttpServletRequest httpRequest) {
 
         if (!jwtProvider.validateToken(refreshTokenRaw)) {
-            throw new BusinessException(ErrorCode.INVALID_TOKEN);
+            throw new AppException(ErrorCode.INVALID_TOKEN);
         }
 
         String oldHash = TokenHashUtil.sha256(refreshTokenRaw);
@@ -83,9 +128,7 @@ public class AuthApiController {
     }
 
     @PostMapping("/api/v1/auth/logout-all")
-    public ResponseEntity<ApiResponse<Void>> logoutAll(
-            @CookieValue(name = "refreshToken", required = false) String refreshTokenRaw,
-            HttpServletRequest httpRequest) {
+    public ResponseEntity<ApiResponse<Void>> logoutAll(HttpServletRequest httpRequest) {
 
         UUID accountId = getAccountIdFromRequest(httpRequest);
         refreshTokenService.revokeAllTokens(accountId);
@@ -100,11 +143,11 @@ public class AuthApiController {
     private UUID getAccountIdFromRequest(HttpServletRequest request) {
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+            throw new AppException(ErrorCode.UNAUTHORIZED);
         }
         String token = authHeader.substring(7);
         if (!jwtProvider.validateToken(token)) {
-            throw new BusinessException(ErrorCode.INVALID_TOKEN);
+            throw new AppException(ErrorCode.INVALID_TOKEN);
         }
         return jwtProvider.getAccountId(token);
     }

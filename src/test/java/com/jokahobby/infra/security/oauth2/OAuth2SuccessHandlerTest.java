@@ -3,7 +3,6 @@ package com.jokahobby.infra.security.oauth2;
 import com.jokahobby.infra.AbstractContainerBaseTest;
 import com.jokahobby.infra.MockMvcTest;
 import com.jokahobby.infra.config.AppProperties;
-import com.jokahobby.infra.security.jwt.JwtProvider;
 import com.jokahobby.modules.account.Account;
 import com.jokahobby.modules.account.AccountRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -25,7 +24,6 @@ class OAuth2SuccessHandlerTest extends AbstractContainerBaseTest {
 
     @Autowired private OAuth2SuccessHandler oAuth2SuccessHandler;
     @Autowired private AccountRepository accountRepository;
-    @Autowired private JwtProvider jwtProvider;
     @Autowired private AppProperties appProperties;
 
     @AfterEach
@@ -33,7 +31,7 @@ class OAuth2SuccessHandlerTest extends AbstractContainerBaseTest {
         accountRepository.deleteAll();
     }
 
-    @DisplayName("Success handler generates tokens and redirects with nicknameRequired=true for new account")
+    @DisplayName("Success handler generates code and redirects with oauth2_binding cookie for new account")
     @Test
     void successHandler_newAccount() throws Exception {
         Account account = Account.builder()
@@ -55,15 +53,17 @@ class OAuth2SuccessHandlerTest extends AbstractContainerBaseTest {
 
         String redirectUrl = response.getRedirectedUrl();
         assertThat(redirectUrl).startsWith(appProperties.getFrontendUrl() + "/oauth2/callback");
-        assertThat(redirectUrl).contains("token=");
-        assertThat(redirectUrl).contains("expiresIn=");
-        assertThat(redirectUrl).contains("nicknameRequired=true");
+        assertThat(redirectUrl).contains("code=");
+        assertThat(redirectUrl).doesNotContain("token=");
+        assertThat(redirectUrl).doesNotContain("expiresIn=");
 
-        // Verify refresh token cookie is set
-        assertThat(response.getHeader("Set-Cookie")).contains("refreshToken");
+        // Verify oauth2_binding cookie is set, refreshToken cookie is NOT set
+        String setCookieHeader = response.getHeader("Set-Cookie");
+        assertThat(setCookieHeader).contains("oauth2_binding");
+        assertThat(setCookieHeader).doesNotContain("refreshToken");
     }
 
-    @DisplayName("Success handler sets nicknameRequired=false for account with nickname")
+    @DisplayName("Success handler redirects with code for account with nickname (no nicknameRequired in URL)")
     @Test
     void successHandler_existingAccountWithNickname() throws Exception {
         Account account = Account.builder()
@@ -84,6 +84,8 @@ class OAuth2SuccessHandlerTest extends AbstractContainerBaseTest {
         oAuth2SuccessHandler.onAuthenticationSuccess(request, response, auth);
 
         String redirectUrl = response.getRedirectedUrl();
-        assertThat(redirectUrl).contains("nicknameRequired=false");
+        assertThat(redirectUrl).contains("code=");
+        assertThat(redirectUrl).doesNotContain("nicknameRequired=");
+        assertThat(redirectUrl).doesNotContain("token=");
     }
 }
