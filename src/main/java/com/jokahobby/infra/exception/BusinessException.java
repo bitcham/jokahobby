@@ -1,19 +1,12 @@
 package com.jokahobby.infra.exception;
 
-import lombok.Getter;
-
-@Getter
-public class BusinessException extends RuntimeException {
-
-    private final ErrorCode errorCode;
+public class BusinessException extends AppException {
 
     public BusinessException(ErrorCode errorCode) {
-        super(errorCode.getMessage());
-        this.errorCode = errorCode;
+        super(errorCode);
     }
 
     public BusinessException(ErrorCode errorCode, String message) {
-        super(message);
-        this.errorCode = errorCode;
+        super(errorCode, message);
     }
 }

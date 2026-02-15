@@ -14,6 +14,7 @@ public enum ErrorCode {
     REFRESH_TOKEN_REUSED("AUTH_005", "Refresh token has already been used.", 401),
     MAX_SESSIONS_EXCEEDED("AUTH_006", "Maximum session limit reached.", 401),
     OAUTH2_AUTHENTICATION_FAILED("AUTH_007", "OAuth2 authentication failed.", 401),
+    INVALID_AUTHORIZATION_CODE("AUTH_008", "Invalid or expired authorization code.", 401),
 
     // Authorization
     FORBIDDEN("AUTH_010", "Access denied.", 403),
