@@ -105,7 +105,7 @@ jokahobby/
 │   │   └── service/           # ApplicationService (orchestration layer)
 │   ├── infra/
 │   │   ├── config/            # AppConfig, AsyncConfig, SecurityConfig
-│   │   ├── exception/         # ErrorCode enum, BusinessException
+│   │   ├── exception/         # ErrorCode enum, AppException, BusinessException
 │   │   ├── mail/              # EmailService interface + implementations
 │   │   ├── scheduler/         # RefreshToken cleanup scheduler
 │   │   └── security/
@@ -138,11 +138,12 @@ jokahobby/
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
+| POST | `/api/v1/auth/oauth2/token` | Cookie | Exchange OAuth2 authorization code for JWT tokens |
 | POST | `/api/v1/auth/refresh` | Cookie | Rotate refresh token, return new access token |
 | POST | `/api/v1/auth/logout` | Cookie | Revoke current refresh token |
 | POST | `/api/v1/auth/logout-all` | Bearer | Revoke all refresh tokens for the account |
 
-> Login is handled via OAuth2 redirect (`/oauth2/authorization/google`), not a REST endpoint.
+> Login initiates via OAuth2 redirect (`/oauth2/authorization/google`). On success, a short-lived authorization code is issued and exchanged for JWT tokens via `/api/v1/auth/oauth2/token` with a binding cookie for CSRF protection.
 
 ### Account
 
