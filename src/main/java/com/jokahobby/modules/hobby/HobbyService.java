@@ -8,7 +8,6 @@ import com.jokahobby.modules.zone.Zone;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -46,9 +45,8 @@ public class HobbyService {
     }
 
     public Hobby getHobby(String path) {
-        Hobby hobby = this.hobbyRepository.findByPath(path);
-        checkIfExistingHobby(path, hobby);
-        return hobby;
+        return hobbyRepository.findByPath(path)
+                .orElseThrow(() -> new BusinessException(ErrorCode.HOBBY_NOT_FOUND));
     }
 
     public Hobby getHobbyWithManagerCheck(Account account, String path) {
@@ -153,15 +151,9 @@ public class HobbyService {
                 .toList();
     }
 
-    private void checkIfExistingHobby(String path, Hobby hobby) {
-        if (hobby == null) {
-            throw new BusinessException(ErrorCode.HOBBY_NOT_FOUND);
-        }
-    }
-
     private void checkIfManager(Account account, Hobby hobby) {
         if (!isManager(hobby, account)) {
-            throw new AccessDeniedException("You do not have permission to access this hobby.");
+            throw new BusinessException(ErrorCode.FORBIDDEN);
         }
     }
 

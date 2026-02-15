@@ -45,8 +45,8 @@ class HobbySoftDeleteRepositoryTest extends AbstractContainerBaseTest {
             em.flush();
             em.clear();
 
-            Hobby found = hobbyRepository.findByPath("test-path");
-            assertThat(found).isNull();
+            Optional<Hobby> found = hobbyRepository.findByPath("test-path");
+            assertThat(found).isEmpty();
         }
 
         @Test
@@ -130,7 +130,7 @@ class HobbySoftDeleteRepositoryTest extends AbstractContainerBaseTest {
             em.flush();
             em.clear();
 
-            Hobby reloaded = hobbyRepository.findByPath("audit-path");
+            Hobby reloaded = hobbyRepository.findByPath("audit-path").orElseThrow();
             assertThat(reloaded.getCreatedAt()).isEqualTo(originalCreatedAt);
             assertThat(reloaded.getUpdatedAt()).isAfterOrEqualTo(originalUpdatedAt);
         }

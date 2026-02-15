@@ -52,7 +52,7 @@ class HobbyServiceSoftDeleteTest extends AbstractContainerBaseTest {
         em.flush();
         em.clear();
 
-        assertThat(hobbyRepository.findByPath("removable")).isNull();
+        assertThat(hobbyRepository.findByPath("removable")).isEmpty();
     }
 
     @Test
