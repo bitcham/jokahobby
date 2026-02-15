@@ -52,7 +52,7 @@ flowchart TB
 | **Frontend** | React 19, TypeScript, Vite, TailwindCSS |
 | **State Management** | Zustand, TanStack React Query |
 | **Email** | Spring Mail (Gmail SMTP), Thymeleaf (email templates), Async via ThreadPoolTaskExecutor |
-| **Testing** | JUnit 5, TestContainers, ArchUnit, WireMock, Vitest, Playwright |
+| **Testing** | JUnit 5, TestContainers, Vitest, Playwright |
 | **Containerization** | Docker Compose (PostgreSQL 17) |
 
 ---

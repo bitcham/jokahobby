@@ -21,6 +21,7 @@ public enum ErrorCode {
     // Validation
     INVALID_INPUT("VALID_001", "Invalid input value.", 400),
     DUPLICATE_NICKNAME("VALID_003", "Nickname already exists.", 409),
+    DATA_CONFLICT("VALID_004", "Data conflict.", 409),
 
     // Hobby
     HOBBY_ALREADY_PUBLISHED("HOBBY_001", "Hobby is already published or closed.", 400),

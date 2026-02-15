@@ -2,6 +2,8 @@ package com.jokahobby.modules.event;
 
 import com.jokahobby.modules.account.Account;
 import com.jokahobby.modules.hobby.Hobby;
+import com.jokahobby.infra.exception.BusinessException;
+import com.jokahobby.infra.exception.ErrorCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +18,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -78,13 +81,14 @@ class EventServiceTest {
     }
 
     @Test
-    @DisplayName("newEnrollment: duplicate returns null")
-    void newEnrollment_duplicate_returnsNull() {
+    @DisplayName("newEnrollment: duplicate throws BusinessException")
+    void newEnrollment_duplicate_throwsBusinessException() {
         given(enrollmentRepository.existsByEventAndAccount(fcfsEvent, account)).willReturn(true);
 
-        Enrollment result = eventService.newEnrollment(fcfsEvent, account);
-
-        assertThat(result).isNull();
+        assertThatThrownBy(() -> eventService.newEnrollment(fcfsEvent, account))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(ex -> assertThat(((BusinessException) ex).getErrorCode())
+                        .isEqualTo(ErrorCode.EVENT_NOT_ENROLLABLE));
     }
 
     @Test

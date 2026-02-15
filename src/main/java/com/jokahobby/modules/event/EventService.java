@@ -1,5 +1,7 @@
 package com.jokahobby.modules.event;
 
+import com.jokahobby.infra.exception.BusinessException;
+import com.jokahobby.infra.exception.ErrorCode;
 import com.jokahobby.modules.account.Account;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,17 +34,18 @@ public class EventService {
     }
 
     public Enrollment newEnrollment(Event event, Account account) {
-        if (!enrollmentRepository.existsByEventAndAccount(event, account)) {
-            Enrollment enrollment = Enrollment.builder()
-                    .enrolledAt(Instant.now())
-                    .accepted(event.isAbleToAcceptWaitingEnrollment())
-                    .account(account)
-                    .build();
-            event.addEnrollment(enrollment);
-            enrollmentRepository.save(enrollment);
-            return enrollment;
+        if (enrollmentRepository.existsByEventAndAccount(event, account)) {
+            throw new BusinessException(ErrorCode.EVENT_NOT_ENROLLABLE);
         }
-        return null;
+
+        Enrollment enrollment = Enrollment.builder()
+                .enrolledAt(Instant.now())
+                .accepted(event.isAbleToAcceptWaitingEnrollment())
+                .account(account)
+                .build();
+        event.addEnrollment(enrollment);
+        enrollmentRepository.save(enrollment);
+        return enrollment;
     }
 
     public Enrollment cancelEnrollment(Event event, Account account) {

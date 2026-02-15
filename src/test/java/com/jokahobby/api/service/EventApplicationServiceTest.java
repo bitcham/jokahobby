@@ -85,6 +85,7 @@ class EventApplicationServiceTest {
                 .id(1L).account(enrollee).enrolledAt(Instant.now()).accepted(true).build();
 
         given(hobbyService.getHobby("test-hobby")).willReturn(hobby);
+        given(eventRepository.findByIdForUpdate(1L)).willReturn(Optional.of(event));
         given(eventRepository.findWithEnrollmentsById(1L)).willReturn(Optional.of(event));
         given(eventService.newEnrollment(event, enrollee)).willReturn(acceptedEnrollment);
 
@@ -101,6 +102,7 @@ class EventApplicationServiceTest {
                 .id(1L).account(enrollee).enrolledAt(Instant.now()).accepted(false).build();
 
         given(hobbyService.getHobby("test-hobby")).willReturn(hobby);
+        given(eventRepository.findByIdForUpdate(1L)).willReturn(Optional.of(event));
         given(eventRepository.findWithEnrollmentsById(1L)).willReturn(Optional.of(event));
         given(eventService.newEnrollment(event, enrollee)).willReturn(waitingEnrollment);
 
@@ -118,6 +120,7 @@ class EventApplicationServiceTest {
                 .id(2L).account(enrollee).enrolledAt(Instant.now()).accepted(true).build();
 
         given(hobbyService.getHobby("test-hobby")).willReturn(hobby);
+        given(eventRepository.findByIdForUpdate(1L)).willReturn(Optional.of(event));
         given(eventRepository.findWithEnrollmentsById(1L)).willReturn(Optional.of(event));
         given(eventService.cancelEnrollment(event, enrollee)).willReturn(promotedEnrollment);
 
@@ -133,6 +136,7 @@ class EventApplicationServiceTest {
         addEnrollmentToEvent(event, enrollee, true);
 
         given(hobbyService.getHobby("test-hobby")).willReturn(hobby);
+        given(eventRepository.findByIdForUpdate(1L)).willReturn(Optional.of(event));
         given(eventRepository.findWithEnrollmentsById(1L)).willReturn(Optional.of(event));
         given(eventService.cancelEnrollment(event, enrollee)).willReturn(null);
 
@@ -152,6 +156,7 @@ class EventApplicationServiceTest {
                 .id(2L).account(enrollee2).enrolledAt(Instant.now()).accepted(true).build();
 
         given(hobbyService.getHobbyWithManagerCheck(manager, "test-hobby")).willReturn(hobby);
+        given(eventRepository.findByIdForUpdate(1L)).willReturn(Optional.of(event));
         given(eventRepository.findWithEnrollmentsById(1L)).willReturn(Optional.of(event));
         given(eventService.updateEvent(eq(event), any(), any(), any(), any(), any(), any()))
                 .willReturn(List.of(promoted1, promoted2));

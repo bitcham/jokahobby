@@ -64,7 +64,6 @@ secrets.json
 serviceAccountKey.json
 
 migration.md
-migration/
 .claude/
 CLAUDE.md
 analysis/

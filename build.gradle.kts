@@ -57,14 +57,11 @@ dependencies {
     testCompileOnly("org.projectlombok:lombok")
     testAnnotationProcessor("org.projectlombok:lombok")
 
-    testImplementation("com.tngtech.archunit:archunit:1.4.1")
     testImplementation("org.junit.jupiter:junit-jupiter")
 
     testImplementation("org.testcontainers:testcontainers")
     testImplementation("org.testcontainers:testcontainers-junit-jupiter")
     testImplementation("org.testcontainers:testcontainers-postgresql")
-
-    testImplementation("org.wiremock:wiremock-standalone:3.10.0")
 
     implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
     annotationProcessor("com.querydsl:querydsl-apt:5.1.0:jakarta")

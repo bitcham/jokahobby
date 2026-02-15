@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -44,6 +45,13 @@ public class GlobalExceptionHandler {
         log.warn("Missing cookie: {}", e.getCookieName());
         return ResponseEntity.badRequest()
                 .body(ApiResponse.error(ErrorCode.INVALID_INPUT));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDataIntegrityViolation(DataIntegrityViolationException e) {
+        log.warn("Data integrity violation: {}", e.getMostSpecificCause().getMessage());
+        return ResponseEntity.status(409)
+                .body(ApiResponse.error(ErrorCode.DATA_CONFLICT));
     }
 
     @ExceptionHandler(AccessDeniedException.class)

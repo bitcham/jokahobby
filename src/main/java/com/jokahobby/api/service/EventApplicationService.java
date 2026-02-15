@@ -56,7 +56,7 @@ public class EventApplicationService {
 
     public EventResponse updateEvent(String path, Long eventId, Account account, EventUpdateRequest request) {
         Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
-        Event event = getEventOfHobby(eventId, hobby);
+        Event event = getEventOfHobbyForUpdate(eventId, hobby);
 
         if (request.limitOfEnrollments() < event.getNumberOfAcceptedEnrollments()) {
             throw new BusinessException(ErrorCode.EVENT_ENROLLMENT_LIMIT_TOO_LOW);
@@ -84,21 +84,21 @@ public class EventApplicationService {
 
     public void enroll(String path, Long eventId, Account account) {
         Hobby hobby = hobbyService.getHobby(path);
-        Event event = getEventOfHobby(eventId, hobby);
+        Event event = getEventOfHobbyForUpdate(eventId, hobby);
 
         if (!event.isEnrollableFor(account)) {
             throw new BusinessException(ErrorCode.EVENT_NOT_ENROLLABLE);
         }
 
         Enrollment enrollment = eventService.newEnrollment(event, account);
-        if (enrollment != null && enrollment.isAccepted()) {
+        if (enrollment.isAccepted()) {
             eventPublisher.publishEvent(new EnrollmentAcceptedEvent(enrollment));
         }
     }
 
     public void disenroll(String path, Long eventId, Account account) {
         Hobby hobby = hobbyService.getHobby(path);
-        Event event = getEventOfHobby(eventId, hobby);
+        Event event = getEventOfHobbyForUpdate(eventId, hobby);
 
         if (!event.isDisenrollableFor(account)) {
             throw new BusinessException(ErrorCode.EVENT_NOT_DISENROLLABLE);
@@ -149,6 +149,17 @@ public class EventApplicationService {
     }
 
     private Event getEventOfHobby(Long eventId, Hobby hobby) {
+        Event event = eventRepository.findWithEnrollmentsById(eventId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.EVENT_NOT_FOUND));
+        if (!event.getHobby().equals(hobby)) {
+            throw new BusinessException(ErrorCode.EVENT_NOT_FOUND);
+        }
+        return event;
+    }
+
+    private Event getEventOfHobbyForUpdate(Long eventId, Hobby hobby) {
+        eventRepository.findByIdForUpdate(eventId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.EVENT_NOT_FOUND));
         Event event = eventRepository.findWithEnrollmentsById(eventId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.EVENT_NOT_FOUND));
         if (!event.getHobby().equals(hobby)) {
