@@ -49,6 +49,11 @@ public class HobbyService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.HOBBY_NOT_FOUND));
     }
 
+    public Hobby getHobbyForUpdate(String path) {
+        return hobbyRepository.findByPathForUpdate(path)
+                .orElseThrow(() -> new BusinessException(ErrorCode.HOBBY_NOT_FOUND));
+    }
+
     public Hobby getHobbyWithManagerCheck(Account account, String path) {
         Hobby hobby = this.getHobby(path);
         checkIfManager(account, hobby);

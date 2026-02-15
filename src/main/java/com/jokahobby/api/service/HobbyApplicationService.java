@@ -82,7 +82,7 @@ public class HobbyApplicationService {
     }
 
     public void joinHobby(String path, Account account) {
-        Hobby hobby = hobbyService.getHobby(path);
+        Hobby hobby = hobbyService.getHobbyForUpdate(path);
         if (!hobbyService.isJoinable(hobby, account)) {
             throw new BusinessException(ErrorCode.HOBBY_NOT_JOINABLE);
         }
@@ -90,7 +90,7 @@ public class HobbyApplicationService {
     }
 
     public void leaveHobby(String path, Account account) {
-        Hobby hobby = hobbyService.getHobby(path);
+        Hobby hobby = hobbyService.getHobbyForUpdate(path);
         if (!hobbyService.isMember(hobby, account)) {
             throw new BusinessException(ErrorCode.HOBBY_NOT_MEMBER);
         }
