@@ -47,6 +47,9 @@ src/main/resources/application-prod.properties
 ### Environment ###
 *env*
 
+### Logs ###
+logs/
+
 ### Docs ###
 docs/
 checkpoints/

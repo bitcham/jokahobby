@@ -37,6 +37,7 @@ public class EnrollmentEventListener {
         Account account = enrollment.getAccount();
         Event event = enrollment.getEvent();
         Hobby hobby = event.getHobby();
+        log.info("Processing EnrollmentEvent enrollmentId={}, eventId={}", enrollment.getId(), event.getId());
 
         if(account.isHobbyEnrollmentResultByEmail()){
             sendEnrollmentResultEmail(account, hobby, event, enrollmentEvent);

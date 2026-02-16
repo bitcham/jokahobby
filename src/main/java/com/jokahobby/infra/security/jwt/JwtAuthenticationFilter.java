@@ -3,12 +3,16 @@ package com.jokahobby.infra.security.jwt;
 import com.jokahobby.infra.security.oauth2.OAuth2UserPrincipal;
 import com.jokahobby.modules.account.Account;
 import com.jokahobby.modules.account.AccountRepository;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -32,15 +36,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         String token = extractToken(request);
 
-        if (token != null && jwtProvider.validateToken(token)) {
-            UUID accountId = jwtProvider.getAccountId(token);
-            Account account = accountRepository.findById(accountId).orElse(null);
+        if (token != null) {
+            try {
+                UUID accountId = jwtProvider.getAccountId(token);
+                Account account = accountRepository.findById(accountId).orElse(null);
 
-            if (account != null) {
-                OAuth2UserPrincipal principal = new OAuth2UserPrincipal(account, Map.of());
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                if (account != null) {
+                    MDC.put("accountId", accountId.toString());
+                    OAuth2UserPrincipal principal = new OAuth2UserPrincipal(account, Map.of());
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    log.debug("Authenticated accountId={}", accountId);
+                }
+            } catch (SignatureException e) {
+                log.warn("Token signature mismatch: {}", e.getMessage());
+            } catch (ExpiredJwtException e) {
+                log.debug("Token expired: {}", e.getMessage());
+            } catch (JwtException | IllegalArgumentException e) {
+                log.debug("Token validation failed: {}", e.getMessage());
             }
         }
 

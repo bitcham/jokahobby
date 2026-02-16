@@ -1,11 +1,14 @@
 package com.jokahobby.infra.config;
 
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskDecorator;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import java.util.Map;
 import java.util.concurrent.Executor;
 
 @Slf4j
@@ -23,7 +26,26 @@ public class AsyncConfig implements AsyncConfigurer {
         executor.setQueueCapacity(50);
         executor.setKeepAliveSeconds(60);
         executor.setThreadNamePrefix("Async-");
+        executor.setTaskDecorator(new MdcTaskDecorator());
         executor.initialize();
         return executor;
+    }
+
+    private static class MdcTaskDecorator implements TaskDecorator {
+
+        @Override
+        public Runnable decorate(Runnable runnable) {
+            Map<String, String> contextMap = MDC.getCopyOfContextMap();
+            return () -> {
+                try {
+                    if (contextMap != null) {
+                        MDC.setContextMap(contextMap);
+                    }
+                    runnable.run();
+                } finally {
+                    MDC.clear();
+                }
+            };
+        }
     }
 }

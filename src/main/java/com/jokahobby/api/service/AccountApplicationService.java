@@ -9,11 +9,13 @@ import com.jokahobby.modules.tag.TagService;
 import com.jokahobby.modules.zone.Zone;
 import com.jokahobby.modules.zone.ZoneService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -29,7 +31,9 @@ public class AccountApplicationService {
     }
 
     public Account updateProfile(Account account, ProfileUpdateRequest request) {
-        return accountService.updateProfile(account, request.bio(), request.url(), request.location(), request.profileImage());
+        Account updated = accountService.updateProfile(account, request.bio(), request.url(), request.location(), request.profileImage());
+        log.info("Profile updated");
+        return updated;
     }
 
     public void updateNotifications(Account account, NotificationUpdateRequest request) {
@@ -40,7 +44,9 @@ public class AccountApplicationService {
     }
 
     public Account updateNickname(Account account, String nickname) {
-        return accountService.updateNicknameWithDuplicateCheck(account, nickname);
+        Account updated = accountService.updateNicknameWithDuplicateCheck(account, nickname);
+        log.info("Nickname updated");
+        return updated;
     }
 
     @Transactional(readOnly = true)

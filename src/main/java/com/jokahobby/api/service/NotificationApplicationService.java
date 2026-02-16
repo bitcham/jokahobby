@@ -10,6 +10,7 @@ import com.jokahobby.modules.notification.NotificationRepository;
 import com.jokahobby.modules.notification.NotificationService;
 import com.jokahobby.modules.notification.NotificationType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -56,9 +58,11 @@ public class NotificationApplicationService {
         List<Notification> unchecked = notificationRepository
                 .findByAccountAndCheckedOrderByCreatedAtDesc(account, false);
         notificationService.markAsRead(unchecked);
+        log.debug("Notifications marked as read");
     }
 
     public void deleteReadNotifications(Account account) {
         notificationRepository.deleteByAccountAndChecked(account, true);
+        log.debug("Read notifications deleted");
     }
 }

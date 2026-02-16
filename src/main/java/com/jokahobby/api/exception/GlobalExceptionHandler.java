@@ -36,6 +36,7 @@ public class GlobalExceptionHandler {
                         fe -> fe.getDefaultMessage() != null ? fe.getDefaultMessage() : "Invalid value",
                         (a, b) -> a
                 ));
+        log.debug("Validation failed: {}", fieldErrors.keySet());
         return ResponseEntity.badRequest()
                 .body(ApiResponse.error(ErrorCode.INVALID_INPUT, fieldErrors));
     }
@@ -56,6 +57,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException e) {
+        log.warn("Access denied");
         return ResponseEntity.status(403)
                 .body(ApiResponse.error(ErrorCode.FORBIDDEN));
     }

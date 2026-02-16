@@ -14,12 +14,14 @@ import com.jokahobby.modules.hobby.Hobby;
 import com.jokahobby.modules.hobby.HobbyService;
 import com.jokahobby.modules.hobby.event.HobbyUpdateEvent;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -35,6 +37,7 @@ public class EventApplicationService {
         Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
         Event event = request.toEntity(hobby, account);
         Event saved = eventService.createEvent(event);
+        log.info("Event created path={}, eventId={}", path, saved.getId());
         eventPublisher.publishEvent(new HobbyUpdateEvent(hobby,
                 "'" + saved.getTitle() + "' event created"));
         return EventResponse.from(saved, account);
@@ -66,6 +69,7 @@ public class EventApplicationService {
                 request.endEnrollmentDateTime(), request.startDateTime(),
                 request.endDateTime(), request.limitOfEnrollments());
 
+        log.info("Event updated eventId={}", eventId);
         eventPublisher.publishEvent(new HobbyUpdateEvent(hobby,
                 "'" + event.getTitle() + "' event updated. Please check the details."));
         promotedEnrollments.forEach(enrollment ->
@@ -78,6 +82,7 @@ public class EventApplicationService {
         Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
         Event event = getEventOfHobby(eventId, hobby);
         eventService.deleteEvent(event);
+        log.info("Event deleted eventId={}", eventId);
         eventPublisher.publishEvent(new HobbyUpdateEvent(hobby,
                 "'" + event.getTitle() + "' event canceled."));
     }
@@ -91,6 +96,7 @@ public class EventApplicationService {
         }
 
         Enrollment enrollment = eventService.newEnrollment(event, account);
+        log.info("Enrolled eventId={}", eventId);
         if (enrollment.isAccepted()) {
             eventPublisher.publishEvent(new EnrollmentAcceptedEvent(enrollment));
         }
@@ -105,6 +111,7 @@ public class EventApplicationService {
         }
 
         Enrollment promotedEnrollment = eventService.cancelEnrollment(event, account);
+        log.info("Disenrolled eventId={}", eventId);
         if (promotedEnrollment != null) {
             eventPublisher.publishEvent(new EnrollmentAcceptedEvent(promotedEnrollment));
         }
@@ -120,6 +127,7 @@ public class EventApplicationService {
         }
 
         eventService.acceptEnrollment(event, enrollment);
+        log.info("Enrollment accepted enrollmentId={}", enrollmentId);
         eventPublisher.publishEvent(new EnrollmentAcceptedEvent(enrollment));
     }
 
@@ -133,6 +141,7 @@ public class EventApplicationService {
         }
 
         eventService.rejectEnrollment(event, enrollment);
+        log.info("Enrollment rejected enrollmentId={}", enrollmentId);
         eventPublisher.publishEvent(new EnrollmentRejectedEvent(enrollment));
     }
 
@@ -140,12 +149,14 @@ public class EventApplicationService {
         hobbyService.getHobbyWithManagerCheck(account, path);
         Enrollment enrollment = getEnrollment(enrollmentId);
         eventService.checkInEnrollment(enrollment);
+        log.info("Check-in enrollmentId={}", enrollmentId);
     }
 
     public void cancelCheckIn(String path, Long enrollmentId, Account account) {
         hobbyService.getHobbyWithManagerCheck(account, path);
         Enrollment enrollment = getEnrollment(enrollmentId);
         eventService.cancelCheckInEnrollment(enrollment);
+        log.info("Check-in canceled enrollmentId={}", enrollmentId);
     }
 
     private Event getEventOfHobby(Long eventId, Hobby hobby) {

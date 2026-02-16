@@ -45,6 +45,7 @@ public class HobbyEventListener {
     @Transactional
     public void handleHobbyCreatedEvent(HobbyCreatedEvent event) {
         Hobby hobby = hobbyRepository.findById(event.getHobby().getId()).orElseThrow();
+        log.info("Processing HobbyCreatedEvent hobbyId={}, path={}", hobby.getId(), hobby.getPath());
         Set<com.jokahobby.modules.tag.Tag> tags = hobbyTagRepository.findAllByHobbyId(hobby.getId()).stream()
                 .map(HobbyTag::getTag).collect(Collectors.toSet());
         Set<com.jokahobby.modules.zone.Zone> zones = hobbyZoneRepository.findAllByHobbyId(hobby.getId()).stream()
@@ -65,6 +66,7 @@ public class HobbyEventListener {
     @Transactional
     public void handleHobbyUpdateEvent(HobbyUpdateEvent hobbyUpdateEvent) {
         Hobby hobby = hobbyRepository.findById(hobbyUpdateEvent.getHobby().getId()).orElseThrow();
+        log.info("Processing HobbyUpdateEvent hobbyId={}", hobby.getId());
         Set<Account> accounts = new HashSet<>();
         accounts.addAll(hobbyManagerRepository.findAllByHobbyId(hobby.getId()).stream()
                 .map(HobbyManager::getAccount).toList());
