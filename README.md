@@ -19,7 +19,7 @@ flowchart TB
     Client["Client (React SPA)"]
 
     subgraph Backend["Spring Boot 4.0.2"]
-        SEC["Spring Security 7\nJWT + OAuth2/OIDC"]
+        SEC["Spring Security 7 JWT + OAuth2/OIDC"]
         CTRL["REST Controllers"]
         APP["ApplicationService"]
         SVC["DomainService"]
@@ -31,7 +31,7 @@ flowchart TB
         PG[("PostgreSQL 17")]
     end
 
-    Client -->|"HTTP/JSON\nBearer JWT"| CTRL
+    Client -->|"HTTP/JSON Bearer JWT"| CTRL
     CTRL --> SEC
     CTRL --> APP
     APP --> SVC
