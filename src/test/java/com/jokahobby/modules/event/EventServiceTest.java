@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,6 +49,7 @@ class EventServiceTest {
                 .build();
 
         hobby = Hobby.builder()
+                .id(1L)
                 .path("test-hobby")
                 .title("Test Hobby")
                 .shortDescription("desc")
@@ -139,6 +141,119 @@ class EventServiceTest {
 
         assertThat(result).hasSize(2);
         assertThat(result).allMatch(Enrollment::isAccepted);
+    }
+
+    // ===== getEventsByHobby =====
+
+    @Test
+    @DisplayName("getEventsByHobby: returns events from repository")
+    void getEventsByHobby_returnsEvents() {
+        given(eventRepository.findByHobbyOrderByStartDateTime(hobby)).willReturn(List.of(fcfsEvent));
+
+        List<Event> result = eventService.getEventsByHobby(hobby);
+
+        assertThat(result).containsExactly(fcfsEvent);
+        verify(eventRepository).findByHobbyOrderByStartDateTime(hobby);
+    }
+
+    // ===== getEventWithHobbyCheck =====
+
+    @Test
+    @DisplayName("getEventWithHobbyCheck: returns event when hobby matches")
+    void getEventWithHobbyCheck_returnsEvent() {
+        given(eventRepository.findWithEnrollmentsById(1L)).willReturn(Optional.of(fcfsEvent));
+
+        Event result = eventService.getEventWithHobbyCheck(1L, hobby);
+
+        assertThat(result).isEqualTo(fcfsEvent);
+    }
+
+    @Test
+    @DisplayName("getEventWithHobbyCheck: throws when event not found")
+    void getEventWithHobbyCheck_eventNotFound_throwsException() {
+        given(eventRepository.findWithEnrollmentsById(1L)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> eventService.getEventWithHobbyCheck(1L, hobby))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(ex -> assertThat(((BusinessException) ex).getErrorCode())
+                        .isEqualTo(ErrorCode.EVENT_NOT_FOUND));
+    }
+
+    @Test
+    @DisplayName("getEventWithHobbyCheck: throws when hobby does not match")
+    void getEventWithHobbyCheck_hobbyMismatch_throwsException() {
+        Hobby otherHobby = Hobby.builder().id(999L).path("other").title("Other").shortDescription("other").build();
+        given(eventRepository.findWithEnrollmentsById(1L)).willReturn(Optional.of(fcfsEvent));
+
+        assertThatThrownBy(() -> eventService.getEventWithHobbyCheck(1L, otherHobby))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(ex -> assertThat(((BusinessException) ex).getErrorCode())
+                        .isEqualTo(ErrorCode.EVENT_NOT_FOUND));
+    }
+
+    // ===== getEventWithHobbyCheckForUpdate =====
+
+    @Test
+    @DisplayName("getEventWithHobbyCheckForUpdate: acquires lock then returns event")
+    void getEventWithHobbyCheckForUpdate_returnsEvent() {
+        given(eventRepository.findByIdForUpdate(1L)).willReturn(Optional.of(fcfsEvent));
+        given(eventRepository.findWithEnrollmentsById(1L)).willReturn(Optional.of(fcfsEvent));
+
+        Event result = eventService.getEventWithHobbyCheckForUpdate(1L, hobby);
+
+        assertThat(result).isEqualTo(fcfsEvent);
+        var inOrder = org.mockito.Mockito.inOrder(eventRepository);
+        inOrder.verify(eventRepository).findByIdForUpdate(1L);
+        inOrder.verify(eventRepository).findWithEnrollmentsById(1L);
+    }
+
+    @Test
+    @DisplayName("getEventWithHobbyCheckForUpdate: throws when lock query finds nothing")
+    void getEventWithHobbyCheckForUpdate_lockFails_throwsException() {
+        given(eventRepository.findByIdForUpdate(1L)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> eventService.getEventWithHobbyCheckForUpdate(1L, hobby))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(ex -> assertThat(((BusinessException) ex).getErrorCode())
+                        .isEqualTo(ErrorCode.EVENT_NOT_FOUND));
+    }
+
+    @Test
+    @DisplayName("getEventWithHobbyCheckForUpdate: throws when hobby does not match")
+    void getEventWithHobbyCheckForUpdate_hobbyMismatch_throwsException() {
+        Hobby otherHobby = Hobby.builder().id(999L).path("other").title("Other").shortDescription("other").build();
+        given(eventRepository.findByIdForUpdate(1L)).willReturn(Optional.of(fcfsEvent));
+        given(eventRepository.findWithEnrollmentsById(1L)).willReturn(Optional.of(fcfsEvent));
+
+        assertThatThrownBy(() -> eventService.getEventWithHobbyCheckForUpdate(1L, otherHobby))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(ex -> assertThat(((BusinessException) ex).getErrorCode())
+                        .isEqualTo(ErrorCode.EVENT_NOT_FOUND));
+    }
+
+    // ===== getEnrollment =====
+
+    @Test
+    @DisplayName("getEnrollment: returns enrollment when found")
+    void getEnrollment_returnsEnrollment() {
+        Enrollment enrollment = Enrollment.builder()
+                .id(1L).account(account).enrolledAt(Instant.now()).accepted(true).build();
+        given(enrollmentRepository.findById(1L)).willReturn(Optional.of(enrollment));
+
+        Enrollment result = eventService.getEnrollment(1L);
+
+        assertThat(result).isEqualTo(enrollment);
+    }
+
+    @Test
+    @DisplayName("getEnrollment: throws when enrollment not found")
+    void getEnrollment_notFound_throwsException() {
+        given(enrollmentRepository.findById(1L)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> eventService.getEnrollment(1L))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(ex -> assertThat(((BusinessException) ex).getErrorCode())
+                        .isEqualTo(ErrorCode.ENROLLMENT_NOT_FOUND));
     }
 
     @Test

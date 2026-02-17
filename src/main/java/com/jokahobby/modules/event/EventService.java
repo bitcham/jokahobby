@@ -3,6 +3,7 @@ package com.jokahobby.modules.event;
 import com.jokahobby.infra.exception.BusinessException;
 import com.jokahobby.infra.exception.ErrorCode;
 import com.jokahobby.modules.account.Account;
+import com.jokahobby.modules.hobby.Hobby;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -72,5 +73,34 @@ public class EventService {
 
     public void cancelCheckInEnrollment(Enrollment enrollment) {
         enrollment.cancelCheckIn();
+    }
+
+    public List<Event> getEventsByHobby(Hobby hobby) {
+        return eventRepository.findByHobbyOrderByStartDateTime(hobby);
+    }
+
+    public Event getEventWithHobbyCheck(Long eventId, Hobby hobby) {
+        Event event = eventRepository.findWithEnrollmentsById(eventId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.EVENT_NOT_FOUND));
+        if (!event.getHobby().equals(hobby)) {
+            throw new BusinessException(ErrorCode.EVENT_NOT_FOUND);
+        }
+        return event;
+    }
+
+    public Event getEventWithHobbyCheckForUpdate(Long eventId, Hobby hobby) {
+        eventRepository.findByIdForUpdate(eventId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.EVENT_NOT_FOUND));
+        Event event = eventRepository.findWithEnrollmentsById(eventId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.EVENT_NOT_FOUND));
+        if (!event.getHobby().equals(hobby)) {
+            throw new BusinessException(ErrorCode.EVENT_NOT_FOUND);
+        }
+        return event;
+    }
+
+    public Enrollment getEnrollment(Long enrollmentId) {
+        return enrollmentRepository.findById(enrollmentId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENROLLMENT_NOT_FOUND));
     }
 }
