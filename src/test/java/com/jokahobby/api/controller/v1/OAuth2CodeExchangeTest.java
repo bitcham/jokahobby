@@ -23,7 +23,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @MockMvcTest
-class AuthApiController_OAuth2CodeExchangeTest extends AbstractContainerBaseTest {
+class OAuth2CodeExchangeTest extends AbstractContainerBaseTest {
 
     @Autowired MockMvcTester mockMvc;
     @Autowired AccountRepository accountRepository;

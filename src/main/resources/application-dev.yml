@@ -5,3 +5,9 @@ spring:
     open-in-view: false
   flyway:
     enabled: false
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.type.descriptor.sql.BasicBinder: trace
+    org.flywaydb: debug

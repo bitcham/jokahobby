@@ -124,21 +124,25 @@ public class HobbyApplicationService {
         Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
         hobbyService.updateHobbyDescription(hobby, request.shortDescription(), request.fullDescription());
         eventPublisher.publishEvent(new HobbyUpdateEvent(hobby, "Hobby description updated"));
+        log.info("Hobby description updated path={}", path);
     }
 
     public void updateBanner(String path, Account account, HobbyBannerUpdateRequest request) {
         Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
         hobbyService.updateHobbyImage(hobby, request.image());
+        log.info("Hobby banner updated path={}", path);
     }
 
     public void enableBanner(String path, Account account) {
         Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
         hobbyService.enableHobbyBanner(hobby);
+        log.info("Hobby banner enabled path={}", path);
     }
 
     public void disableBanner(String path, Account account) {
         Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
         hobbyService.disableHobbyBanner(hobby);
+        log.info("Hobby banner disabled path={}", path);
     }
 
     @Transactional(readOnly = true)
@@ -151,12 +155,14 @@ public class HobbyApplicationService {
         Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
         Tag tag = tagService.findOrCreateNew(tagTitle);
         hobbyService.addTag(hobby, tag);
+        log.info("Hobby tag added path={} tag={}", path, tagTitle);
     }
 
     public void removeHobbyTag(String path, Account account, String tagTitle) {
         Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
         Tag tag = tagService.findByTitle(tagTitle);
         hobbyService.removeTag(hobby, tag);
+        log.info("Hobby tag removed path={} tag={}", path, tagTitle);
     }
 
     @Transactional(readOnly = true)
@@ -169,12 +175,14 @@ public class HobbyApplicationService {
         Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
         Zone zone = zoneService.findByZoneName(zoneName);
         hobbyService.addZone(hobby, zone);
+        log.info("Hobby zone added path={} zone={}", path, zoneName);
     }
 
     public void removeHobbyZone(String path, Account account, String zoneName) {
         Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
         Zone zone = zoneService.findByZoneName(zoneName);
         hobbyService.removeZone(hobby, zone);
+        log.info("Hobby zone removed path={} zone={}", path, zoneName);
     }
 
     public void publish(String path, Account account) {

@@ -32,7 +32,7 @@ public class AccountApplicationService {
 
     public Account updateProfile(Account account, ProfileUpdateRequest request) {
         Account updated = accountService.updateProfile(account, request.bio(), request.url(), request.location(), request.profileImage());
-        log.info("Profile updated");
+        log.info("Profile updated nickname={}", updated.getNickname());
         return updated;
     }
 
@@ -41,11 +41,12 @@ public class AccountApplicationService {
                 request.hobbyCreatedByEmail(), request.hobbyCreatedByWeb(),
                 request.hobbyEnrollmentResultByEmail(), request.hobbyEnrollmentResultByWeb(),
                 request.hobbyUpdatedByEmail(), request.hobbyUpdatedByWeb());
+        log.info("Notifications updated nickname={}", account.getNickname());
     }
 
     public Account updateNickname(Account account, String nickname) {
         Account updated = accountService.updateNicknameWithDuplicateCheck(account, nickname);
-        log.info("Nickname updated");
+        log.info("Nickname updated nickname={}", updated.getNickname());
         return updated;
     }
 
@@ -57,11 +58,13 @@ public class AccountApplicationService {
     public void addTag(Account account, String tagTitle) {
         Tag tag = tagService.findOrCreateNew(tagTitle);
         accountService.addTag(account, tag);
+        log.info("Tag added nickname={} tag={}", account.getNickname(), tagTitle);
     }
 
     public void removeTag(Account account, String tagTitle) {
         Tag tag = tagService.findByTitle(tagTitle);
         accountService.removeTag(account, tag);
+        log.info("Tag removed nickname={} tag={}", account.getNickname(), tagTitle);
     }
 
     @Transactional(readOnly = true)
@@ -72,10 +75,12 @@ public class AccountApplicationService {
     public void addZone(Account account, String zoneName) {
         Zone zone = zoneService.findByZoneName(zoneName);
         accountService.addZone(account, zone);
+        log.info("Zone added nickname={} zone={}", account.getNickname(), zoneName);
     }
 
     public void removeZone(Account account, String zoneName) {
         Zone zone = zoneService.findByZoneName(zoneName);
         accountService.removeZone(account, zone);
+        log.info("Zone removed nickname={} zone={}", account.getNickname(), zoneName);
     }
 }
