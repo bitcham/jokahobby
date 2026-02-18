@@ -93,6 +93,7 @@ class HobbyTagRepositoryTest extends AbstractContainerBaseTest {
             List<HobbyTag> result = hobbyTagRepository.findAllByHobbyId(hobby.getId());
 
             assertThat(result).hasSize(2);
+            assertThat(result.get(0).getTag().getTitle()).isNotNull();
         }
     }
 
