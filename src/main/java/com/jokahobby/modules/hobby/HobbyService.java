@@ -11,6 +11,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.jokahobby.modules.hobby.Hobby.VALID_PATH_PATTERN;
 
@@ -91,6 +93,17 @@ public class HobbyService {
         return hobbyTagRepository.findAllByHobbyId(hobby.getId()).stream()
                 .map(HobbyTag::getTag)
                 .toList();
+    }
+
+    public Map<Long, List<Tag>> getTagsByHobbyIds(List<Long> hobbyIds) {
+        if (hobbyIds.isEmpty()) {
+            return Map.of();
+        }
+        return hobbyTagRepository.findAllByHobbyIdIn(hobbyIds).stream()
+                .collect(Collectors.groupingBy(
+                        ht -> ht.getHobby().getId(),
+                        Collectors.mapping(HobbyTag::getTag, Collectors.toList())
+                ));
     }
 
     public void addZone(Hobby hobby, Zone zone) {

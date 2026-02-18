@@ -98,6 +98,38 @@ class HobbyTagRepositoryTest extends AbstractContainerBaseTest {
     }
 
     @Nested
+    @DisplayName("findAllByHobbyIdIn")
+    class FindAllByHobbyIdIn {
+
+        @Test
+        @DisplayName("returns tags for multiple hobbies in one query")
+        void returnsTagsForMultipleHobbies() {
+            Hobby hobby2 = hobbyRepository.save(Hobby.builder()
+                    .path("hobby-2").title("Hobby 2").shortDescription("desc2").build());
+            Tag tag2 = tagRepository.save(Tag.builder().title("java").build());
+
+            hobbyTagRepository.save(HobbyTag.builder().hobby(hobby).tag(tag).build());
+            hobbyTagRepository.save(HobbyTag.builder().hobby(hobby).tag(tag2).build());
+            hobbyTagRepository.save(HobbyTag.builder().hobby(hobby2).tag(tag).build());
+
+            List<HobbyTag> result = hobbyTagRepository.findAllByHobbyIdIn(
+                    List.of(hobby.getId(), hobby2.getId()));
+
+            assertThat(result).hasSize(3);
+            assertThat(result).allSatisfy(ht ->
+                    assertThat(ht.getTag().getTitle()).isNotNull());
+        }
+
+        @Test
+        @DisplayName("returns empty list when no tags exist for given hobby ids")
+        void returnsEmptyWhenNoTags() {
+            List<HobbyTag> result = hobbyTagRepository.findAllByHobbyIdIn(List.of(hobby.getId()));
+
+            assertThat(result).isEmpty();
+        }
+    }
+
+    @Nested
     @DisplayName("deleteByHobbyAndTag")
     class DeleteByHobbyAndTag {
 

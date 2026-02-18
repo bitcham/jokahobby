@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -40,8 +41,10 @@ public class HobbyApplicationService {
     @Transactional(readOnly = true)
     public Page<HobbyListResponse> getPublishedHobbies(String country, String city, HobbySortType sort, Pageable pageable) {
         Page<Hobby> hobbies = hobbyService.findPublished(country, city, sort, pageable);
+        List<Long> hobbyIds = hobbies.getContent().stream().map(Hobby::getId).toList();
+        Map<Long, List<Tag>> tagsByHobbyId = hobbyService.getTagsByHobbyIds(hobbyIds);
         return hobbies.map(hobby -> {
-            List<Tag> tags = hobbyService.getTags(hobby);
+            List<Tag> tags = tagsByHobbyId.getOrDefault(hobby.getId(), List.of());
             return HobbyListResponse.from(hobby, tags);
         });
     }
@@ -49,8 +52,10 @@ public class HobbyApplicationService {
     @Transactional(readOnly = true)
     public Page<HobbyListResponse> searchHobbies(String keyword, Pageable pageable) {
         Page<Hobby> hobbies = hobbyService.findByKeyword(keyword, pageable);
+        List<Long> hobbyIds = hobbies.getContent().stream().map(Hobby::getId).toList();
+        Map<Long, List<Tag>> tagsByHobbyId = hobbyService.getTagsByHobbyIds(hobbyIds);
         return hobbies.map(hobby -> {
-            List<Tag> tags = hobbyService.getTags(hobby);
+            List<Tag> tags = tagsByHobbyId.getOrDefault(hobby.getId(), List.of());
             return HobbyListResponse.from(hobby, tags);
         });
     }
