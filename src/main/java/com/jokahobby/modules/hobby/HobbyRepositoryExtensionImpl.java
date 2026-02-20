@@ -24,20 +24,19 @@ public class HobbyRepositoryExtensionImpl extends QuerydslRepositorySupport impl
         QHobbyZone hobbyZone = QHobbyZone.hobbyZone;
 
         JPQLQuery<Hobby> query = from(hobby).where(hobby.published.isTrue()
-                        .and(hobby.title.containsIgnoreCase(keyword))
-                        .or(hobby.id.in(
-                                JPAExpressions.select(hobbyTag.hobby.id)
-                                        .from(hobbyTag)
-                                        .where(hobbyTag.tag.title.containsIgnoreCase(keyword))))
-                        .or(hobby.id.in(
-                                JPAExpressions.select(hobbyZone.hobby.id)
-                                        .from(hobbyZone)
-                                        .where(hobbyZone.zone.city.containsIgnoreCase(keyword))))
-                        .or(hobby.id.in(
-                                JPAExpressions.select(hobbyZone.hobby.id)
-                                        .from(hobbyZone)
-                                        .where(hobbyZone.zone.localNameOfCity.containsIgnoreCase(keyword)))))
-;
+                        .and(hobby.title.containsIgnoreCase(keyword)
+                                .or(hobby.id.in(
+                                        JPAExpressions.select(hobbyTag.hobby.id)
+                                                .from(hobbyTag)
+                                                .where(hobbyTag.tag.title.containsIgnoreCase(keyword))))
+                                .or(hobby.id.in(
+                                        JPAExpressions.select(hobbyZone.hobby.id)
+                                                .from(hobbyZone)
+                                                .where(hobbyZone.zone.city.containsIgnoreCase(keyword))))
+                                .or(hobby.id.in(
+                                        JPAExpressions.select(hobbyZone.hobby.id)
+                                                .from(hobbyZone)
+                                                .where(hobbyZone.zone.localNameOfCity.containsIgnoreCase(keyword))))));
         long total = query.fetchCount();
         JPQLQuery<Hobby> pageableQuery = getQuerydsl().applyPagination(pageable, query);
         List<Hobby> content = pageableQuery.fetch();
