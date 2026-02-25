@@ -9,6 +9,7 @@ import com.jokahobby.modules.hobby.event.HobbyCreatedEvent;
 import com.jokahobby.modules.hobby.event.HobbyUpdateEvent;
 import com.jokahobby.modules.tag.Tag;
 import com.jokahobby.modules.tag.TagService;
+import com.jokahobby.modules.account.AccountService;
 import com.jokahobby.modules.zone.ZoneService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -45,6 +46,9 @@ class HobbyApplicationServiceTest {
     private HobbyService hobbyService;
 
     @Mock
+    private AccountService accountService;
+
+    @Mock
     private TagService tagService;
 
     @Mock
@@ -75,7 +79,7 @@ class HobbyApplicationServiceTest {
     @Test
     @DisplayName("publish publishes HobbyCreatedEvent")
     void publish_publishesHobbyCreatedEvent() {
-        given(hobbyService.getHobbyWithManagerCheck(manager, "test-hobby")).willReturn(hobby);
+        given(hobbyService.getHobbyWithHostOrManagerCheck(manager, "test-hobby")).willReturn(hobby);
 
         hobbyApplicationService.publish("test-hobby", manager);
 
@@ -85,7 +89,7 @@ class HobbyApplicationServiceTest {
     @Test
     @DisplayName("close publishes HobbyUpdateEvent")
     void close_publishesHobbyUpdateEvent() {
-        given(hobbyService.getHobbyWithManagerCheck(manager, "test-hobby")).willReturn(hobby);
+        given(hobbyService.getHobbyWithHostOrManagerCheck(manager, "test-hobby")).willReturn(hobby);
 
         hobbyApplicationService.close("test-hobby", manager);
 
@@ -95,7 +99,7 @@ class HobbyApplicationServiceTest {
     @Test
     @DisplayName("updateDescription publishes HobbyUpdateEvent")
     void updateDescription_publishesHobbyUpdateEvent() {
-        given(hobbyService.getHobbyWithManagerCheck(manager, "test-hobby")).willReturn(hobby);
+        given(hobbyService.getHobbyWithHostOrManagerCheck(manager, "test-hobby")).willReturn(hobby);
 
         hobbyApplicationService.updateDescription("test-hobby", manager,
                 new com.jokahobby.api.dto.request.HobbyDescriptionUpdateRequest("short", "full"));
@@ -106,7 +110,7 @@ class HobbyApplicationServiceTest {
     @Test
     @DisplayName("startRecruit publishes HobbyUpdateEvent")
     void startRecruit_publishesHobbyUpdateEvent() {
-        given(hobbyService.getHobbyWithManagerCheck(manager, "test-hobby")).willReturn(hobby);
+        given(hobbyService.getHobbyWithHostOrManagerCheck(manager, "test-hobby")).willReturn(hobby);
 
         hobbyApplicationService.startRecruit("test-hobby", manager);
 
@@ -116,7 +120,7 @@ class HobbyApplicationServiceTest {
     @Test
     @DisplayName("stopRecruit publishes HobbyUpdateEvent")
     void stopRecruit_publishesHobbyUpdateEvent() {
-        given(hobbyService.getHobbyWithManagerCheck(manager, "test-hobby")).willReturn(hobby);
+        given(hobbyService.getHobbyWithHostOrManagerCheck(manager, "test-hobby")).willReturn(hobby);
 
         hobbyApplicationService.stopRecruit("test-hobby", manager);
 

@@ -34,6 +34,7 @@ public class DevDataInitializer implements ApplicationRunner {
     private final AccountTagRepository accountTagRepository;
     private final AccountZoneRepository accountZoneRepository;
     private final HobbyRepository hobbyRepository;
+    private final HobbyHostRepository hobbyHostRepository;
     private final HobbyManagerRepository hobbyManagerRepository;
     private final HobbyMemberRepository hobbyMemberRepository;
     private final HobbyTagRepository hobbyTagRepository;
@@ -134,20 +135,18 @@ public class DevDataInitializer implements ApplicationRunner {
                 .fullDescription("This hobby is still in draft state.")
                 .published(false)
                 .recruiting(false)
-                .memberCount(0)
+                .memberCount(1)
                 .build());
 
-        // 6. HobbyManager / HobbyMember
-        hobbyManagerRepository.saveAll(List.of(
-                HobbyManager.builder().hobby(photographyClub).account(alice).build(),
-                HobbyManager.builder().hobby(codingLab).account(alice).build(),
-                HobbyManager.builder().hobby(draftHobby).account(alice).build()
+        // 6. HobbyHost / HobbyManager / HobbyMember
+        hobbyHostRepository.saveAll(List.of(
+                HobbyHost.builder().hobby(photographyClub).account(alice).build(),
+                HobbyHost.builder().hobby(codingLab).account(alice).build(),
+                HobbyHost.builder().hobby(draftHobby).account(alice).build()
         ));
 
         hobbyMemberRepository.saveAll(List.of(
-                HobbyMember.builder().hobby(photographyClub).account(alice).build(),
-                HobbyMember.builder().hobby(photographyClub).account(bob).build(),
-                HobbyMember.builder().hobby(codingLab).account(alice).build()
+                HobbyMember.builder().hobby(photographyClub).account(bob).build()
         ));
 
         // 7. HobbyTag / HobbyZone
@@ -278,7 +277,7 @@ public class DevDataInitializer implements ApplicationRunner {
 
         log.info("""
                 === Dev test data initialized ===
-                Accounts: alice(manager), bob(member), charlie(observer)
+                Accounts: alice(host), bob(member), charlie(observer)
                 Hobbies: photography-club, coding-lab, draft-hobby
                 Use POST /api/v1/dev/token/{nickname} to get JWT tokens""");
     }

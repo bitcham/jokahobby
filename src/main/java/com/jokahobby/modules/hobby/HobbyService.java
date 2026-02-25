@@ -23,6 +23,7 @@ public class HobbyService {
     private final HobbyRepository hobbyRepository;
     private final HobbyTagRepository hobbyTagRepository;
     private final HobbyZoneRepository hobbyZoneRepository;
+    private final HobbyHostRepository hobbyHostRepository;
     private final HobbyManagerRepository hobbyManagerRepository;
     private final HobbyMemberRepository hobbyMemberRepository;
 
@@ -34,7 +35,7 @@ public class HobbyService {
             throw new BusinessException(ErrorCode.HOBBY_TITLE_ALREADY_EXISTS);
         }
         Hobby saved = hobbyRepository.save(hobby);
-        addManager(saved, account);
+        addHost(saved, account);
         return saved;
     }
 
@@ -56,9 +57,23 @@ public class HobbyService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.HOBBY_NOT_FOUND));
     }
 
-    public Hobby getHobbyWithManagerCheck(Account account, String path) {
+    public Hobby getHobbyWithHostCheckForUpdate(Account account, String path) {
+        Hobby hobby = this.getHobbyForUpdate(path);
+        checkIfHost(account, hobby);
+        return hobby;
+    }
+
+    private void checkIfHost(Account account, Hobby hobby) {
+        if (!isHost(hobby, account)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+    }
+
+    public Hobby getHobbyWithHostOrManagerCheck(Account account, String path) {
         Hobby hobby = this.getHobby(path);
-        checkIfManager(account, hobby);
+        if (!isHostOrManager(hobby, account)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
         return hobby;
     }
 
@@ -123,11 +138,8 @@ public class HobbyService {
                 .toList();
     }
 
-    public void addManager(Hobby hobby, Account account) {
-        if (hobbyManagerRepository.existsByHobbyAndAccount(hobby, account)) {
-            return;
-        }
-        hobbyManagerRepository.save(HobbyManager.builder().hobby(hobby).account(account).build());
+    public void addHost(Hobby hobby, Account account) {
+        hobbyHostRepository.save(HobbyHost.builder().hobby(hobby).account(account).build());
         hobby.incrementMemberCount();
     }
 
@@ -144,8 +156,21 @@ public class HobbyService {
         hobby.decrementMemberCount();
     }
 
+    public void removeManager(Hobby hobby, Account account) {
+        hobbyManagerRepository.deleteByHobbyAndAccount(hobby, account);
+        hobby.decrementMemberCount();
+    }
+
+    public boolean isHost(Hobby hobby, Account account) {
+        return hobbyHostRepository.existsByHobbyAndAccount(hobby, account);
+    }
+
     public boolean isManager(Hobby hobby, Account account) {
         return hobbyManagerRepository.existsByHobbyAndAccount(hobby, account);
+    }
+
+    public boolean isHostOrManager(Hobby hobby, Account account) {
+        return isHost(hobby, account) || isManager(hobby, account);
     }
 
     public boolean isMember(Hobby hobby, Account account) {
@@ -154,7 +179,13 @@ public class HobbyService {
 
     public boolean isJoinable(Hobby hobby, Account account) {
         return hobby.isPublished() && hobby.isRecruiting()
-                && !isMember(hobby, account) && !isManager(hobby, account);
+                && !isMember(hobby, account) && !isManager(hobby, account) && !isHost(hobby, account);
+    }
+
+    public Account getHost(Hobby hobby) {
+        return hobbyHostRepository.findByHobbyId(hobby.getId())
+                .map(HobbyHost::getAccount)
+                .orElseThrow(() -> new BusinessException(ErrorCode.HOBBY_HOST_NOT_FOUND));
     }
 
     public List<Account> getManagers(Hobby hobby) {
@@ -169,10 +200,50 @@ public class HobbyService {
                 .toList();
     }
 
-    private void checkIfManager(Account account, Hobby hobby) {
-        if (!isManager(hobby, account)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN);
+    public void promoteToManager(Hobby hobby, Account target, Account promotedBy) {
+        if (isHost(hobby, target)) {
+            throw new BusinessException(ErrorCode.HOBBY_CANNOT_PROMOTE_HOST);
         }
+        if (isManager(hobby, target)) {
+            throw new BusinessException(ErrorCode.HOBBY_ALREADY_MANAGER);
+        }
+        if (!isMember(hobby, target)) {
+            throw new BusinessException(ErrorCode.HOBBY_TARGET_NOT_MEMBER);
+        }
+        hobbyMemberRepository.deleteByHobbyAndAccount(hobby, target);
+        hobbyManagerRepository.save(HobbyManager.builder()
+                .hobby(hobby).account(target).promotedBy(promotedBy).build());
+    }
+
+    public void demoteToMember(Hobby hobby, Account target) {
+        if (!isManager(hobby, target)) {
+            throw new BusinessException(ErrorCode.HOBBY_TARGET_NOT_MANAGER);
+        }
+        hobbyManagerRepository.deleteByHobbyAndAccount(hobby, target);
+        hobbyMemberRepository.save(HobbyMember.builder().hobby(hobby).account(target).build());
+    }
+
+    public void transferHost(Hobby hobby, Account newHost) {
+        HobbyHost hobbyHost = hobbyHostRepository.findByHobbyId(hobby.getId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.HOBBY_HOST_NOT_FOUND));
+        Account oldHost = hobbyHost.getAccount();
+
+        if (oldHost.getId().equals(newHost.getId())) {
+            throw new BusinessException(ErrorCode.HOBBY_TRANSFER_TARGET_INVALID);
+        }
+
+        if (isMember(hobby, newHost)) {
+            hobbyMemberRepository.deleteByHobbyAndAccount(hobby, newHost);
+        } else if (isManager(hobby, newHost)) {
+            hobbyManagerRepository.deleteByHobbyAndAccount(hobby, newHost);
+        } else {
+            throw new BusinessException(ErrorCode.HOBBY_TRANSFER_TARGET_INVALID);
+        }
+
+        hobbyManagerRepository.save(HobbyManager.builder()
+                .hobby(hobby).account(oldHost).promotedBy(newHost).build());
+
+        hobbyHost.transferTo(newHost, oldHost);
     }
 
     public void updateHobbyPath(Hobby hobby, String newPath) {

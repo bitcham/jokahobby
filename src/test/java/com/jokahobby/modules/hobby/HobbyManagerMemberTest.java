@@ -20,6 +20,7 @@ class HobbyManagerMemberTest extends AbstractContainerBaseTest {
 
     @Autowired HobbyRepository hobbyRepository;
     @Autowired AccountRepository accountRepository;
+    @Autowired HobbyHostRepository hobbyHostRepository;
     @Autowired HobbyManagerRepository hobbyManagerRepository;
     @Autowired HobbyMemberRepository hobbyMemberRepository;
 
@@ -29,6 +30,7 @@ class HobbyManagerMemberTest extends AbstractContainerBaseTest {
 
     @BeforeEach
     void setUp() {
+        hobbyHostRepository.deleteAll();
         hobbyManagerRepository.deleteAll();
         hobbyMemberRepository.deleteAll();
         creator = accountRepository.save(Account.builder()
@@ -55,31 +57,63 @@ class HobbyManagerMemberTest extends AbstractContainerBaseTest {
     }
 
     @Nested
+    @DisplayName("HobbyHost")
+    class HobbyHostTests {
+
+        @Test
+        @DisplayName("saves HobbyHost with audit columns")
+        void savesWithAudit() {
+            HobbyHost hh = hobbyHostRepository.save(HobbyHost.builder()
+                    .hobby(hobby)
+                    .account(creator)
+                    .build());
+
+            assertThat(hh.getId()).isNotNull();
+            assertThat(hh.getCreatedAt()).isNotNull();
+            assertThat(hh.getAccount().getId()).isEqualTo(creator.getId());
+        }
+
+        @Test
+        @DisplayName("rejects duplicate hobby (unique constraint)")
+        void rejectsDuplicate() {
+            hobbyHostRepository.save(HobbyHost.builder()
+                    .hobby(hobby).account(creator).build());
+
+            assertThatThrownBy(() -> {
+                hobbyHostRepository.saveAndFlush(HobbyHost.builder()
+                        .hobby(hobby).account(user).build());
+            }).isInstanceOf(Exception.class);
+        }
+    }
+
+    @Nested
     @DisplayName("HobbyManager")
     class HobbyManagerTests {
 
         @Test
-        @DisplayName("saves HobbyManager with audit columns")
+        @DisplayName("saves HobbyManager with audit columns and promotedBy")
         void savesWithAudit() {
             HobbyManager hm = hobbyManagerRepository.save(HobbyManager.builder()
                     .hobby(hobby)
-                    .account(creator)
-                                        .build());
+                    .account(user)
+                    .promotedBy(creator)
+                    .build());
 
             assertThat(hm.getId()).isNotNull();
             assertThat(hm.getCreatedAt()).isNotNull();
-            assertThat(hm.getAccount().getId()).isEqualTo(creator.getId());
+            assertThat(hm.getAccount().getId()).isEqualTo(user.getId());
+            assertThat(hm.getPromotedBy().getId()).isEqualTo(creator.getId());
         }
 
         @Test
         @DisplayName("rejects duplicate hobby-account pair")
         void rejectsDuplicate() {
             hobbyManagerRepository.save(HobbyManager.builder()
-                    .hobby(hobby).account(creator).build());
+                    .hobby(hobby).account(user).promotedBy(creator).build());
 
             assertThatThrownBy(() -> {
                 hobbyManagerRepository.saveAndFlush(HobbyManager.builder()
-                        .hobby(hobby).account(creator).build());
+                        .hobby(hobby).account(user).promotedBy(creator).build());
             }).isInstanceOf(Exception.class);
         }
     }
@@ -94,7 +128,7 @@ class HobbyManagerMemberTest extends AbstractContainerBaseTest {
             HobbyMember hm = hobbyMemberRepository.save(HobbyMember.builder()
                     .hobby(hobby)
                     .account(user)
-                                        .build());
+                    .build());
 
             assertThat(hm.getId()).isNotNull();
             assertThat(hm.getCreatedAt()).isNotNull();

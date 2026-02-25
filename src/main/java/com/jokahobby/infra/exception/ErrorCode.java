@@ -34,6 +34,13 @@ public enum ErrorCode {
     HOBBY_PATH_ALREADY_EXISTS("HOBBY_007", "Hobby path already exists.", 409),
     HOBBY_TITLE_ALREADY_EXISTS("HOBBY_008", "Hobby title already exists.", 409),
     INVALID_HOBBY_PATH("HOBBY_009", "Invalid hobby path format.", 400),
+    HOBBY_HOST_CANNOT_LEAVE("HOBBY_010", "Host must transfer host role before leaving.", 400),
+    HOBBY_ALREADY_MANAGER("HOBBY_011", "Account is already a manager.", 400),
+    HOBBY_TARGET_NOT_MEMBER("HOBBY_012", "Target account is not a member of this hobby.", 400),
+    HOBBY_TARGET_NOT_MANAGER("HOBBY_013", "Target account is not a manager of this hobby.", 400),
+    HOBBY_TRANSFER_TARGET_INVALID("HOBBY_014", "Cannot transfer host to this account. Target must be a member or manager.", 400),
+    HOBBY_CANNOT_PROMOTE_HOST("HOBBY_015", "Cannot promote the host.", 400),
+    HOBBY_HOST_NOT_FOUND("HOBBY_016", "Hobby host not found.", 404),
 
     // Event
     EVENT_NOT_ENROLLABLE("EVENT_001", "Cannot enroll in this event.", 400),

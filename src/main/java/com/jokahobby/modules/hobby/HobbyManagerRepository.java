@@ -12,4 +12,6 @@ public interface HobbyManagerRepository extends JpaRepository<HobbyManager, Long
 
     @Query("SELECT hm FROM HobbyManager hm JOIN FETCH hm.account WHERE hm.hobby.id = :hobbyId")
     List<HobbyManager> findAllByHobbyId(Long hobbyId);
+
+    void deleteByHobbyAndAccount(Hobby hobby, Account account);
 }

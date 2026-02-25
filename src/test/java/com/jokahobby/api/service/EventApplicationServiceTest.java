@@ -147,7 +147,7 @@ class EventApplicationServiceTest {
         Enrollment promoted2 = Enrollment.builder()
                 .id(2L).account(enrollee2).enrolledAt(Instant.now()).accepted(true).build();
 
-        given(hobbyService.getHobbyWithManagerCheck(manager, "test-hobby")).willReturn(hobby);
+        given(hobbyService.getHobbyWithHostOrManagerCheck(manager, "test-hobby")).willReturn(hobby);
         given(eventService.getEventWithHobbyCheckForUpdate(1L, hobby)).willReturn(event);
         given(eventService.updateEvent(eq(event), any(), any(), any(), any(), any(), any()))
                 .willReturn(List.of(promoted1, promoted2));
@@ -171,7 +171,7 @@ class EventApplicationServiceTest {
     void createEvent_publishesHobbyUpdateEvent() {
         Event event = createFcfsEvent();
 
-        given(hobbyService.getHobbyWithManagerCheck(manager, "test-hobby")).willReturn(hobby);
+        given(hobbyService.getHobbyWithHostOrManagerCheck(manager, "test-hobby")).willReturn(hobby);
         given(eventService.createEvent(any(Event.class))).willReturn(event);
 
         eventApplicationService.createEvent("test-hobby", manager,
@@ -192,7 +192,7 @@ class EventApplicationServiceTest {
                 .id(1L).account(enrollee).enrolledAt(Instant.now()).accepted(false).build();
         event.addEnrollment(enrollment);
 
-        given(hobbyService.getHobbyWithManagerCheck(manager, "test-hobby")).willReturn(hobby);
+        given(hobbyService.getHobbyWithHostOrManagerCheck(manager, "test-hobby")).willReturn(hobby);
         given(eventService.getEnrollment(1L)).willReturn(enrollment);
 
         eventApplicationService.acceptEnrollment("test-hobby", 1L, manager);
@@ -208,7 +208,7 @@ class EventApplicationServiceTest {
                 .id(1L).account(enrollee).enrolledAt(Instant.now()).accepted(true).build();
         event.addEnrollment(enrollment);
 
-        given(hobbyService.getHobbyWithManagerCheck(manager, "test-hobby")).willReturn(hobby);
+        given(hobbyService.getHobbyWithHostOrManagerCheck(manager, "test-hobby")).willReturn(hobby);
         given(eventService.getEnrollment(1L)).willReturn(enrollment);
 
         eventApplicationService.rejectEnrollment("test-hobby", 1L, manager);

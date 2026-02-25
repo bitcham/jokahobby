@@ -11,7 +11,7 @@
 Console output should show:
 ```
 === Dev test data initialized ===
-Accounts: alice(manager), bob(member), charlie(observer)
+Accounts: alice(host), bob(member), charlie(observer)
 Hobbies: photography-club, coding-lab, draft-hobby
 Use POST /api/v1/dev/token/{nickname} to get JWT tokens
 ```
@@ -30,17 +30,32 @@ http://localhost:8080/swagger-ui.html
 
 | Nickname | Role | Email | Description |
 |----------|------|-------|-------------|
-| alice | Manager | alice@dev.local | Hobby creator/manager |
+| alice | Host | alice@dev.local | Hobby creator/host |
 | bob | Member | bob@dev.local | Joined hobbies, enrolled in events |
 | charlie | Observer | charlie@dev.local | Clean state, no associations |
 
 ### Hobbies
 
-| Path | Title | Published | Recruiting | Manager | Members |
-|------|-------|-----------|------------|---------|---------|
-| photography-club | Photography Club | O | O | alice | alice, bob |
-| coding-lab | Coding Lab | O | X | alice | alice |
+| Path | Title | Published | Recruiting | Host | Members |
+|------|-------|-----------|------------|------|---------|
+| photography-club | Photography Club | O | O | alice | bob |
+| coding-lab | Coding Lab | O | X | alice | - |
 | draft-hobby | Draft Hobby | X | X | alice | - |
+
+### Role Hierarchy
+
+```
+Host > Manager > Member
+```
+
+| Permission | Host | Manager | Member |
+|------------|------|---------|--------|
+| Settings access | O | O | X |
+| Event CRUD | O | O | X |
+| Promote/Demote | O | X | X |
+| Transfer host | O | X | X |
+| Delete hobby | O | X | X |
+| Leave hobby | X (must transfer) | O | O |
 
 ### Events
 
@@ -95,7 +110,7 @@ A token must be issued before testing any authenticated API endpoint.
 
 ## Test Scenarios
 
-### Phase 1: alice (Manager)
+### Phase 1: alice (Host)
 
 > Token: `POST /api/v1/dev/token/alice`
 
@@ -125,21 +140,52 @@ A token must be issued before testing any authenticated API endpoint.
 | # | Endpoint | Expected | Check |
 |---|----------|----------|-------|
 | 1 | `GET /api/v1/hobbies` | published hobbies (2 items) | [ ] |
-| 2 | `GET /api/v1/hobbies/photography-club` | detail with tags, zones | [ ] |
-| 3 | `GET /api/v1/hobbies/coding-lab` | detail | [ ] |
+| 2 | `GET /api/v1/hobbies/photography-club` | detail with isHost=true (alice) | [ ] |
+| 3 | `GET /api/v1/hobbies/coding-lab` | detail with isHost=true | [ ] |
 | 4 | `GET /api/v1/hobbies/draft-hobby` | detail (unpublished) | [ ] |
-| 5 | `GET /api/v1/hobbies/photography-club/members` | 2 members (alice, bob) | [ ] |
-| 6 | `GET /api/v1/hobbies/coding-lab/members` | 1 member (alice) | [ ] |
+| 5 | `GET /api/v1/hobbies/photography-club/members` | host: alice, members: bob | [ ] |
+| 6 | `GET /api/v1/hobbies/coding-lab/members` | host: alice, members: empty | [ ] |
 
-#### 1-3. Hobby Management API (Manager Only)
+#### 1-3. Hobby Settings API (Host/Manager)
 
 | # | Endpoint | Expected | Check |
 |---|----------|----------|-------|
-| 1 | `POST` photography-club recruiting stop | recruiting=false | [ ] |
-| 2 | `POST` photography-club recruiting start | recruiting=true (cooldown cleared) | [ ] |
-| 3 | `POST` draft-hobby publish | published=true | [ ] |
+| 1 | `GET /api/v1/hobbies/photography-club/settings` | host info + members | [ ] |
+| 2 | `POST` photography-club recruiting stop | recruiting=false | [ ] |
+| 3 | `POST` photography-club recruiting start | recruiting=true | [ ] |
+| 4 | `POST` draft-hobby publish | published=true | [ ] |
 
-#### 1-4. Event API
+#### 1-4. Role Management API (Host Only)
+
+| # | Endpoint | Expected | Check |
+|---|----------|----------|-------|
+| 1 | `POST /api/v1/hobbies/photography-club/settings/managers` `{"nickname":"bob"}` | bob promoted to manager | [ ] |
+| 2 | `GET /api/v1/hobbies/photography-club/settings` | managers: [bob] | [ ] |
+| 3 | `DELETE /api/v1/hobbies/photography-club/settings/managers/bob` | bob demoted to member | [ ] |
+| 4 | `GET /api/v1/hobbies/photography-club/settings` | managers: [], members: [bob] | [ ] |
+| 5 | `POST /api/v1/hobbies/photography-club/settings/managers` `{"nickname":"bob"}` | re-promote bob | [ ] |
+| 6 | `POST /api/v1/hobbies/photography-club/settings/host` `{"nickname":"bob"}` | host transferred to bob, alice becomes manager | [ ] |
+| 7 | `GET /api/v1/hobbies/photography-club/settings` | 403 (alice is now manager, but settings still accessible) | [ ] |
+
+> After transfer: bob=host, alice=manager. Re-issue alice's token to verify manager access.
+
+| 8 | `GET /api/v1/hobbies/photography-club/settings` | alice as manager can still access settings | [ ] |
+
+> Switch to bob's token to transfer back.
+
+| 9 | (bob token) `POST /api/v1/hobbies/photography-club/settings/host` `{"nickname":"alice"}` | host back to alice | [ ] |
+
+#### 1-5. Role Error Cases (Host Only)
+
+| # | Endpoint | Expected | Check |
+|---|----------|----------|-------|
+| 1 | `POST .../managers` `{"nickname":"charlie"}` | 400 HOBBY_012 (not a member) | [ ] |
+| 2 | `POST .../managers` `{"nickname":"bob"}` (after re-promote) | 400 HOBBY_011 (already manager) | [ ] |
+| 3 | `DELETE .../managers/bob` (when bob is member) | 400 HOBBY_013 (not a manager) | [ ] |
+| 4 | `POST .../host` `{"nickname":"charlie"}` | 400 HOBBY_006 (not a member) | [ ] |
+| 5 | `DELETE /api/v1/hobbies/photography-club/members` (host leave) | 400 HOBBY_010 (must transfer) | [ ] |
+
+#### 1-6. Event API
 
 | # | Endpoint | Expected | Check |
 |---|----------|----------|-------|
@@ -147,7 +193,7 @@ A token must be issued before testing any authenticated API endpoint.
 | 2 | `GET /api/v1/hobbies/coding-lab/events` | 2 events | [ ] |
 | 3 | Event detail for each | enrollments list visible | [ ] |
 
-#### 1-5. Notification API
+#### 1-7. Notification API
 
 | # | Endpoint | Expected | Check |
 |---|----------|----------|-------|
@@ -253,14 +299,17 @@ A token must be issued before testing any authenticated API endpoint.
 
 | # | Action | Token | Expected | Check |
 |---|--------|-------|----------|-------|
-| 1 | Manage coding-lab settings | bob | 403 Forbidden | [ ] |
-| 2 | Accept/reject enrollment | bob | 403 Forbidden | [ ] |
+| 1 | `GET` coding-lab settings | bob | 403 Forbidden (member) | [ ] |
+| 2 | `POST` promote member | bob | 403 Forbidden (not host) | [ ] |
+| 3 | `POST` transfer host | bob | 403 Forbidden (not host) | [ ] |
+| 4 | `DELETE` hobby (host-only) | bob | 403 Forbidden (not host) | [ ] |
+| 5 | Accept/reject enrollment | charlie | 403 Forbidden | [ ] |
 
 ---
 
 ## Checklist Summary
 
-- [ ] Phase 1: alice (Manager) - all passed
+- [ ] Phase 1: alice (Host) - all passed
 - [ ] Phase 2: bob (Member) - all passed
 - [ ] Phase 3: charlie (Observer) - all passed
 - [ ] Phase 4: Permission Denied - all passed

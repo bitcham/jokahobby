@@ -29,6 +29,7 @@ class HobbyApiControllerTest extends AbstractContainerBaseTest {
     @Autowired MockMvcTester mockMvc;
     @Autowired AccountRepository accountRepository;
     @Autowired HobbyRepository hobbyRepository;
+    @Autowired HobbyHostRepository hobbyHostRepository;
     @Autowired HobbyManagerRepository hobbyManagerRepository;
     @Autowired HobbyMemberRepository hobbyMemberRepository;
     @Autowired HobbyTagRepository hobbyTagRepository;
@@ -67,7 +68,7 @@ class HobbyApiControllerTest extends AbstractContainerBaseTest {
                 .recruiting(true)
                 .memberCount(1)
                 .build());
-        hobbyManagerRepository.save(HobbyManager.builder().hobby(hobby).account(testAccount).build());
+        hobbyHostRepository.save(HobbyHost.builder().hobby(hobby).account(testAccount).build());
         return hobby;
     }
 
@@ -141,7 +142,7 @@ class HobbyApiControllerTest extends AbstractContainerBaseTest {
                     .recruiting(true)
                     .memberCount(5)
                     .build());
-            hobbyManagerRepository.save(HobbyManager.builder().hobby(h1).account(testAccount).build());
+            hobbyHostRepository.save(HobbyHost.builder().hobby(h1).account(testAccount).build());
 
             Hobby h2 = hobbyRepository.saveAndFlush(Hobby.builder()
                     .path("more-popular")
@@ -153,7 +154,7 @@ class HobbyApiControllerTest extends AbstractContainerBaseTest {
                     .recruiting(true)
                     .memberCount(10)
                     .build());
-            hobbyManagerRepository.save(HobbyManager.builder().hobby(h2).account(testAccount).build());
+            hobbyHostRepository.save(HobbyHost.builder().hobby(h2).account(testAccount).build());
 
             assertThat(mockMvc.get().uri("/api/v1/hobbies?sortType=POPULAR"))
                     .bodyJson()
@@ -221,7 +222,7 @@ class HobbyApiControllerTest extends AbstractContainerBaseTest {
     class CreateHobby {
 
         @Test
-        @DisplayName("creates hobby with valid data")
+        @DisplayName("creates hobby with valid data and creator becomes host")
         void validCreate() {
             assertThat(mockMvc.post().uri("/api/v1/hobbies")
                             .header("Authorization", bearer())
@@ -236,7 +237,7 @@ class HobbyApiControllerTest extends AbstractContainerBaseTest {
                                     """))
                     .hasStatus(HttpStatus.CREATED)
                     .bodyJson()
-                    .extractingPath("$.data.title").isEqualTo("New Hobby");
+                    .extractingPath("$.data.isHost").isEqualTo(true);
         }
 
         @Test
@@ -312,15 +313,15 @@ class HobbyApiControllerTest extends AbstractContainerBaseTest {
         }
 
         @Test
-        @DisplayName("includes membership info for authenticated user")
-        void authenticatedUser() {
+        @DisplayName("includes isHost flag for authenticated host user")
+        void authenticatedHost() {
             createPublishedHobby("test-hobby", "Test Hobby");
 
             assertThat(mockMvc.get().uri("/api/v1/hobbies/{path}", "test-hobby")
                             .header("Authorization", bearer()))
                     .hasStatusOk()
                     .bodyJson()
-                    .extractingPath("$.data.isManager").isEqualTo(true);
+                    .extractingPath("$.data.isHost").isEqualTo(true);
         }
 
         @Test
@@ -340,14 +341,18 @@ class HobbyApiControllerTest extends AbstractContainerBaseTest {
     class GetHobbyMembers {
 
         @Test
-        @DisplayName("returns managers and members lists")
+        @DisplayName("returns host, managers and members lists")
         void returnsMembersList() {
             createPublishedHobby("test-hobby", "Test Hobby");
 
             assertThat(mockMvc.get().uri("/api/v1/hobbies/{path}/members", "test-hobby"))
                     .hasStatusOk()
                     .bodyJson()
-                    .extractingPath("$.data.managers").asArray().hasSize(1);
+                    .extractingPath("$.data.host.nickname").isEqualTo("testuser");
+            assertThat(mockMvc.get().uri("/api/v1/hobbies/{path}/members", "test-hobby"))
+                    .hasStatusOk()
+                    .bodyJson()
+                    .extractingPath("$.data.host.role").isEqualTo("HOST");
         }
 
         @Test
@@ -404,7 +409,7 @@ class HobbyApiControllerTest extends AbstractContainerBaseTest {
                     .fullDescription("Full")
                     .published(false)
                     .build());
-            hobbyManagerRepository.save(HobbyManager.builder().hobby(hobby).account(testAccount).build());
+            hobbyHostRepository.save(HobbyHost.builder().hobby(hobby).account(testAccount).build());
 
             Account otherAccount = accountRepository.save(Account.builder()
                     .email("other2@example.com")
@@ -439,7 +444,7 @@ class HobbyApiControllerTest extends AbstractContainerBaseTest {
     class LeaveHobby {
 
         @Test
-        @DisplayName("leaves hobby successfully")
+        @DisplayName("member leaves hobby successfully")
         void leaveSuccess() {
             Account otherAccount = accountRepository.save(Account.builder()
                     .email("other@example.com")
@@ -458,6 +463,41 @@ class HobbyApiControllerTest extends AbstractContainerBaseTest {
                     .hasStatusOk()
                     .bodyJson()
                     .extractingPath("$.success").isEqualTo(true);
+        }
+
+        @Test
+        @DisplayName("manager leaves hobby successfully")
+        void managerLeaveSuccess() {
+            Account managerAccount = accountRepository.save(Account.builder()
+                    .email("mgr@example.com")
+                    .nickname("mgruser")
+                    .provider("google")
+                    .providerId("google-mgr")
+                    .joinedAt(Instant.now())
+                    .build());
+            Hobby hobby = createPublishedHobby("leave-hobby", "Leave Hobby");
+            hobbyManagerRepository.save(HobbyManager.builder()
+                    .hobby(hobby).account(managerAccount).promotedBy(testAccount).build());
+
+            String managerToken = "Bearer " + jwtProvider.createAccessToken(managerAccount.getId());
+
+            assertThat(mockMvc.delete().uri("/api/v1/hobbies/{path}/members", "leave-hobby")
+                            .header("Authorization", managerToken))
+                    .hasStatusOk()
+                    .bodyJson()
+                    .extractingPath("$.success").isEqualTo(true);
+        }
+
+        @Test
+        @DisplayName("host cannot leave without transferring")
+        void hostCannotLeave() {
+            createPublishedHobby("host-hobby", "Host Hobby");
+
+            assertThat(mockMvc.delete().uri("/api/v1/hobbies/{path}/members", "host-hobby")
+                            .header("Authorization", bearer()))
+                    .hasStatus(HttpStatus.BAD_REQUEST)
+                    .bodyJson()
+                    .extractingPath("$.error.code").isEqualTo("HOBBY_010");
         }
 
         @Test
@@ -497,7 +537,7 @@ class HobbyApiControllerTest extends AbstractContainerBaseTest {
     class DeleteHobby {
 
         @Test
-        @DisplayName("deletes removable hobby by manager")
+        @DisplayName("deletes removable hobby by host")
         void deleteSuccess() {
             Hobby hobby = hobbyRepository.save(Hobby.builder()
                     .path("removable-hobby")
@@ -506,7 +546,7 @@ class HobbyApiControllerTest extends AbstractContainerBaseTest {
                     .fullDescription("Full")
                     .published(false)
                     .build());
-            hobbyManagerRepository.save(HobbyManager.builder().hobby(hobby).account(testAccount).build());
+            hobbyHostRepository.save(HobbyHost.builder().hobby(hobby).account(testAccount).build());
 
             assertThat(mockMvc.delete().uri("/api/v1/hobbies/{path}", "removable-hobby")
                             .header("Authorization", bearer()))
@@ -516,13 +556,13 @@ class HobbyApiControllerTest extends AbstractContainerBaseTest {
         }
 
         @Test
-        @DisplayName("returns 403 for non-manager")
-        void nonManager() {
-            Account otherAccount = accountRepository.save(Account.builder()
-                    .email("other@example.com")
-                    .nickname("otheruser")
+        @DisplayName("returns 403 for manager (not host)")
+        void managerCannotDelete() {
+            Account hostAccount = accountRepository.save(Account.builder()
+                    .email("host@example.com")
+                    .nickname("hostuser")
                     .provider("google")
-                    .providerId("google-other")
+                    .providerId("google-host")
                     .joinedAt(Instant.now())
                     .build());
             Hobby hobby = hobbyRepository.save(Hobby.builder()
@@ -532,9 +572,35 @@ class HobbyApiControllerTest extends AbstractContainerBaseTest {
                     .fullDescription("Full")
                     .published(false)
                     .build());
-            hobbyManagerRepository.save(HobbyManager.builder().hobby(hobby).account(otherAccount).build());
+            hobbyHostRepository.save(HobbyHost.builder().hobby(hobby).account(hostAccount).build());
+            hobbyManagerRepository.save(HobbyManager.builder()
+                    .hobby(hobby).account(testAccount).promotedBy(hostAccount).build());
 
             assertThat(mockMvc.delete().uri("/api/v1/hobbies/{path}", "other-hobby")
+                            .header("Authorization", bearer()))
+                    .hasStatus(HttpStatus.FORBIDDEN);
+        }
+
+        @Test
+        @DisplayName("returns 403 for non-host non-manager")
+        void nonHostNonManager() {
+            Account otherAccount = accountRepository.save(Account.builder()
+                    .email("other@example.com")
+                    .nickname("otheruser")
+                    .provider("google")
+                    .providerId("google-other")
+                    .joinedAt(Instant.now())
+                    .build());
+            Hobby hobby = hobbyRepository.save(Hobby.builder()
+                    .path("other-hobby2")
+                    .title("Other Hobby 2")
+                    .shortDescription("Short")
+                    .fullDescription("Full")
+                    .published(false)
+                    .build());
+            hobbyHostRepository.save(HobbyHost.builder().hobby(hobby).account(otherAccount).build());
+
+            assertThat(mockMvc.delete().uri("/api/v1/hobbies/{path}", "other-hobby2")
                             .header("Authorization", bearer()))
                     .hasStatus(HttpStatus.FORBIDDEN);
         }

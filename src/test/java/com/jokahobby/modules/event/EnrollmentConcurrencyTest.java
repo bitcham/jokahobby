@@ -33,24 +33,26 @@ class EnrollmentConcurrencyTest extends AbstractContainerBaseTest {
     @Autowired EventApplicationService eventApplicationService;
     @Autowired AccountRepository accountRepository;
     @Autowired HobbyRepository hobbyRepository;
+    @Autowired HobbyHostRepository hobbyHostRepository;
     @Autowired HobbyManagerRepository hobbyManagerRepository;
     @Autowired HobbyMemberRepository hobbyMemberRepository;
     @Autowired EventRepository eventRepository;
     @Autowired EnrollmentRepository enrollmentRepository;
 
-    private Account managerAccount;
+    private Account hostAccount;
     private Hobby hobby;
 
     @BeforeEach
     void setUp() {
         enrollmentRepository.deleteAllInBatch();
         eventRepository.deleteAllInBatch();
+        hobbyHostRepository.deleteAllInBatch();
         hobbyManagerRepository.deleteAllInBatch();
         hobbyMemberRepository.deleteAllInBatch();
         hobbyRepository.deleteAllInBatch();
         accountRepository.deleteAllInBatch();
 
-        managerAccount = accountRepository.save(Account.builder()
+        hostAccount = accountRepository.save(Account.builder()
                 .email("manager@test.com")
                 .nickname("manager-" + UUID.randomUUID().toString().substring(0, 8))
                 .provider("google")
@@ -69,14 +71,15 @@ class EnrollmentConcurrencyTest extends AbstractContainerBaseTest {
                 .memberCount(1)
                 .build());
 
-        hobbyManagerRepository.save(HobbyManager.builder()
-                .hobby(hobby).account(managerAccount).build());
+        hobbyHostRepository.save(HobbyHost.builder()
+                .hobby(hobby).account(hostAccount).build());
     }
 
     @AfterEach
     void tearDown() {
         enrollmentRepository.deleteAllInBatch();
         eventRepository.deleteAllInBatch();
+        hobbyHostRepository.deleteAllInBatch();
         hobbyManagerRepository.deleteAllInBatch();
         hobbyMemberRepository.deleteAllInBatch();
         hobbyRepository.deleteAllInBatch();
@@ -95,7 +98,7 @@ class EnrollmentConcurrencyTest extends AbstractContainerBaseTest {
                 .endDateTime(Instant.now().plus(3, ChronoUnit.DAYS))
                 .limitOfEnrollments(1)
                 .hobby(hobby)
-                .createdBy(managerAccount)
+                .createdBy(hostAccount)
                 .build());
 
         int threadCount = 10;
@@ -148,7 +151,7 @@ class EnrollmentConcurrencyTest extends AbstractContainerBaseTest {
                 .endDateTime(Instant.now().plus(3, ChronoUnit.DAYS))
                 .limitOfEnrollments(5)
                 .hobby(hobby)
-                .createdBy(managerAccount)
+                .createdBy(hostAccount)
                 .build());
 
         Account singleAccount = accountRepository.save(Account.builder()
@@ -204,7 +207,7 @@ class EnrollmentConcurrencyTest extends AbstractContainerBaseTest {
                 .endDateTime(Instant.now().plus(3, ChronoUnit.DAYS))
                 .limitOfEnrollments(1)
                 .hobby(hobby)
-                .createdBy(managerAccount)
+                .createdBy(hostAccount)
                 .build());
 
         Account existingEnrollee = accountRepository.save(Account.builder()
@@ -280,7 +283,7 @@ class EnrollmentConcurrencyTest extends AbstractContainerBaseTest {
                 .endDateTime(Instant.now().plus(3, ChronoUnit.DAYS))
                 .limitOfEnrollments(1)
                 .hobby(hobby)
-                .createdBy(managerAccount)
+                .createdBy(hostAccount)
                 .build());
 
         Account accepted = accountRepository.save(Account.builder()
@@ -340,7 +343,7 @@ class EnrollmentConcurrencyTest extends AbstractContainerBaseTest {
             readyLatch.countDown();
             try {
                 startLatch.await();
-                eventApplicationService.updateEvent(hobby.getPath(), event.getId(), managerAccount, updateRequest);
+                eventApplicationService.updateEvent(hobby.getPath(), event.getId(), hostAccount, updateRequest);
             } catch (Exception ignored) {}
         });
 

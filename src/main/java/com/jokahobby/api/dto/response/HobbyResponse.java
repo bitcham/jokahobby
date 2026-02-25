@@ -24,12 +24,13 @@ public record HobbyResponse(
         Instant recruitingUpdatedDateTime,
         List<TagResponse> tags,
         List<ZoneResponse> zones,
+        boolean isHost,
         boolean isManager,
         boolean isMember,
         boolean isJoinable
 ) {
     public static HobbyResponse from(Hobby hobby, List<Tag> tags, List<Zone> zones,
-                                      boolean isManager, boolean isMember, boolean isJoinable) {
+                                      boolean isHost, boolean isManager, boolean isMember, boolean isJoinable) {
         return new HobbyResponse(
                 hobby.getId(),
                 hobby.getPath(),
@@ -47,6 +48,7 @@ public record HobbyResponse(
                 hobby.getRecruitingUpdatedDateTime(),
                 tags.stream().map(TagResponse::from).toList(),
                 zones.stream().map(ZoneResponse::from).toList(),
+                isHost,
                 isManager,
                 isMember,
                 isJoinable

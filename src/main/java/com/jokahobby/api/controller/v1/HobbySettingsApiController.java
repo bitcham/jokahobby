@@ -165,6 +165,36 @@ public class HobbySettingsApiController {
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
+    @Operation(summary = "Promote member to manager")
+    @PostMapping("/api/v1/hobbies/{path}/settings/managers")
+    public ResponseEntity<ApiResponse<Void>> promoteToManager(
+            @PathVariable String path,
+            @CurrentAccount Account account,
+            @Valid @RequestBody ManagerPromoteRequest request) {
+        hobbyApplicationService.promoteToManager(path, account, request.nickname());
+        return ResponseEntity.ok(ApiResponse.ok());
+    }
+
+    @Operation(summary = "Demote manager to member")
+    @DeleteMapping("/api/v1/hobbies/{path}/settings/managers/{nickname}")
+    public ResponseEntity<ApiResponse<Void>> demoteToMember(
+            @PathVariable String path,
+            @PathVariable String nickname,
+            @CurrentAccount Account account) {
+        hobbyApplicationService.demoteToMember(path, account, nickname);
+        return ResponseEntity.ok(ApiResponse.ok());
+    }
+
+    @Operation(summary = "Transfer host role")
+    @PostMapping("/api/v1/hobbies/{path}/settings/host")
+    public ResponseEntity<ApiResponse<Void>> transferHost(
+            @PathVariable String path,
+            @CurrentAccount Account account,
+            @Valid @RequestBody HostTransferRequest request) {
+        hobbyApplicationService.transferHost(path, account, request.nickname());
+        return ResponseEntity.ok(ApiResponse.ok());
+    }
+
     @Operation(summary = "Update hobby URL path")
     @PutMapping("/api/v1/hobbies/{path}/settings/path")
     public ResponseEntity<ApiResponse<Void>> updatePath(

@@ -25,10 +25,18 @@ class HobbyManagerRepositoryTest extends AbstractContainerBaseTest {
 
     private Hobby hobby;
     private Account manager;
+    private Account promoter;
 
     @BeforeEach
     void setUp() {
         hobbyManagerRepository.deleteAll();
+        promoter = accountRepository.save(Account.builder()
+                .email("promoter@example.com")
+                .nickname("promoter")
+                .provider("google")
+                .providerId("google-promoter")
+                .joinedAt(Instant.now())
+                .build());
         manager = accountRepository.save(Account.builder()
                 .email("manager@example.com")
                 .nickname("manager")
@@ -53,21 +61,23 @@ class HobbyManagerRepositoryTest extends AbstractContainerBaseTest {
             HobbyManager hobbyManager = hobbyManagerRepository.save(HobbyManager.builder()
                     .hobby(hobby)
                     .account(manager)
+                    .promotedBy(promoter)
                     .build());
 
             assertThat(hobbyManager.getId()).isNotNull();
             assertThat(hobbyManager.getCreatedAt()).isNotNull();
+            assertThat(hobbyManager.getPromotedBy().getId()).isEqualTo(promoter.getId());
         }
 
         @Test
         @DisplayName("rejects duplicate hobby-account pair")
         void rejectsDuplicate() {
             hobbyManagerRepository.save(HobbyManager.builder()
-                    .hobby(hobby).account(manager).build());
+                    .hobby(hobby).account(manager).promotedBy(promoter).build());
 
             assertThatThrownBy(() -> {
                 hobbyManagerRepository.saveAndFlush(HobbyManager.builder()
-                        .hobby(hobby).account(manager).build());
+                        .hobby(hobby).account(manager).promotedBy(promoter).build());
             }).isInstanceOf(Exception.class);
         }
     }
@@ -87,9 +97,9 @@ class HobbyManagerRepositoryTest extends AbstractContainerBaseTest {
                     .joinedAt(Instant.now())
                     .build());
             hobbyManagerRepository.save(HobbyManager.builder()
-                    .hobby(hobby).account(manager).build());
+                    .hobby(hobby).account(manager).promotedBy(promoter).build());
             hobbyManagerRepository.save(HobbyManager.builder()
-                    .hobby(hobby).account(manager2).build());
+                    .hobby(hobby).account(manager2).promotedBy(promoter).build());
 
             List<HobbyManager> result = hobbyManagerRepository.findAllByHobbyId(hobby.getId());
 

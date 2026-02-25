@@ -5,13 +5,15 @@ import com.jokahobby.modules.account.Account;
 import java.util.List;
 
 public record HobbyMembersResponse(
+        MemberResponse host,
         List<MemberResponse> managers,
         List<MemberResponse> members
 ) {
-    public static HobbyMembersResponse from(List<Account> managers, List<Account> members) {
+    public static HobbyMembersResponse from(Account host, List<Account> managers, List<Account> members) {
         return new HobbyMembersResponse(
-                managers.stream().map(MemberResponse::from).toList(),
-                members.stream().map(MemberResponse::from).toList()
+                MemberResponse.from(host, "HOST"),
+                managers.stream().map(m -> MemberResponse.from(m, "MANAGER")).toList(),
+                members.stream().map(m -> MemberResponse.from(m, "MEMBER")).toList()
         );
     }
 }

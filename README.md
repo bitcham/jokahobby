@@ -69,7 +69,11 @@ flowchart TB
 - Logout from single device or all devices
 
 ### Hobby Group System
-- Create and manage hobby groups as a manager
+- 3-tier role hierarchy: **Host > Manager > Member**
+- Hobby creator becomes Host with exclusive permissions (delete, role management, host transfer)
+- Host can promote members to Manager, demote managers, and transfer host role
+- Settings access for both Host and Manager
+- Host must transfer role before leaving
 - Member join/leave with count tracking
 - Publishing workflow: Draft → Published → Closed
 - Recruiting control with one-hour cooldown
@@ -81,7 +85,7 @@ flowchart TB
 - FCFS (first-come-first-served) and Confirmative event types
 - Enrollment with auto-accept (FCFS) or manager approval (Confirmative)
 - Check-in / cancel check-in system for event attendance
-- Enrollment accept/reject by managers
+- Enrollment accept/reject by host or managers
 - Async notifications via Spring Events
 
 ### Discovery
@@ -160,7 +164,7 @@ A `dev` profile is provided for local testing without OAuth2 login.
 
 | Nickname | Role | Description |
 |----------|------|-------------|
-| alice | Manager | Creates and manages hobbies |
+| alice | Host | Creates hobbies, full management permissions |
 | bob | Member | Joins hobbies, enrolls in events |
 | charlie | Observer | Clean state, no associations |
 
@@ -214,12 +218,12 @@ See [`test-guideline.md`](test-guideline.md) for detailed test scenarios with st
 | GET | `/api/v1/hobbies/search` | Public | Search hobbies by keyword |
 | POST | `/api/v1/hobbies` | Bearer | Create new hobby |
 | GET | `/api/v1/hobbies/{path}` | Public | Get hobby detail |
-| DELETE | `/api/v1/hobbies/{path}` | Bearer | Delete hobby (manager) |
+| DELETE | `/api/v1/hobbies/{path}` | Bearer | Delete hobby (host only) |
 | GET | `/api/v1/hobbies/{path}/members` | Public | List hobby members |
 | POST | `/api/v1/hobbies/{path}/members` | Bearer | Join hobby |
 | DELETE | `/api/v1/hobbies/{path}/members` | Bearer | Leave hobby |
 
-### Hobby Settings (Manager only)
+### Hobby Settings (Host or Manager)
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
@@ -240,6 +244,14 @@ See [`test-guideline.md`](test-guideline.md) for detailed test scenarios with st
 | POST | `/api/v1/hobbies/{path}/settings/recruit/stop` | Bearer | Stop recruiting |
 | PUT | `/api/v1/hobbies/{path}/settings/path` | Bearer | Update hobby path |
 | PUT | `/api/v1/hobbies/{path}/settings/title` | Bearer | Update hobby title |
+
+### Hobby Role Management (Host only)
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/v1/hobbies/{path}/settings/managers` | Bearer | Promote member to manager |
+| DELETE | `/api/v1/hobbies/{path}/settings/managers/{nickname}` | Bearer | Demote manager to member |
+| POST | `/api/v1/hobbies/{path}/settings/host` | Bearer | Transfer host role |
 
 ### Event & Enrollment
 

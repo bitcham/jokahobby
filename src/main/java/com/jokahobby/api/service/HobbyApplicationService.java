@@ -5,6 +5,7 @@ import com.jokahobby.api.dto.response.*;
 import com.jokahobby.infra.exception.BusinessException;
 import com.jokahobby.infra.exception.ErrorCode;
 import com.jokahobby.modules.account.Account;
+import com.jokahobby.modules.account.AccountService;
 import com.jokahobby.modules.hobby.Hobby;
 import com.jokahobby.modules.hobby.HobbyService;
 import com.jokahobby.modules.hobby.HobbySortType;
@@ -32,6 +33,7 @@ import java.util.Map;
 public class HobbyApplicationService {
 
     private final HobbyService hobbyService;
+    private final AccountService accountService;
     private final TagService tagService;
     private final ZoneService zoneService;
     private final ApplicationEventPublisher eventPublisher;
@@ -66,19 +68,22 @@ public class HobbyApplicationService {
         List<Tag> tags = hobbyService.getTags(hobby);
         List<Zone> zones = hobbyService.getZones(hobby);
 
+        boolean isHost = account != null && hobbyService.isHost(hobby, account);
         boolean isManager = account != null && hobbyService.isManager(hobby, account);
         boolean isMember = account != null && hobbyService.isMember(hobby, account);
-        boolean isJoinable = account != null && hobbyService.isJoinable(hobby, account);
+        boolean isJoinable = account != null && hobby.isPublished() && hobby.isRecruiting()
+                && !isMember && !isManager && !isHost;
 
-        return HobbyResponse.from(hobby, tags, zones, isManager, isMember, isJoinable);
+        return HobbyResponse.from(hobby, tags, zones, isHost, isManager, isMember, isJoinable);
     }
 
     @Transactional(readOnly = true)
     public HobbyMembersResponse getHobbyMembers(String path) {
         Hobby hobby = hobbyService.getHobby(path);
+        Account host = hobbyService.getHost(hobby);
         List<Account> managers = hobbyService.getManagers(hobby);
         List<Account> members = hobbyService.getMembers(hobby);
-        return HobbyMembersResponse.from(managers, members);
+        return HobbyMembersResponse.from(host, managers, members);
     }
 
     public HobbyResponse createHobby(HobbyCreateRequest request, Account account) {
@@ -86,7 +91,7 @@ public class HobbyApplicationService {
         log.info("Hobby created path={}", hobby.getPath());
         List<Tag> tags = hobbyService.getTags(hobby);
         List<Zone> zones = hobbyService.getZones(hobby);
-        return HobbyResponse.from(hobby, tags, zones, true, false, false);
+        return HobbyResponse.from(hobby, tags, zones, true, false, false, false);
     }
 
     public void joinHobby(String path, Account account) {
@@ -100,6 +105,17 @@ public class HobbyApplicationService {
 
     public void leaveHobby(String path, Account account) {
         Hobby hobby = hobbyService.getHobbyForUpdate(path);
+
+        if (hobbyService.isHost(hobby, account)) {
+            throw new BusinessException(ErrorCode.HOBBY_HOST_CANNOT_LEAVE);
+        }
+
+        if (hobbyService.isManager(hobby, account)) {
+            hobbyService.removeManager(hobby, account);
+            log.info("Manager left hobby path={}", path);
+            return;
+        }
+
         if (!hobbyService.isMember(hobby, account)) {
             throw new BusinessException(ErrorCode.HOBBY_NOT_MEMBER);
         }
@@ -108,63 +124,87 @@ public class HobbyApplicationService {
     }
 
     public void deleteHobby(String path, Account account) {
-        Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
+        Hobby hobby = hobbyService.getHobbyWithHostCheckForUpdate(account, path);
         hobbyService.remove(hobby);
         log.info("Hobby deleted path={}", path);
     }
 
-    // ===== Settings endpoints (manager only) =====
+    // ===== Role management endpoints (host only) =====
+
+    public void promoteToManager(String path, Account host, String targetNickname) {
+        Hobby hobby = hobbyService.getHobbyWithHostCheckForUpdate(host, path);
+        Account target = accountService.getAccount(targetNickname);
+        hobbyService.promoteToManager(hobby, target, host);
+        log.info("Member promoted to manager path={} target={}", path, targetNickname);
+    }
+
+    public void demoteToMember(String path, Account host, String targetNickname) {
+        Hobby hobby = hobbyService.getHobbyWithHostCheckForUpdate(host, path);
+        Account target = accountService.getAccount(targetNickname);
+        hobbyService.demoteToMember(hobby, target);
+        log.info("Manager demoted to member path={} target={}", path, targetNickname);
+    }
+
+    public void transferHost(String path, Account host, String targetNickname) {
+        Hobby hobby = hobbyService.getHobbyWithHostCheckForUpdate(host, path);
+        Account target = accountService.getAccount(targetNickname);
+        hobbyService.transferHost(hobby, target);
+        log.info("Host transferred path={} newHost={}", path, targetNickname);
+    }
+
+    // ===== Settings endpoints (host or manager) =====
 
     @Transactional(readOnly = true)
     public HobbySettingsResponse getHobbySettings(String path, Account account) {
-        Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
+        Hobby hobby = hobbyService.getHobbyWithHostOrManagerCheck(account, path);
         List<Tag> tags = hobbyService.getTags(hobby);
         List<Zone> zones = hobbyService.getZones(hobby);
+        Account host = hobbyService.getHost(hobby);
         List<Account> managers = hobbyService.getManagers(hobby);
         List<Account> members = hobbyService.getMembers(hobby);
-        return HobbySettingsResponse.from(hobby, tags, zones, managers, members);
+        return HobbySettingsResponse.from(hobby, tags, zones, host, managers, members);
     }
 
     public void updateDescription(String path, Account account, HobbyDescriptionUpdateRequest request) {
-        Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
+        Hobby hobby = hobbyService.getHobbyWithHostOrManagerCheck(account, path);
         hobbyService.updateHobbyDescription(hobby, request.shortDescription(), request.fullDescription());
         eventPublisher.publishEvent(new HobbyUpdateEvent(hobby, "Hobby description updated"));
         log.info("Hobby description updated path={}", path);
     }
 
     public void updateBanner(String path, Account account, HobbyBannerUpdateRequest request) {
-        Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
+        Hobby hobby = hobbyService.getHobbyWithHostOrManagerCheck(account, path);
         hobbyService.updateHobbyImage(hobby, request.image());
         log.info("Hobby banner updated path={}", path);
     }
 
     public void enableBanner(String path, Account account) {
-        Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
+        Hobby hobby = hobbyService.getHobbyWithHostOrManagerCheck(account, path);
         hobbyService.enableHobbyBanner(hobby);
         log.info("Hobby banner enabled path={}", path);
     }
 
     public void disableBanner(String path, Account account) {
-        Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
+        Hobby hobby = hobbyService.getHobbyWithHostOrManagerCheck(account, path);
         hobbyService.disableHobbyBanner(hobby);
         log.info("Hobby banner disabled path={}", path);
     }
 
     @Transactional(readOnly = true)
     public List<TagResponse> getHobbyTags(String path, Account account) {
-        Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
+        Hobby hobby = hobbyService.getHobbyWithHostOrManagerCheck(account, path);
         return hobbyService.getTags(hobby).stream().map(TagResponse::from).toList();
     }
 
     public void addHobbyTag(String path, Account account, String tagTitle) {
-        Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
+        Hobby hobby = hobbyService.getHobbyWithHostOrManagerCheck(account, path);
         Tag tag = tagService.findOrCreateNew(tagTitle);
         hobbyService.addTag(hobby, tag);
         log.info("Hobby tag added path={} tag={}", path, tagTitle);
     }
 
     public void removeHobbyTag(String path, Account account, String tagTitle) {
-        Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
+        Hobby hobby = hobbyService.getHobbyWithHostOrManagerCheck(account, path);
         Tag tag = tagService.findByTitle(tagTitle);
         hobbyService.removeTag(hobby, tag);
         log.info("Hobby tag removed path={} tag={}", path, tagTitle);
@@ -172,60 +212,60 @@ public class HobbyApplicationService {
 
     @Transactional(readOnly = true)
     public List<ZoneResponse> getHobbyZones(String path, Account account) {
-        Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
+        Hobby hobby = hobbyService.getHobbyWithHostOrManagerCheck(account, path);
         return hobbyService.getZones(hobby).stream().map(ZoneResponse::from).toList();
     }
 
     public void addHobbyZone(String path, Account account, String zoneName) {
-        Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
+        Hobby hobby = hobbyService.getHobbyWithHostOrManagerCheck(account, path);
         Zone zone = zoneService.findByZoneName(zoneName);
         hobbyService.addZone(hobby, zone);
         log.info("Hobby zone added path={} zone={}", path, zoneName);
     }
 
     public void removeHobbyZone(String path, Account account, String zoneName) {
-        Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
+        Hobby hobby = hobbyService.getHobbyWithHostOrManagerCheck(account, path);
         Zone zone = zoneService.findByZoneName(zoneName);
         hobbyService.removeZone(hobby, zone);
         log.info("Hobby zone removed path={} zone={}", path, zoneName);
     }
 
     public void publish(String path, Account account) {
-        Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
+        Hobby hobby = hobbyService.getHobbyWithHostOrManagerCheck(account, path);
         hobbyService.publish(hobby);
         eventPublisher.publishEvent(new HobbyCreatedEvent(hobby));
         log.info("Hobby published path={}", path);
     }
 
     public void close(String path, Account account) {
-        Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
+        Hobby hobby = hobbyService.getHobbyWithHostOrManagerCheck(account, path);
         hobbyService.close(hobby);
         eventPublisher.publishEvent(new HobbyUpdateEvent(hobby, "Hobby closed"));
         log.info("Hobby closed path={}", path);
     }
 
     public void startRecruit(String path, Account account) {
-        Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
+        Hobby hobby = hobbyService.getHobbyWithHostOrManagerCheck(account, path);
         hobbyService.startRecruit(hobby);
         eventPublisher.publishEvent(new HobbyUpdateEvent(hobby, "Hobby recruitment started"));
         log.info("Hobby recruit started path={}", path);
     }
 
     public void stopRecruit(String path, Account account) {
-        Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
+        Hobby hobby = hobbyService.getHobbyWithHostOrManagerCheck(account, path);
         hobbyService.stopRecruit(hobby);
         eventPublisher.publishEvent(new HobbyUpdateEvent(hobby, "Hobby recruitment stopped"));
         log.info("Hobby recruit stopped path={}", path);
     }
 
     public void updatePath(String path, Account account, HobbyPathUpdateRequest request) {
-        Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
+        Hobby hobby = hobbyService.getHobbyWithHostOrManagerCheck(account, path);
         hobbyService.updateHobbyPath(hobby, request.newPath());
         log.info("Hobby path updated oldPath={}, newPath={}", path, request.newPath());
     }
 
     public void updateTitle(String path, Account account, HobbyTitleUpdateRequest request) {
-        Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
+        Hobby hobby = hobbyService.getHobbyWithHostOrManagerCheck(account, path);
         hobbyService.updateHobbyTitle(hobby, request.newTitle());
         log.info("Hobby title updated path={}", path);
     }

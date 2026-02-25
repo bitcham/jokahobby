@@ -27,28 +27,29 @@ class EventApiControllerTest extends AbstractContainerBaseTest {
     @Autowired MockMvcTester mockMvc;
     @Autowired AccountRepository accountRepository;
     @Autowired HobbyRepository hobbyRepository;
+    @Autowired HobbyHostRepository hobbyHostRepository;
     @Autowired HobbyManagerRepository hobbyManagerRepository;
     @Autowired HobbyMemberRepository hobbyMemberRepository;
     @Autowired EventRepository eventRepository;
     @Autowired EnrollmentRepository enrollmentRepository;
     @Autowired JwtProvider jwtProvider;
 
-    private Account managerAccount;
+    private Account hostAccount;
     private Account memberAccount;
-    private String managerToken;
+    private String hostToken;
     private String memberToken;
     private Hobby hobby;
 
     @BeforeEach
     void setUp() {
-        managerAccount = accountRepository.save(Account.builder()
+        hostAccount = accountRepository.save(Account.builder()
                 .email("manager@example.com")
                 .nickname("manager")
                 .provider("google")
                 .providerId("google-manager")
                 .joinedAt(Instant.now())
                 .build());
-        managerToken = jwtProvider.createAccessToken(managerAccount.getId());
+        hostToken = jwtProvider.createAccessToken(hostAccount.getId());
 
         memberAccount = accountRepository.save(Account.builder()
                 .email("member@example.com")
@@ -69,12 +70,12 @@ class EventApiControllerTest extends AbstractContainerBaseTest {
                 .recruiting(true)
                 .memberCount(2)
                 .build());
-        hobbyManagerRepository.save(HobbyManager.builder().hobby(hobby).account(managerAccount).build());
+        hobbyHostRepository.save(HobbyHost.builder().hobby(hobby).account(hostAccount).build());
         hobbyMemberRepository.save(HobbyMember.builder().hobby(hobby).account(memberAccount).build());
     }
 
-    private String managerBearer() {
-        return "Bearer " + managerToken;
+    private String hostBearer() {
+        return "Bearer " + hostToken;
     }
 
     private String memberBearer() {
@@ -95,7 +96,7 @@ class EventApiControllerTest extends AbstractContainerBaseTest {
                 .endDateTime(Instant.now().plus(3, ChronoUnit.DAYS))
                 .limitOfEnrollments(5)
                 .hobby(hobby)
-                .createdBy(managerAccount)
+                .createdBy(hostAccount)
                 .build());
         return event;
     }
@@ -110,7 +111,7 @@ class EventApiControllerTest extends AbstractContainerBaseTest {
                 .endDateTime(Instant.now().plus(3, ChronoUnit.DAYS))
                 .limitOfEnrollments(5)
                 .hobby(hobby)
-                .createdBy(managerAccount)
+                .createdBy(hostAccount)
                 .build());
         return event;
     }
@@ -135,7 +136,7 @@ class EventApiControllerTest extends AbstractContainerBaseTest {
         @DisplayName("creates FCFS event with valid data")
         void createFcfsEvent() {
             assertThat(mockMvc.post().uri("/api/v1/hobbies/{path}/events", "test-hobby")
-                            .header("Authorization", managerBearer())
+                            .header("Authorization", hostBearer())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {
@@ -157,7 +158,7 @@ class EventApiControllerTest extends AbstractContainerBaseTest {
         @DisplayName("creates CONFIRMATIVE event with valid data")
         void createConfirmativeEvent() {
             assertThat(mockMvc.post().uri("/api/v1/hobbies/{path}/events", "test-hobby")
-                            .header("Authorization", managerBearer())
+                            .header("Authorization", hostBearer())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {
@@ -179,7 +180,7 @@ class EventApiControllerTest extends AbstractContainerBaseTest {
         @DisplayName("returns 400 for missing required fields")
         void missingFields() {
             assertThat(mockMvc.post().uri("/api/v1/hobbies/{path}/events", "test-hobby")
-                            .header("Authorization", managerBearer())
+                            .header("Authorization", hostBearer())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"title": "Only Title"}
@@ -192,7 +193,7 @@ class EventApiControllerTest extends AbstractContainerBaseTest {
         void invalidDates() {
             String pastInstant = "\"" + Instant.now().minus(1, ChronoUnit.HOURS).toString() + "\"";
             assertThat(mockMvc.post().uri("/api/v1/hobbies/{path}/events", "test-hobby")
-                            .header("Authorization", managerBearer())
+                            .header("Authorization", hostBearer())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {
@@ -345,7 +346,7 @@ class EventApiControllerTest extends AbstractContainerBaseTest {
             Event event = createFcfsEvent();
 
             assertThat(mockMvc.put().uri("/api/v1/hobbies/{path}/events/{eventId}", "test-hobby", event.getId())
-                            .header("Authorization", managerBearer())
+                            .header("Authorization", hostBearer())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {
@@ -367,10 +368,10 @@ class EventApiControllerTest extends AbstractContainerBaseTest {
         void limitBelowAccepted() {
             Event event = createFcfsEvent();
             createEnrollment(event, memberAccount, true);
-            createEnrollment(event, managerAccount, true);
+            createEnrollment(event, hostAccount, true);
 
             assertThat(mockMvc.put().uri("/api/v1/hobbies/{path}/events/{eventId}", "test-hobby", event.getId())
-                            .header("Authorization", managerBearer())
+                            .header("Authorization", hostBearer())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {
@@ -436,7 +437,7 @@ class EventApiControllerTest extends AbstractContainerBaseTest {
             Event event = createFcfsEvent();
 
             assertThat(mockMvc.delete().uri("/api/v1/hobbies/{path}/events/{eventId}", "test-hobby", event.getId())
-                            .header("Authorization", managerBearer()))
+                            .header("Authorization", hostBearer()))
                     .hasStatusOk()
                     .bodyJson()
                     .extractingPath("$.success").isEqualTo(true);
@@ -569,7 +570,7 @@ class EventApiControllerTest extends AbstractContainerBaseTest {
             Enrollment enrollment = createEnrollment(event, memberAccount, false);
 
             assertThat(mockMvc.patch().uri("/api/v1/hobbies/{path}/enrollments/{enrollmentId}/accept", "test-hobby", enrollment.getId())
-                            .header("Authorization", managerBearer()))
+                            .header("Authorization", hostBearer()))
                     .hasStatusOk()
                     .bodyJson()
                     .extractingPath("$.success").isEqualTo(true);
@@ -582,7 +583,7 @@ class EventApiControllerTest extends AbstractContainerBaseTest {
             Enrollment enrollment = createEnrollment(event, memberAccount, false);
 
             assertThat(mockMvc.patch().uri("/api/v1/hobbies/{path}/enrollments/{enrollmentId}/accept", "test-hobby", enrollment.getId())
-                            .header("Authorization", managerBearer()))
+                            .header("Authorization", hostBearer()))
                     .hasStatus(HttpStatus.BAD_REQUEST)
                     .bodyJson()
                     .extractingPath("$.error.code").isEqualTo("EVENT_004");
@@ -613,7 +614,7 @@ class EventApiControllerTest extends AbstractContainerBaseTest {
             Enrollment enrollment = createEnrollment(event, memberAccount, true);
 
             assertThat(mockMvc.patch().uri("/api/v1/hobbies/{path}/enrollments/{enrollmentId}/reject", "test-hobby", enrollment.getId())
-                            .header("Authorization", managerBearer()))
+                            .header("Authorization", hostBearer()))
                     .hasStatusOk()
                     .bodyJson()
                     .extractingPath("$.success").isEqualTo(true);
@@ -626,7 +627,7 @@ class EventApiControllerTest extends AbstractContainerBaseTest {
             Enrollment enrollment = createEnrollment(event, memberAccount, true);
 
             assertThat(mockMvc.patch().uri("/api/v1/hobbies/{path}/enrollments/{enrollmentId}/reject", "test-hobby", enrollment.getId())
-                            .header("Authorization", managerBearer()))
+                            .header("Authorization", hostBearer()))
                     .hasStatus(HttpStatus.BAD_REQUEST)
                     .bodyJson()
                     .extractingPath("$.error.code").isEqualTo("EVENT_005");
@@ -657,7 +658,7 @@ class EventApiControllerTest extends AbstractContainerBaseTest {
             Enrollment enrollment = createEnrollment(event, memberAccount, true);
 
             assertThat(mockMvc.patch().uri("/api/v1/hobbies/{path}/enrollments/{enrollmentId}/checkin", "test-hobby", enrollment.getId())
-                            .header("Authorization", managerBearer()))
+                            .header("Authorization", hostBearer()))
                     .hasStatusOk()
                     .bodyJson()
                     .extractingPath("$.success").isEqualTo(true);
@@ -689,7 +690,7 @@ class EventApiControllerTest extends AbstractContainerBaseTest {
             enrollment.checkIn();
 
             assertThat(mockMvc.patch().uri("/api/v1/hobbies/{path}/enrollments/{enrollmentId}/cancel-checkin", "test-hobby", enrollment.getId())
-                            .header("Authorization", managerBearer()))
+                            .header("Authorization", hostBearer()))
                     .hasStatusOk()
                     .bodyJson()
                     .extractingPath("$.success").isEqualTo(true);

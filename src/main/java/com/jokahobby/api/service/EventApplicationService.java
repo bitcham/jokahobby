@@ -34,7 +34,7 @@ public class EventApplicationService {
     private final ApplicationEventPublisher eventPublisher;
 
     public EventResponse createEvent(String path, Account account, EventCreateRequest request) {
-        Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
+        Hobby hobby = hobbyService.getHobbyWithHostOrManagerCheck(account, path);
         Event event = request.toEntity(hobby, account);
         Event saved = eventService.createEvent(event);
         log.info("Event created path={}, eventId={}", path, saved.getId());
@@ -58,7 +58,7 @@ public class EventApplicationService {
     }
 
     public EventResponse updateEvent(String path, Long eventId, Account account, EventUpdateRequest request) {
-        Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
+        Hobby hobby = hobbyService.getHobbyWithHostOrManagerCheck(account, path);
         Event event = eventService.getEventWithHobbyCheckForUpdate(eventId, hobby);
 
         if (request.limitOfEnrollments() < event.getNumberOfAcceptedEnrollments()) {
@@ -79,7 +79,7 @@ public class EventApplicationService {
     }
 
     public void deleteEvent(String path, Long eventId, Account account) {
-        Hobby hobby = hobbyService.getHobbyWithManagerCheck(account, path);
+        Hobby hobby = hobbyService.getHobbyWithHostOrManagerCheck(account, path);
         Event event = eventService.getEventWithHobbyCheck(eventId, hobby);
         eventService.deleteEvent(event);
         log.info("Event deleted eventId={}", eventId);
@@ -118,7 +118,7 @@ public class EventApplicationService {
     }
 
     public void acceptEnrollment(String path, Long enrollmentId, Account account) {
-        hobbyService.getHobbyWithManagerCheck(account, path);
+        hobbyService.getHobbyWithHostOrManagerCheck(account, path);
         Enrollment enrollment = eventService.getEnrollment(enrollmentId);
         Event event = enrollment.getEvent();
 
@@ -132,7 +132,7 @@ public class EventApplicationService {
     }
 
     public void rejectEnrollment(String path, Long enrollmentId, Account account) {
-        hobbyService.getHobbyWithManagerCheck(account, path);
+        hobbyService.getHobbyWithHostOrManagerCheck(account, path);
         Enrollment enrollment = eventService.getEnrollment(enrollmentId);
         Event event = enrollment.getEvent();
 
@@ -146,14 +146,14 @@ public class EventApplicationService {
     }
 
     public void checkIn(String path, Long enrollmentId, Account account) {
-        hobbyService.getHobbyWithManagerCheck(account, path);
+        hobbyService.getHobbyWithHostOrManagerCheck(account, path);
         Enrollment enrollment = eventService.getEnrollment(enrollmentId);
         eventService.checkInEnrollment(enrollment);
         log.info("Check-in enrollmentId={}", enrollmentId);
     }
 
     public void cancelCheckIn(String path, Long enrollmentId, Account account) {
-        hobbyService.getHobbyWithManagerCheck(account, path);
+        hobbyService.getHobbyWithHostOrManagerCheck(account, path);
         Enrollment enrollment = eventService.getEnrollment(enrollmentId);
         eventService.cancelCheckInEnrollment(enrollment);
         log.info("Check-in canceled enrollmentId={}", enrollmentId);

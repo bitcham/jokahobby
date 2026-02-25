@@ -30,20 +30,22 @@ class HobbyMemberConcurrencyTest extends AbstractContainerBaseTest {
     @Autowired HobbyApplicationService hobbyApplicationService;
     @Autowired AccountRepository accountRepository;
     @Autowired HobbyRepository hobbyRepository;
+    @Autowired HobbyHostRepository hobbyHostRepository;
     @Autowired HobbyManagerRepository hobbyManagerRepository;
     @Autowired HobbyMemberRepository hobbyMemberRepository;
 
-    private Account managerAccount;
+    private Account hostAccount;
     private Hobby hobby;
 
     @BeforeEach
     void setUp() {
         hobbyMemberRepository.deleteAllInBatch();
         hobbyManagerRepository.deleteAllInBatch();
+        hobbyHostRepository.deleteAllInBatch();
         hobbyRepository.deleteAllInBatch();
         accountRepository.deleteAllInBatch();
 
-        managerAccount = accountRepository.save(Account.builder()
+        hostAccount = accountRepository.save(Account.builder()
                 .email("manager@test.com")
                 .nickname("manager-" + UUID.randomUUID().toString().substring(0, 8))
                 .provider("google")
@@ -62,20 +64,21 @@ class HobbyMemberConcurrencyTest extends AbstractContainerBaseTest {
                 .memberCount(1)
                 .build());
 
-        hobbyManagerRepository.save(HobbyManager.builder()
-                .hobby(hobby).account(managerAccount).build());
+        hobbyHostRepository.save(HobbyHost.builder()
+                .hobby(hobby).account(hostAccount).build());
     }
 
     @AfterEach
     void tearDown() {
         hobbyMemberRepository.deleteAllInBatch();
         hobbyManagerRepository.deleteAllInBatch();
+        hobbyHostRepository.deleteAllInBatch();
         hobbyRepository.deleteAllInBatch();
         accountRepository.deleteAllInBatch();
     }
 
     @Test
-    @DisplayName("10 concurrent joins: memberCount == 11 (1 manager + 10 members)")
+    @DisplayName("10 concurrent joins: memberCount == 11 (1 host + 10 members)")
     void concurrentJoins_memberCountCorrect() throws InterruptedException {
         int threadCount = 10;
         List<Account> accounts = createAccounts(threadCount);
@@ -123,7 +126,7 @@ class HobbyMemberConcurrencyTest extends AbstractContainerBaseTest {
                 .joinedAt(Instant.now())
                 .build());
         hobbyApplicationService.joinHobby(hobby.getPath(), existingMember);
-        // Now: manager(1) + existing member(1) = memberCount 2
+        // Now: host(1) + existing member(1) = memberCount 2
 
         int joinCount = 5;
         List<Account> joinAccounts = createAccounts(joinCount);
@@ -170,7 +173,7 @@ class HobbyMemberConcurrencyTest extends AbstractContainerBaseTest {
     }
 
     @Test
-    @DisplayName("same account 10 concurrent joins: memberCount == 2 (1 manager + 1 member)")
+    @DisplayName("same account 10 concurrent joins: memberCount == 2 (1 host + 1 member)")
     void concurrentDuplicateJoins_memberCountCorrect() throws InterruptedException {
         Account singleAccount = accountRepository.save(Account.builder()
                 .email("dup@test.com")

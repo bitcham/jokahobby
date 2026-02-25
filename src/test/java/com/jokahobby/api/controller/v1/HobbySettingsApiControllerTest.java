@@ -29,6 +29,7 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
     @Autowired MockMvcTester mockMvc;
     @Autowired AccountRepository accountRepository;
     @Autowired HobbyRepository hobbyRepository;
+    @Autowired HobbyHostRepository hobbyHostRepository;
     @Autowired HobbyManagerRepository hobbyManagerRepository;
     @Autowired HobbyMemberRepository hobbyMemberRepository;
     @Autowired HobbyTagRepository hobbyTagRepository;
@@ -37,19 +38,39 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
     @Autowired ZoneRepository zoneRepository;
     @Autowired JwtProvider jwtProvider;
 
+    private Account hostAccount;
     private Account managerAccount;
+    private Account memberAccount;
     private Account otherAccount;
     private Hobby testHobby;
+    private String hostToken;
     private String managerToken;
+    private String memberToken;
     private String otherToken;
 
     @BeforeEach
     void setUp() {
+        hostAccount = accountRepository.save(Account.builder()
+                .email("host@example.com")
+                .nickname("hostuser")
+                .provider("google")
+                .providerId("google-host")
+                .joinedAt(Instant.now())
+                .build());
+
         managerAccount = accountRepository.save(Account.builder()
                 .email("manager@example.com")
                 .nickname("manager")
                 .provider("google")
                 .providerId("google-manager")
+                .joinedAt(Instant.now())
+                .build());
+
+        memberAccount = accountRepository.save(Account.builder()
+                .email("member@example.com")
+                .nickname("memberuser")
+                .provider("google")
+                .providerId("google-member")
                 .joinedAt(Instant.now())
                 .build());
 
@@ -66,12 +87,19 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
                 .title("Test Hobby")
                 .shortDescription("Short description")
                 .fullDescription("Full description")
+                .memberCount(3)
                 .build());
 
+        hobbyHostRepository.save(HobbyHost.builder()
+                .hobby(testHobby).account(hostAccount).build());
         hobbyManagerRepository.save(HobbyManager.builder()
-                .hobby(testHobby).account(managerAccount).build());
+                .hobby(testHobby).account(managerAccount).promotedBy(hostAccount).build());
+        hobbyMemberRepository.save(HobbyMember.builder()
+                .hobby(testHobby).account(memberAccount).build());
 
+        hostToken = "Bearer " + jwtProvider.createAccessToken(hostAccount.getId());
         managerToken = "Bearer " + jwtProvider.createAccessToken(managerAccount.getId());
+        memberToken = "Bearer " + jwtProvider.createAccessToken(memberAccount.getId());
         otherToken = "Bearer " + jwtProvider.createAccessToken(otherAccount.getId());
     }
 
@@ -80,6 +108,21 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
     @Nested
     @DisplayName("GET /api/v1/hobbies/{path}/settings")
     class GetSettings {
+
+        @Test
+        @DisplayName("returns full settings with host info and role")
+        void hostAccess() {
+            assertThat(mockMvc.get().uri("/api/v1/hobbies/{path}/settings", "test-hobby")
+                            .header("Authorization", hostToken))
+                    .hasStatusOk()
+                    .bodyJson()
+                    .extractingPath("$.data.host.nickname").isEqualTo("hostuser");
+            assertThat(mockMvc.get().uri("/api/v1/hobbies/{path}/settings", "test-hobby")
+                            .header("Authorization", hostToken))
+                    .hasStatusOk()
+                    .bodyJson()
+                    .extractingPath("$.data.host.role").isEqualTo("HOST");
+        }
 
         @Test
         @DisplayName("returns full settings for manager")
@@ -92,8 +135,16 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
         }
 
         @Test
-        @DisplayName("returns 403 for non-manager")
-        void nonManagerAccess() {
+        @DisplayName("returns 403 for member")
+        void memberAccess() {
+            assertThat(mockMvc.get().uri("/api/v1/hobbies/{path}/settings", "test-hobby")
+                            .header("Authorization", memberToken))
+                    .hasStatus(HttpStatus.FORBIDDEN);
+        }
+
+        @Test
+        @DisplayName("returns 403 for non-member")
+        void nonMemberAccess() {
             assertThat(mockMvc.get().uri("/api/v1/hobbies/{path}/settings", "test-hobby")
                             .header("Authorization", otherToken))
                     .hasStatus(HttpStatus.FORBIDDEN);
@@ -114,10 +165,10 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
     class UpdateDescription {
 
         @Test
-        @DisplayName("updates description with valid data")
+        @DisplayName("host updates description with valid data")
         void validUpdate() {
             assertThat(mockMvc.put().uri("/api/v1/hobbies/{path}/settings/description", "test-hobby")
-                            .header("Authorization", managerToken)
+                            .header("Authorization", hostToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {
@@ -131,11 +182,23 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
         }
 
         @Test
+        @DisplayName("manager updates description")
+        void managerUpdate() {
+            assertThat(mockMvc.put().uri("/api/v1/hobbies/{path}/settings/description", "test-hobby")
+                            .header("Authorization", managerToken)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {"shortDescription": "Short", "fullDescription": "Full"}
+                                    """))
+                    .hasStatusOk();
+        }
+
+        @Test
         @DisplayName("returns 400 for invalid data")
         void invalidData() {
             String longDesc = "a".repeat(151);
             assertThat(mockMvc.put().uri("/api/v1/hobbies/{path}/settings/description", "test-hobby")
-                            .header("Authorization", managerToken)
+                            .header("Authorization", hostToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"shortDescription": "%s", "fullDescription": "Valid"}
@@ -144,10 +207,10 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
         }
 
         @Test
-        @DisplayName("returns 403 for non-manager")
-        void nonManager() {
+        @DisplayName("returns 403 for member")
+        void memberForbidden() {
             assertThat(mockMvc.put().uri("/api/v1/hobbies/{path}/settings/description", "test-hobby")
-                            .header("Authorization", otherToken)
+                            .header("Authorization", memberToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"shortDescription": "Short", "fullDescription": "Full"}
@@ -166,7 +229,7 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
         @DisplayName("updates banner image")
         void validUpdate() {
             assertThat(mockMvc.put().uri("/api/v1/hobbies/{path}/settings/banner", "test-hobby")
-                            .header("Authorization", managerToken)
+                            .header("Authorization", hostToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"image": "data:image/png;base64,abc123"}
@@ -180,7 +243,7 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
         @DisplayName("returns 400 for blank image")
         void blankImage() {
             assertThat(mockMvc.put().uri("/api/v1/hobbies/{path}/settings/banner", "test-hobby")
-                            .header("Authorization", managerToken)
+                            .header("Authorization", hostToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"image": ""}
@@ -189,10 +252,10 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
         }
 
         @Test
-        @DisplayName("returns 403 for non-manager")
-        void nonManager() {
+        @DisplayName("returns 403 for member")
+        void memberForbidden() {
             assertThat(mockMvc.put().uri("/api/v1/hobbies/{path}/settings/banner", "test-hobby")
-                            .header("Authorization", otherToken)
+                            .header("Authorization", memberToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"image": "data:image/png;base64,abc123"}
@@ -211,7 +274,7 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
         @DisplayName("enables banner")
         void enable() {
             assertThat(mockMvc.post().uri("/api/v1/hobbies/{path}/settings/banner/enable", "test-hobby")
-                            .header("Authorization", managerToken))
+                            .header("Authorization", hostToken))
                     .hasStatusOk()
                     .bodyJson()
                     .extractingPath("$.success").isEqualTo(true);
@@ -221,17 +284,17 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
         @DisplayName("disables banner")
         void disable() {
             assertThat(mockMvc.post().uri("/api/v1/hobbies/{path}/settings/banner/disable", "test-hobby")
-                            .header("Authorization", managerToken))
+                            .header("Authorization", hostToken))
                     .hasStatusOk()
                     .bodyJson()
                     .extractingPath("$.success").isEqualTo(true);
         }
 
         @Test
-        @DisplayName("returns 403 for non-manager")
-        void nonManager() {
+        @DisplayName("returns 403 for member")
+        void memberForbidden() {
             assertThat(mockMvc.post().uri("/api/v1/hobbies/{path}/settings/banner/enable", "test-hobby")
-                            .header("Authorization", otherToken))
+                            .header("Authorization", memberToken))
                     .hasStatus(HttpStatus.FORBIDDEN);
         }
     }
@@ -249,7 +312,7 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
             hobbyTagRepository.save(HobbyTag.builder().hobby(testHobby).tag(tag).build());
 
             assertThat(mockMvc.get().uri("/api/v1/hobbies/{path}/settings/tags", "test-hobby")
-                            .header("Authorization", managerToken))
+                            .header("Authorization", hostToken))
                     .hasStatusOk()
                     .bodyJson()
                     .extractingPath("$.data[0].title").isEqualTo("spring");
@@ -259,7 +322,7 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
         @DisplayName("adds valid tag")
         void addTag() {
             assertThat(mockMvc.post().uri("/api/v1/hobbies/{path}/settings/tags", "test-hobby")
-                            .header("Authorization", managerToken)
+                            .header("Authorization", hostToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"tagTitle": "java"}
@@ -276,7 +339,7 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
             hobbyTagRepository.save(HobbyTag.builder().hobby(testHobby).tag(tag).build());
 
             assertThat(mockMvc.delete().uri("/api/v1/hobbies/{path}/settings/tags", "test-hobby")
-                            .header("Authorization", managerToken)
+                            .header("Authorization", hostToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"tagTitle": "remove-me"}
@@ -287,10 +350,10 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
         }
 
         @Test
-        @DisplayName("returns 403 for non-manager")
-        void nonManager() {
+        @DisplayName("returns 403 for member")
+        void memberForbidden() {
             assertThat(mockMvc.get().uri("/api/v1/hobbies/{path}/settings/tags", "test-hobby")
-                            .header("Authorization", otherToken))
+                            .header("Authorization", memberToken))
                     .hasStatus(HttpStatus.FORBIDDEN);
         }
     }
@@ -317,7 +380,7 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
             hobbyZoneRepository.save(HobbyZone.builder().hobby(testHobby).zone(testZone).build());
 
             assertThat(mockMvc.get().uri("/api/v1/hobbies/{path}/settings/zones", "test-hobby")
-                            .header("Authorization", managerToken))
+                            .header("Authorization", hostToken))
                     .hasStatusOk()
                     .bodyJson()
                     .extractingPath("$.data[0].city").isEqualTo("Seoul");
@@ -327,7 +390,7 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
         @DisplayName("adds valid zone")
         void addZone() {
             assertThat(mockMvc.post().uri("/api/v1/hobbies/{path}/settings/zones", "test-hobby")
-                            .header("Authorization", managerToken)
+                            .header("Authorization", hostToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"zoneName": "Korea/Seoul"}
@@ -343,7 +406,7 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
             hobbyZoneRepository.save(HobbyZone.builder().hobby(testHobby).zone(testZone).build());
 
             assertThat(mockMvc.delete().uri("/api/v1/hobbies/{path}/settings/zones", "test-hobby")
-                            .header("Authorization", managerToken)
+                            .header("Authorization", hostToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"zoneName": "Korea/Seoul"}
@@ -354,10 +417,10 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
         }
 
         @Test
-        @DisplayName("returns 403 for non-manager")
-        void nonManager() {
+        @DisplayName("returns 403 for member")
+        void memberForbidden() {
             assertThat(mockMvc.get().uri("/api/v1/hobbies/{path}/settings/zones", "test-hobby")
-                            .header("Authorization", otherToken))
+                            .header("Authorization", memberToken))
                     .hasStatus(HttpStatus.FORBIDDEN);
         }
     }
@@ -372,7 +435,7 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
         @DisplayName("publishes unpublished hobby")
         void publish() {
             assertThat(mockMvc.post().uri("/api/v1/hobbies/{path}/settings/publish", "test-hobby")
-                            .header("Authorization", managerToken))
+                            .header("Authorization", hostToken))
                     .hasStatusOk()
                     .bodyJson()
                     .extractingPath("$.success").isEqualTo(true);
@@ -385,7 +448,7 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
             hobbyRepository.save(testHobby);
 
             assertThat(mockMvc.post().uri("/api/v1/hobbies/{path}/settings/close", "test-hobby")
-                            .header("Authorization", managerToken))
+                            .header("Authorization", hostToken))
                     .hasStatusOk()
                     .bodyJson()
                     .extractingPath("$.success").isEqualTo(true);
@@ -398,17 +461,17 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
             hobbyRepository.save(testHobby);
 
             assertThat(mockMvc.post().uri("/api/v1/hobbies/{path}/settings/publish", "test-hobby")
-                            .header("Authorization", managerToken))
+                            .header("Authorization", hostToken))
                     .hasStatus(HttpStatus.BAD_REQUEST)
                     .bodyJson()
                     .extractingPath("$.error.code").isEqualTo("HOBBY_001");
         }
 
         @Test
-        @DisplayName("returns 403 for non-manager")
-        void nonManager() {
+        @DisplayName("returns 403 for member")
+        void memberForbidden() {
             assertThat(mockMvc.post().uri("/api/v1/hobbies/{path}/settings/publish", "test-hobby")
-                            .header("Authorization", otherToken))
+                            .header("Authorization", memberToken))
                     .hasStatus(HttpStatus.FORBIDDEN);
         }
     }
@@ -429,7 +492,7 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
         @DisplayName("starts recruiting")
         void startRecruit() {
             assertThat(mockMvc.post().uri("/api/v1/hobbies/{path}/settings/recruit/start", "test-hobby")
-                            .header("Authorization", managerToken))
+                            .header("Authorization", hostToken))
                     .hasStatusOk()
                     .bodyJson()
                     .extractingPath("$.success").isEqualTo(true);
@@ -439,17 +502,17 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
         @DisplayName("stops recruiting")
         void stopRecruit() {
             assertThat(mockMvc.post().uri("/api/v1/hobbies/{path}/settings/recruit/stop", "test-hobby")
-                            .header("Authorization", managerToken))
+                            .header("Authorization", hostToken))
                     .hasStatusOk()
                     .bodyJson()
                     .extractingPath("$.success").isEqualTo(true);
         }
 
         @Test
-        @DisplayName("returns 403 for non-manager")
-        void nonManager() {
+        @DisplayName("returns 403 for member")
+        void memberForbidden() {
             assertThat(mockMvc.post().uri("/api/v1/hobbies/{path}/settings/recruit/start", "test-hobby")
-                            .header("Authorization", otherToken))
+                            .header("Authorization", memberToken))
                     .hasStatus(HttpStatus.FORBIDDEN);
         }
     }
@@ -464,7 +527,7 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
         @DisplayName("updates path with valid value")
         void validUpdate() {
             assertThat(mockMvc.put().uri("/api/v1/hobbies/{path}/settings/path", "test-hobby")
-                            .header("Authorization", managerToken)
+                            .header("Authorization", hostToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"newPath": "new-path"}
@@ -478,7 +541,7 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
         @DisplayName("returns error for invalid path format")
         void invalidPath() {
             assertThat(mockMvc.put().uri("/api/v1/hobbies/{path}/settings/path", "test-hobby")
-                            .header("Authorization", managerToken)
+                            .header("Authorization", hostToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"newPath": "a"}
@@ -497,7 +560,7 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
                     .build());
 
             assertThat(mockMvc.put().uri("/api/v1/hobbies/{path}/settings/path", "test-hobby")
-                            .header("Authorization", managerToken)
+                            .header("Authorization", hostToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"newPath": "existing-path"}
@@ -508,10 +571,10 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
         }
 
         @Test
-        @DisplayName("returns 403 for non-manager")
-        void nonManager() {
+        @DisplayName("returns 403 for member")
+        void memberForbidden() {
             assertThat(mockMvc.put().uri("/api/v1/hobbies/{path}/settings/path", "test-hobby")
-                            .header("Authorization", otherToken)
+                            .header("Authorization", memberToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"newPath": "new-path"}
@@ -530,7 +593,7 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
         @DisplayName("updates title with valid value")
         void validUpdate() {
             assertThat(mockMvc.put().uri("/api/v1/hobbies/{path}/settings/title", "test-hobby")
-                            .header("Authorization", managerToken)
+                            .header("Authorization", hostToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"newTitle": "Updated Title"}
@@ -551,7 +614,7 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
                     .build());
 
             assertThat(mockMvc.put().uri("/api/v1/hobbies/{path}/settings/title", "test-hobby")
-                            .header("Authorization", managerToken)
+                            .header("Authorization", hostToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"newTitle": "Existing Title"}
@@ -562,15 +625,190 @@ class HobbySettingsApiControllerTest extends AbstractContainerBaseTest {
         }
 
         @Test
-        @DisplayName("returns 403 for non-manager")
-        void nonManager() {
+        @DisplayName("returns 403 for member")
+        void memberForbidden() {
             assertThat(mockMvc.put().uri("/api/v1/hobbies/{path}/settings/title", "test-hobby")
-                            .header("Authorization", otherToken)
+                            .header("Authorization", memberToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"newTitle": "New Title"}
                                     """))
                     .hasStatus(HttpStatus.FORBIDDEN);
+        }
+    }
+
+    // ===== Promote to Manager =====
+
+    @Nested
+    @DisplayName("POST /api/v1/hobbies/{path}/settings/managers")
+    class PromoteToManager {
+
+        @Test
+        @DisplayName("host promotes member to manager")
+        void promoteSuccess() {
+            assertThat(mockMvc.post().uri("/api/v1/hobbies/{path}/settings/managers", "test-hobby")
+                            .header("Authorization", hostToken)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {"nickname": "memberuser"}
+                                    """))
+                    .hasStatusOk()
+                    .bodyJson()
+                    .extractingPath("$.success").isEqualTo(true);
+        }
+
+        @Test
+        @DisplayName("returns 403 for manager (not host)")
+        void managerCannotPromote() {
+            assertThat(mockMvc.post().uri("/api/v1/hobbies/{path}/settings/managers", "test-hobby")
+                            .header("Authorization", managerToken)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {"nickname": "memberuser"}
+                                    """))
+                    .hasStatus(HttpStatus.FORBIDDEN);
+        }
+
+        @Test
+        @DisplayName("returns 400 for non-member target")
+        void targetNotMember() {
+            assertThat(mockMvc.post().uri("/api/v1/hobbies/{path}/settings/managers", "test-hobby")
+                            .header("Authorization", hostToken)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {"nickname": "otheruser"}
+                                    """))
+                    .hasStatus(HttpStatus.BAD_REQUEST)
+                    .bodyJson()
+                    .extractingPath("$.error.code").isEqualTo("HOBBY_012");
+        }
+
+        @Test
+        @DisplayName("returns 400 for already-manager target")
+        void alreadyManager() {
+            assertThat(mockMvc.post().uri("/api/v1/hobbies/{path}/settings/managers", "test-hobby")
+                            .header("Authorization", hostToken)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {"nickname": "manager"}
+                                    """))
+                    .hasStatus(HttpStatus.BAD_REQUEST)
+                    .bodyJson()
+                    .extractingPath("$.error.code").isEqualTo("HOBBY_011");
+        }
+    }
+
+    // ===== Demote to Member =====
+
+    @Nested
+    @DisplayName("DELETE /api/v1/hobbies/{path}/settings/managers/{nickname}")
+    class DemoteToMember {
+
+        @Test
+        @DisplayName("host demotes manager to member")
+        void demoteSuccess() {
+            assertThat(mockMvc.delete().uri("/api/v1/hobbies/{path}/settings/managers/{nickname}",
+                            "test-hobby", "manager")
+                            .header("Authorization", hostToken))
+                    .hasStatusOk()
+                    .bodyJson()
+                    .extractingPath("$.success").isEqualTo(true);
+        }
+
+        @Test
+        @DisplayName("returns 403 for manager (not host)")
+        void managerCannotDemote() {
+            assertThat(mockMvc.delete().uri("/api/v1/hobbies/{path}/settings/managers/{nickname}",
+                            "test-hobby", "manager")
+                            .header("Authorization", managerToken))
+                    .hasStatus(HttpStatus.FORBIDDEN);
+        }
+
+        @Test
+        @DisplayName("returns 400 for non-manager target")
+        void targetNotManager() {
+            assertThat(mockMvc.delete().uri("/api/v1/hobbies/{path}/settings/managers/{nickname}",
+                            "test-hobby", "memberuser")
+                            .header("Authorization", hostToken))
+                    .hasStatus(HttpStatus.BAD_REQUEST)
+                    .bodyJson()
+                    .extractingPath("$.error.code").isEqualTo("HOBBY_013");
+        }
+    }
+
+    // ===== Transfer Host =====
+
+    @Nested
+    @DisplayName("POST /api/v1/hobbies/{path}/settings/host")
+    class TransferHost {
+
+        @Test
+        @DisplayName("host transfers to manager, old host becomes manager")
+        void transferToManager() {
+            assertThat(mockMvc.post().uri("/api/v1/hobbies/{path}/settings/host", "test-hobby")
+                            .header("Authorization", hostToken)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {"nickname": "manager"}
+                                    """))
+                    .hasStatusOk()
+                    .bodyJson()
+                    .extractingPath("$.success").isEqualTo(true);
+
+            // Verify new host can access settings as host
+            String newHostToken = managerToken;
+            assertThat(mockMvc.get().uri("/api/v1/hobbies/{path}/settings", "test-hobby")
+                            .header("Authorization", newHostToken))
+                    .hasStatusOk()
+                    .bodyJson()
+                    .extractingPath("$.data.host.nickname").isEqualTo("manager");
+        }
+
+        @Test
+        @DisplayName("host transfers to member")
+        void transferToMember() {
+            assertThat(mockMvc.post().uri("/api/v1/hobbies/{path}/settings/host", "test-hobby")
+                            .header("Authorization", hostToken)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {"nickname": "memberuser"}
+                                    """))
+                    .hasStatusOk()
+                    .bodyJson()
+                    .extractingPath("$.success").isEqualTo(true);
+
+            // Verify new host is reflected in settings
+            assertThat(mockMvc.get().uri("/api/v1/hobbies/{path}/settings", "test-hobby")
+                            .header("Authorization", memberToken))
+                    .hasStatusOk()
+                    .bodyJson()
+                    .extractingPath("$.data.host.nickname").isEqualTo("memberuser");
+        }
+
+        @Test
+        @DisplayName("returns 403 for manager (not host)")
+        void managerCannotTransfer() {
+            assertThat(mockMvc.post().uri("/api/v1/hobbies/{path}/settings/host", "test-hobby")
+                            .header("Authorization", managerToken)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {"nickname": "memberuser"}
+                                    """))
+                    .hasStatus(HttpStatus.FORBIDDEN);
+        }
+
+        @Test
+        @DisplayName("returns 400 for non-member target")
+        void targetNotMember() {
+            assertThat(mockMvc.post().uri("/api/v1/hobbies/{path}/settings/host", "test-hobby")
+                            .header("Authorization", hostToken)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {"nickname": "otheruser"}
+                                    """))
+                    .hasStatus(HttpStatus.BAD_REQUEST)
+                    .bodyJson()
+                    .extractingPath("$.error.code").isEqualTo("HOBBY_014");
         }
     }
 }
