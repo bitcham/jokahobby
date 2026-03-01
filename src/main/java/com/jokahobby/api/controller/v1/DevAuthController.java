@@ -49,10 +49,8 @@ public class DevAuthController {
     )
     @PostMapping("/api/v1/dev/token/{nickname}")
     public ResponseEntity<ApiResponse<TokenResponse>> generateToken(@PathVariable String nickname) {
-        Account account = accountRepository.findByNickname(nickname);
-        if (account == null) {
-            throw new AppException(ErrorCode.ACCOUNT_NOT_FOUND);
-        }
+        Account account = accountRepository.findByNickname(nickname)
+                .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND));
 
         String accessToken = jwtProvider.createAccessToken(account.getId());
         long expiresIn = jwtProvider.getAccessTokenExpirySeconds();

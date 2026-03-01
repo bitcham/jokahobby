@@ -41,7 +41,7 @@ class AccountSoftDeleteRepositoryTest extends AbstractContainerBaseTest {
         em.flush();
         em.clear();
 
-        assertThat(accountRepository.findByNickname("testuser")).isNull();
+        assertThat(accountRepository.findByNickname("testuser")).isEmpty();
     }
 
     @Test

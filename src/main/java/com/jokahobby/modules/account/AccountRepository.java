@@ -12,7 +12,7 @@ public interface AccountRepository extends JpaRepository<Account, UUID>, Queryds
 
     boolean existsByNickname(String nickname);
 
-    Account findByNickname(String nickname);
+    Optional<Account> findByNickname(String nickname);
 
     Optional<Account> findByProviderAndProviderId(String provider, String providerId);
 }

@@ -68,11 +68,8 @@ public class AccountService {
     }
 
     public Account getAccount(String nickname) {
-        Account byNickname = accountRepository.findByNickname(nickname);
-        if (byNickname == null) {
-            throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND);
-        }
-        return byNickname;
+        return accountRepository.findByNickname(nickname)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND));
     }
 
     public Account updateNicknameWithDuplicateCheck(Account account, String nickname) {
