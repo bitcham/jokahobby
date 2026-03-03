@@ -1,5 +1,7 @@
 package com.jokahobby.modules.event;
 
+import com.jokahobby.infra.exception.BusinessException;
+import com.jokahobby.infra.exception.ErrorCode;
 import com.jokahobby.modules.account.Account;
 import com.jokahobby.modules.common.SoftDeletableEntity;
 import com.jokahobby.modules.hobby.Hobby;
@@ -69,6 +71,10 @@ public class Event extends SoftDeletableEntity {
         this.limitOfEnrollments = limitOfEnrollments;
     }
 
+    private boolean isUnlimited() {
+        return this.limitOfEnrollments == null;
+    }
+
     private boolean isNotClosed() {
         return this.endEnrollmentDateTime.isAfter(Instant.now());
     }
@@ -101,17 +107,22 @@ public class Event extends SoftDeletableEntity {
     }
 
     public int numberOfRemainSpots(){
-        return this.limitOfEnrollments - (int) this.enrollments.stream()
-                .filter(Enrollment::isAccepted)
-                .count();
+        if (isUnlimited()) {
+            return Integer.MAX_VALUE;
+        }
+        return this.limitOfEnrollments - (int) this.getNumberOfAcceptedEnrollments();
     }
 
     public long getNumberOfAcceptedEnrollments() {
         return this.enrollments.stream().filter(Enrollment::isAccepted).count();
     }
 
+    private boolean hasCapacityAvailable() {
+        return isUnlimited() || this.getNumberOfAcceptedEnrollments() < this.limitOfEnrollments;
+    }
+
     public boolean isAbleToAcceptWaitingEnrollment() {
-        return this.eventType == EventType.FCFS && this.getNumberOfAcceptedEnrollments() < this.limitOfEnrollments;
+        return this.eventType == EventType.FCFS && hasCapacityAvailable();
     }
 
     public void addEnrollment(Enrollment enrollment) {
@@ -151,6 +162,10 @@ public class Event extends SoftDeletableEntity {
     public List<Enrollment> acceptWaitingList() {
         if (this.isAbleToAcceptWaitingEnrollment()) {
             var waitingList = getWaitingList();
+            if (isUnlimited()) {
+                waitingList.forEach(Enrollment::accept);
+                return waitingList;
+            }
             int numberToAccept = (int) Math.min(
                     this.limitOfEnrollments - this.getNumberOfAcceptedEnrollments(), waitingList.size());
             List<Enrollment> toAccept = waitingList.subList(0, numberToAccept);
@@ -174,15 +189,21 @@ public class Event extends SoftDeletableEntity {
                 && enrollment.isAccepted();
     }
 
+    private boolean hasRemainingCapacity() {
+        return this.eventType == EventType.CONFIRMATIVE && hasCapacityAvailable();
+    }
+
     public void accept(Enrollment enrollment) {
-        if(this.eventType == EventType.CONFIRMATIVE && this.limitOfEnrollments > this.getNumberOfAcceptedEnrollments()) {
-            enrollment.accept();
+        if (!hasRemainingCapacity()) {
+            throw new BusinessException(ErrorCode.EVENT_CANNOT_ACCEPT);
         }
+        enrollment.accept();
     }
 
     public void reject(Enrollment enrollment) {
-        if(this.eventType == EventType.CONFIRMATIVE){
-            enrollment.reject();
+        if (this.eventType != EventType.CONFIRMATIVE) {
+            throw new BusinessException(ErrorCode.EVENT_CANNOT_REJECT);
         }
+        enrollment.reject();
     }
 }
